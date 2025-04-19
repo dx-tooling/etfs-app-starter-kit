@@ -10,7 +10,7 @@ Key Principles
 - Whenever possible, generate TypeScript code instead of Javascript code, and use TypeScript's type system extensively.
 
 PHP/Symfony
-- Use PHP 8.3 features when appropriate.
+- Use PHP 8.4 features when appropriate.
 - Use the PHP Type system extensively.
 - Use PHP Attributes whenever possible, only fall back to PHP Annotations if there is no other option.
 - Never use named arguments when calling functions and methods.

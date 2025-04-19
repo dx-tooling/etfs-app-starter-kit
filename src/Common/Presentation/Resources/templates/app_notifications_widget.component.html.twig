@@ -7,7 +7,7 @@
 
     <button
             type="button"
-            class="rounded-full p-2 text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/10"
+            class="rounded-full p-2 text-dark-600 hover:text-primary-600 dark:text-dark-400 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/10"
             data-action="live#action"
             {{ this.widgetIsOpen ? 'data-live-action-param="closeWidget"' : 'data-live-action-param="openWidget"' }}
     >
@@ -42,16 +42,16 @@
     {% if this.widgetIsOpen %}
         <div class="absolute top-[45px] right-[19px] sm:right-[27px] md:right-[27px] lg:right-[35px] w-0 h-0
             border-l-[15px] border-l-transparent
-            border-b-[20px] border-b-gray-200 dark:border-b-dark-700
+            border-b-[20px] border-b-dark-200 dark:border-b-dark-700
             border-r-[15px] border-r-transparent">
         </div>
 
-        <div class="absolute top-14 right-0 bg-gray-100 dark:bg-dark-800 p-4 rounded-bl-md ring-1 ring-gray-200 dark:ring-dark-700 drop-shadow-xl text-xs text-gray-700 dark:text-dark-300">
+        <div class="absolute top-14 right-0 bg-dark-100 dark:bg-dark-800 p-4 rounded-bl-md ring-1 ring-dark-200 dark:ring-dark-700 drop-shadow-xl text-xs text-dark-700 dark:text-dark-300">
             {% if this.latestAppNotifications|length > 0 %}
                 <table class="border-separate border-spacing-y-2">
                     {% for notification in this.latestAppNotifications %}
                         <tr>
-                            <td class="text-gray-500">{{ notification.createdAt|date('d.m., H:i') }} Uhr:</td>
+                            <td class="text-dark-500">{{ notification.createdAt|date('d.m., H:i') }} Uhr:</td>
                             <td class="pl-2">
                                 <a
                                         class="jm-link-default"

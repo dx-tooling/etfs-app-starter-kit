@@ -20,4 +20,14 @@ class ContentController extends AbstractController
     {
         return $this->render('@content.presentation/homepage.html.twig');
     }
+
+    #[Route(
+        path   : '/about',
+        name   : 'content.presentation.about',
+        methods: [Request::METHOD_GET]
+    )]
+    public function aboutAction(): Response
+    {
+        return $this->render('@content.presentation/about.html.twig');
+    }
 }

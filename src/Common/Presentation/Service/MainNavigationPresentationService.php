@@ -117,6 +117,6 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
 
     public function getBrandLogoHtml(): string
     {
-        return 'Foo';
+        return '<strong>AppStarterKit</strong>';
     }
 }

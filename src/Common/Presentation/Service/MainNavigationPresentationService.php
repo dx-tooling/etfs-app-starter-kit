@@ -80,7 +80,12 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
      */
     protected function getSecondaryMainNavigationEntries(): array
     {
-        $entries = [];
+        $entries = [
+            $this->generateEntry(
+                'Home 2',
+                'content.presentation.homepage',
+            )
+        ];
 
         return $entries;
     }
@@ -108,5 +113,10 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
         ];
 
         return $entries;
+    }
+
+    public function getBrandLogoHtml(): string
+    {
+        return 'Foo';
     }
 }

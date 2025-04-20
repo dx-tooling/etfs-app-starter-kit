@@ -41,5 +41,7 @@ node_modules/
 /var/minify/
 ###< sensiolabs/minify-bundle ###
 
+###> remove-on-project-creation ###
 composer.lock
 package-lock.json
+###< remove-on-project-creation ###

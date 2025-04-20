@@ -1,5 +1,5 @@
 {
-    "name": "@enterprise-tooling-for-symfony/etfs-app-starter-kit",
+    "name": "etfs-app-starter-kit",
     "version": "1.0.0",
     "description": "",
     "main": "index.js",

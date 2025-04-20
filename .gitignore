@@ -40,3 +40,6 @@ node_modules/
 ###> sensiolabs/minify-bundle ###
 /var/minify/
 ###< sensiolabs/minify-bundle ###
+
+composer.lock
+package-lock.json

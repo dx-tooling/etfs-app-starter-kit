@@ -1,3 +1,3 @@
 # Enterprise Tooling for Symfony
 
-## App Starter Kit
+## Etfs App Starter Kit

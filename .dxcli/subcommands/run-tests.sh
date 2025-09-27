@@ -2,8 +2,8 @@
 #@metadata-start
 #@name test
 #@description Run the test suite
-#@source-repo git@github.com:Enterprise-Tooling-for-Symfony/dxcli-commands-app.git
-#@source-commit-id 6c91eb2f8b711933857f1e5691364440507f3c16
+#@source-repo git@github.com:dx-tooling/dxcli-commands-app.git
+#@source-commit-id 7268a9702176717f63f6c694d6a59e646a4ef499
 #@metadata-end
 
 # >>> BEGIN SETUP - always keep this section in your scripts!
@@ -36,6 +36,10 @@ source "$PROJECT_ROOT/.dxcli/shared.sh"
 
 # Validate environment
 require_command php
+
+echo
+log_info "Running architecture tests..."
+/usr/bin/env php "$PROJECT_ROOT/vendor/bin/pest" --group=architecture
 
 echo
 log_info "Running unit tests..."

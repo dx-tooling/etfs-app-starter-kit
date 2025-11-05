@@ -1283,12 +1283,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     },
  * }
  * @psalm-type EtfsSharedConfig = array<mixed>
- * @psalm-type EtfsWebuiConfig = array{
- *     assets?: array{
- *         include_tailwind?: bool, // Default: true
- *         include_stimulus?: bool, // Default: true
- *     },
- * }
+ * @psalm-type EtfsWebuiConfig = array<mixed>
  */
 final class App extends AppReference
 {

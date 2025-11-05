@@ -10,6 +10,7 @@ parameters:
     excludePaths:
         analyse:
             - tests/Architecture/*
+            - config/reference.php
     type_coverage:
         return: 100
         param: 100

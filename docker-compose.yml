@@ -3,11 +3,11 @@ services:
         build:
             context: .
             dockerfile: docker/app/Dockerfile
-        container_name: etfs_app_starter_kit_app
+        container_name: etfs_${ETFS_PROJECT_NAME}_app
         volumes:
             - .:/var/www
         networks:
-            - etfs_app_starter_kit
+            - default
         environment:
             APP_ENV: prod
         depends_on:
@@ -16,7 +16,7 @@ services:
 
     nginx:
         image: nginx:latest
-        container_name: etfs_app_starter_kit_nginx
+        container_name: etfs_${ETFS_PROJECT_NAME}_nginx
         ports:
             - "8080:80"
         volumes:
@@ -25,26 +25,28 @@ services:
         depends_on:
             - app
         networks:
-            - etfs_app_starter_kit
+            - default
         restart: unless-stopped
 
     mariadb:
         image: mariadb:12.0.2
-        container_name: etfs_app_starter_kit_mariadb
+        container_name: etfs_${ETFS_PROJECT_NAME}_mariadb
         environment:
             MYSQL_ROOT_PASSWORD: secret
-            MYSQL_DATABASE: etfs_app_starter_kit_prod
+            MYSQL_DATABASE: etfs_${ETFS_PROJECT_NAME}_dev
             MYSQL_USER: root
             MYSQL_PASSWORD: secret
         volumes:
-            - etfs_app_starter_kit_mariadb_data:/var/lib/mysql
+            - mariadb_data:/var/lib/mysql
         networks:
-            - etfs_app_starter_kit
+            - default
         restart: unless-stopped
 
 networks:
-    etfs_app_starter_kit:
+    default:
+        name: etfs_${ETFS_PROJECT_NAME}_default
         driver: bridge
 
 volumes:
-    etfs_app_starter_kit_mariadb_data:
+    mariadb_data:
+        name: etfs_${ETFS_PROJECT_NAME}_mariadb_data

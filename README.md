@@ -10,9 +10,13 @@ This is a work-in-progress technical preview — it's ready to use, but the deve
 
 ### Scratchbook
 
+    echo "ETFS_PROJECT_NAME=foobar" >> .env
     docker compose up --build
     mise run in-app-container mise trust
     mise run in-app-container mise install
+    mise run console doctrine:database:create
+    mise run console doctrine:migrations:migrate --no-interaction
+    mise run frontend
 
 
 ## Background

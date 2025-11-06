@@ -7,3 +7,6 @@ includes = [
     ".mise/tasks",
     "vendor/enterprise-tooling-for-symfony/shared-bundle/config/mise/tasks"
 ]
+
+[env]
+_.file = './.env'

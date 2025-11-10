@@ -1,5 +1,7 @@
+includes:
+    - vendor/enterprise-tooling-for-symfony/shared-bundle/config/phpstan.app.dist.neon
+
 parameters:
-    level: 10
     paths:
         - bin/
         - config/
@@ -11,21 +13,3 @@ parameters:
         analyse:
             - tests/Architecture/*
             - config/reference.php
-    type_coverage:
-        return: 100
-        param: 100
-        property: 100
-        constant: 100
-    ergebnis:
-        final:
-            enabled: false
-        noExtends:
-            enabled: false
-        noNullableReturnTypeDeclaration:
-            enabled: false
-        noConstructorParameterWithDefaultValue:
-            enabled: false
-        noParameterWithNullDefaultValue:
-            enabled: false
-        noParameterWithNullableTypeDeclaration:
-            enabled: false

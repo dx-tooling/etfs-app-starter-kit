@@ -8,8 +8,6 @@ services:
             - .:/var/www
         networks:
             - default
-        environment:
-            APP_ENV: prod
         depends_on:
             - mariadb
         restart: unless-stopped

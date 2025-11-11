@@ -13,7 +13,8 @@ RUN apt-get update -y && apt-get install -y \
     libicu-dev \
     zip \
     unzip \
-    gpg
+    gpg \
+    mariadb-client
 
 RUN install -dm 755 /etc/apt/keyrings
 RUN wget -qO - https://mise.jdx.dev/gpg-key.pub | gpg --dearmor | tee /etc/apt/keyrings/mise-archive-keyring.gpg 1> /dev/null

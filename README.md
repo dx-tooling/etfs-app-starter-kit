@@ -8,7 +8,7 @@ A very-opinionated, very-batteries-included Symfony application starter kit from
 This is a work-in-progress technical preview — it's ready to use, but the developer experience is not yet streamlined.
 
 
-# Project vision
+# Project vision and outline
 
 The idea of this project is as follows: If you want to build serious business applications on top of Symfony, you need to
 
@@ -17,6 +17,17 @@ The idea of this project is as follows: If you want to build serious business ap
 - clone this repository and follow the instructions,
 
 and you are good to go.
+
+The project's approach is built on these pillars:
+
+- Encourage — and where possible, enforce — a specific code architecture, optimized for building mid- to large-sized,
+  functionally complex business applications, while minimizing the risk of ending up with brittle, hard-to-change legacy code.
+
+- Provide as much setup and tooling as possible to ease testing the functional correctness, as well as the
+  non-functional quality, of the codebase.
+
+- Deliver an outstanding Developer Experience (DX) through streamlined tooling, sane defaults, and useful boilerplates,
+  and thus ensure that setting up and working on ETFS-based projects starts off as, and remains, a low-frustration, productive endeavour.
 
 
 ### Scratchbook

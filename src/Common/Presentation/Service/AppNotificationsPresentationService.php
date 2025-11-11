@@ -22,7 +22,7 @@ readonly class AppNotificationsPresentationService
     }
 
     /**
-     * @return AppNotification[]
+     * @return list<AppNotification>
      */
     public function getLatestAppNotifications(): array
     {

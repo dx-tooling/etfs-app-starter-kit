@@ -42,7 +42,7 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
     }
 
     /**
-     * @return MainNavigationEntry[]
+     * @return list<MainNavigationEntry>
      */
     public function getPrimaryMainNavigationEntries(): array
     {
@@ -62,7 +62,7 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
     }
 
     /**
-     * @return MainNavigationEntry[]
+     * @return list<MainNavigationEntry>
      */
     protected function getSecondaryMainNavigationEntries(): array
     {
@@ -76,6 +76,9 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
         return $entries;
     }
 
+    /**
+     * @return list<MainNavigationEntry>
+     */
     public function getFinalSecondaryMainNavigationEntries(): array
     {
         return $this->getSecondaryMainNavigationEntries();
@@ -87,7 +90,7 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
     }
 
     /**
-     * @return MainNavigationEntry[]
+     * @return list<MainNavigationEntry>
      */
     public function getTertiaryMainNavigationEntries(): array
     {

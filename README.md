@@ -32,6 +32,7 @@ The project's approach is built on these pillars:
 
 ### Scratchbook
 
+    mise trust
     echo "ETFS_PROJECT_NAME=foobar" >> .env
     docker compose up --build -d
     docker compose exec -ti app composer install

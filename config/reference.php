@@ -31,7 +31,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     type?: string|null,
  *     ignore_errors?: bool,
  * }>
- * @psalm-type ParametersConfig = array<string, scalar|\UnitEnum|array<scalar|\UnitEnum|array|null>|null>
+ * @psalm-type ParametersConfig = array<string, scalar|\UnitEnum|array<scalar|\UnitEnum|array<mixed>|null>|null>
  * @psalm-type ArgumentsType = list<mixed>|array<string, mixed>
  * @psalm-type CallType = array<string, ArgumentsType>|array{0:string, 1?:ArgumentsType, 2?:bool}|array{method:string, arguments?:ArgumentsType, returns_clone?:bool}
  * @psalm-type TagsType = list<string|array<string, array<string, mixed>>> // arrays inside the list must have only one element, with the tag name as the key
@@ -83,7 +83,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     autoconfigure?: bool,
  *     bind?: array<string, mixed>,
  *     constructor?: string,
- *     from_callable?: mixed,
+ *     from_callable?: CallbackType,
  * }
  * @psalm-type AliasType = string|array{
  *     alias: string,
@@ -873,6 +873,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     },
  * }
  * @psalm-type DoctrineMigrationsConfig = array{
+ *     enable_service_migrations?: bool, // Whether to enable fetching migrations from the service container. // Default: false
  *     migrations_paths?: array<string, scalar|null>,
  *     services?: array<string, scalar|null>,
  *     factories?: array<string, scalar|null>,
@@ -1284,100 +1285,103 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     dump_destination?: scalar|null, // A stream URL where dumps should be written to. // Default: null
  *     theme?: "dark"|"light", // Changes the color of the dump() output when rendered directly on the templating. "dark" (default) or "light". // Default: "dark"
  * }
+ * @psalm-type ConfigType = array{
+ *     imports?: ImportsConfig,
+ *     parameters?: ParametersConfig,
+ *     services?: ServicesConfig,
+ *     framework?: FrameworkConfig,
+ *     doctrine?: DoctrineConfig,
+ *     doctrine_migrations?: DoctrineMigrationsConfig,
+ *     twig?: TwigConfig,
+ *     stimulus?: StimulusConfig,
+ *     twig_extra?: TwigExtraConfig,
+ *     security?: SecurityConfig,
+ *     monolog?: MonologConfig,
+ *     twig_component?: TwigComponentConfig,
+ *     live_component?: LiveComponentConfig,
+ *     symfonycasts_tailwind?: SymfonycastsTailwindConfig,
+ *     sensiolabs_typescript?: SensiolabsTypescriptConfig,
+ *     sensiolabs_minify?: SensiolabsMinifyConfig,
+ *     etfs_shared?: EtfsSharedConfig,
+ *     etfs_webui?: EtfsWebuiConfig,
+ *     "when@dev"?: array{
+ *         imports?: ImportsConfig,
+ *         parameters?: ParametersConfig,
+ *         services?: ServicesConfig,
+ *         framework?: FrameworkConfig,
+ *         doctrine?: DoctrineConfig,
+ *         doctrine_migrations?: DoctrineMigrationsConfig,
+ *         twig?: TwigConfig,
+ *         stimulus?: StimulusConfig,
+ *         twig_extra?: TwigExtraConfig,
+ *         security?: SecurityConfig,
+ *         monolog?: MonologConfig,
+ *         twig_component?: TwigComponentConfig,
+ *         live_component?: LiveComponentConfig,
+ *         symfonycasts_tailwind?: SymfonycastsTailwindConfig,
+ *         sensiolabs_typescript?: SensiolabsTypescriptConfig,
+ *         sensiolabs_minify?: SensiolabsMinifyConfig,
+ *         etfs_shared?: EtfsSharedConfig,
+ *         etfs_webui?: EtfsWebuiConfig,
+ *         web_profiler?: WebProfilerConfig,
+ *         maker?: MakerConfig,
+ *         debug?: DebugConfig,
+ *     },
+ *     "when@prod"?: array{
+ *         imports?: ImportsConfig,
+ *         parameters?: ParametersConfig,
+ *         services?: ServicesConfig,
+ *         framework?: FrameworkConfig,
+ *         doctrine?: DoctrineConfig,
+ *         doctrine_migrations?: DoctrineMigrationsConfig,
+ *         twig?: TwigConfig,
+ *         stimulus?: StimulusConfig,
+ *         twig_extra?: TwigExtraConfig,
+ *         security?: SecurityConfig,
+ *         monolog?: MonologConfig,
+ *         twig_component?: TwigComponentConfig,
+ *         live_component?: LiveComponentConfig,
+ *         symfonycasts_tailwind?: SymfonycastsTailwindConfig,
+ *         sensiolabs_typescript?: SensiolabsTypescriptConfig,
+ *         sensiolabs_minify?: SensiolabsMinifyConfig,
+ *         etfs_shared?: EtfsSharedConfig,
+ *         etfs_webui?: EtfsWebuiConfig,
+ *     },
+ *     "when@test"?: array{
+ *         imports?: ImportsConfig,
+ *         parameters?: ParametersConfig,
+ *         services?: ServicesConfig,
+ *         framework?: FrameworkConfig,
+ *         doctrine?: DoctrineConfig,
+ *         doctrine_migrations?: DoctrineMigrationsConfig,
+ *         twig?: TwigConfig,
+ *         stimulus?: StimulusConfig,
+ *         twig_extra?: TwigExtraConfig,
+ *         security?: SecurityConfig,
+ *         monolog?: MonologConfig,
+ *         twig_component?: TwigComponentConfig,
+ *         live_component?: LiveComponentConfig,
+ *         symfonycasts_tailwind?: SymfonycastsTailwindConfig,
+ *         sensiolabs_typescript?: SensiolabsTypescriptConfig,
+ *         sensiolabs_minify?: SensiolabsMinifyConfig,
+ *         etfs_shared?: EtfsSharedConfig,
+ *         etfs_webui?: EtfsWebuiConfig,
+ *         web_profiler?: WebProfilerConfig,
+ *     },
+ *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
+ *         imports?: ImportsConfig,
+ *         parameters?: ParametersConfig,
+ *         services?: ServicesConfig,
+ *         ...<string, ExtensionType>,
+ *     }>
+ * }
  */
 final class App extends AppReference
 {
     /**
-     * @param array{
-     *     imports?: ImportsConfig,
-     *     parameters?: ParametersConfig,
-     *     services?: ServicesConfig,
-     *     framework?: FrameworkConfig,
-     *     doctrine?: DoctrineConfig,
-     *     doctrine_migrations?: DoctrineMigrationsConfig,
-     *     twig?: TwigConfig,
-     *     stimulus?: StimulusConfig,
-     *     twig_extra?: TwigExtraConfig,
-     *     security?: SecurityConfig,
-     *     monolog?: MonologConfig,
-     *     twig_component?: TwigComponentConfig,
-     *     live_component?: LiveComponentConfig,
-     *     symfonycasts_tailwind?: SymfonycastsTailwindConfig,
-     *     sensiolabs_typescript?: SensiolabsTypescriptConfig,
-     *     sensiolabs_minify?: SensiolabsMinifyConfig,
-     *     etfs_shared?: EtfsSharedConfig,
-     *     etfs_webui?: EtfsWebuiConfig,
-     *     "when@dev"?: array{
-     *         imports?: ImportsConfig,
-     *         parameters?: ParametersConfig,
-     *         services?: ServicesConfig,
-     *         framework?: FrameworkConfig,
-     *         doctrine?: DoctrineConfig,
-     *         doctrine_migrations?: DoctrineMigrationsConfig,
-     *         twig?: TwigConfig,
-     *         stimulus?: StimulusConfig,
-     *         twig_extra?: TwigExtraConfig,
-     *         security?: SecurityConfig,
-     *         monolog?: MonologConfig,
-     *         twig_component?: TwigComponentConfig,
-     *         live_component?: LiveComponentConfig,
-     *         symfonycasts_tailwind?: SymfonycastsTailwindConfig,
-     *         sensiolabs_typescript?: SensiolabsTypescriptConfig,
-     *         sensiolabs_minify?: SensiolabsMinifyConfig,
-     *         etfs_shared?: EtfsSharedConfig,
-     *         etfs_webui?: EtfsWebuiConfig,
-     *         web_profiler?: WebProfilerConfig,
-     *         maker?: MakerConfig,
-     *         debug?: DebugConfig,
-     *     },
-     *     "when@prod"?: array{
-     *         imports?: ImportsConfig,
-     *         parameters?: ParametersConfig,
-     *         services?: ServicesConfig,
-     *         framework?: FrameworkConfig,
-     *         doctrine?: DoctrineConfig,
-     *         doctrine_migrations?: DoctrineMigrationsConfig,
-     *         twig?: TwigConfig,
-     *         stimulus?: StimulusConfig,
-     *         twig_extra?: TwigExtraConfig,
-     *         security?: SecurityConfig,
-     *         monolog?: MonologConfig,
-     *         twig_component?: TwigComponentConfig,
-     *         live_component?: LiveComponentConfig,
-     *         symfonycasts_tailwind?: SymfonycastsTailwindConfig,
-     *         sensiolabs_typescript?: SensiolabsTypescriptConfig,
-     *         sensiolabs_minify?: SensiolabsMinifyConfig,
-     *         etfs_shared?: EtfsSharedConfig,
-     *         etfs_webui?: EtfsWebuiConfig,
-     *     },
-     *     "when@test"?: array{
-     *         imports?: ImportsConfig,
-     *         parameters?: ParametersConfig,
-     *         services?: ServicesConfig,
-     *         framework?: FrameworkConfig,
-     *         doctrine?: DoctrineConfig,
-     *         doctrine_migrations?: DoctrineMigrationsConfig,
-     *         twig?: TwigConfig,
-     *         stimulus?: StimulusConfig,
-     *         twig_extra?: TwigExtraConfig,
-     *         security?: SecurityConfig,
-     *         monolog?: MonologConfig,
-     *         twig_component?: TwigComponentConfig,
-     *         live_component?: LiveComponentConfig,
-     *         symfonycasts_tailwind?: SymfonycastsTailwindConfig,
-     *         sensiolabs_typescript?: SensiolabsTypescriptConfig,
-     *         sensiolabs_minify?: SensiolabsMinifyConfig,
-     *         etfs_shared?: EtfsSharedConfig,
-     *         etfs_webui?: EtfsWebuiConfig,
-     *         web_profiler?: WebProfilerConfig,
-     *     },
-     *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
-     *         imports?: ImportsConfig,
-     *         parameters?: ParametersConfig,
-     *         services?: ServicesConfig,
-     *         ...<string, ExtensionType>,
-     *     }>
-     * } $config
+     * @param ConfigType $config
+     *
+     * @psalm-return ConfigType
      */
     public static function config(array $config): array
     {
@@ -1398,8 +1402,7 @@ namespace Symfony\Component\Routing\Loader\Configurator;
  *
  *     return Routes::config([
  *         'controllers' => [
- *             'resource' => 'attributes',
- *             'type' => 'tagged_services',
+ *             'resource' => 'routing.controllers',
  *         ],
  *     ]);
  *     ```

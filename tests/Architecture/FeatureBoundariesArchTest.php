@@ -11,7 +11,7 @@ $features = array_filter(
     ),
     static fn (
         string $dir
-    ): bool => $dir !== 'Common'
+    ): bool => true
 );
 
 foreach ($features as $from) {

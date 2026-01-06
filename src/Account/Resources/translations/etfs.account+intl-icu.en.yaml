@@ -1,0 +1,114 @@
+sign_in:
+    title: 'Sign in'
+    content_title: 'Sign into your user account'
+    placeholder:
+        email: 'E-mail address'
+        password: 'Password'
+    cta:
+        sign_in: 'Sign in'
+        sign_in_with_linkedin: 'Sign in with LinkedIn'
+        forgot_password: 'Forgot password?'
+    auth_for_app:
+        note: 'Sign in to use the desktop app.'
+    or: 'or'
+    sign_in_with_linkedin_question: 'Already on LinkedIn?'
+    sign_in_with_linkedin_info: 'Use LinkedIn to sign in with a single click - no sign up required!'
+    forgot_password:
+        request_reset:
+            title: 'Forgot password'
+            note1: 'Please enter your e-mail address to receive a link which will allow you to set a new password.'
+            placeholder:
+                email: 'E-mail address'
+            cta: 'Next step'
+        request_reset_thanks:
+            note1: 'Thanks. If an account for {email} exists, we will now send a link to this address which allows you to set a new password.'
+            note2: 'Check your mail account now and look for a message with subject „ETFS — Password reset“.'
+            note3: "Don't forget to check your spam folder, just in case."
+            note4: 'The link we will send you in the e-mail can only be used within the next 20 minutes!'
+        reset_password_email:
+            subject: 'ETFS — Password reset'
+
+sign_up:
+    title: 'Sign up'
+    content_title: 'Sign up for a user account'
+    placeholder:
+        email: 'E-mail address'
+        password: 'Password'
+    cta:
+        accept_terms: 'Accept Privacy Policy.'
+        sign_up: 'Sign up'
+        sign_up_with_linkedin: 'Sign up with LinkedIn'
+    or: 'or'
+    sign_up_with_linkedin_question: 'Already on LinkedIn?'
+    sign_up_with_linkedin_info: 'Use LinkedIn to sign up with a single click!'
+    validation:
+        agree_terms:
+            must_be_true: 'Please accept our Terms & Conditions.'
+        password:
+            not_blank: 'The password must not be empty.'
+            min_length: 'The password must be at least 6 characters long.'
+    verification_email:
+        subject: 'ETFS — Verify your email address'
+        greeting: "It's nearly done!"
+        text1: 'Thanks for creating your account.'
+        text2: 'Please click the button below to verify your email address.'
+        verify_cta: 'Confirm email'
+    please_verify_email_address:
+        greeting: 'A final step...'
+        note1: 'Please confirm your email address to activate your account.'
+        note2: 'Check your email inbox for our message and simply follow the instructions in the email.'
+        note3: 'Just to be safe, please also check your spam folder.'
+        mail_info: 'We have sent the confirmation email to address {email}.'
+
+thirdpartyauth:
+    errorpage:
+        title: 'An error occurred.'
+        cta_back_to_sign_in: 'Back to sign in form'
+        cta_back_to_sign_up: 'Back to sign up form'
+        linkedin:
+            infotext: 'While exchanging data with LinkedIn, an unexpected error occurred (error {error}). Please try again.'
+
+claim_unregistered_user:
+    form:
+        greeting: 'Hey there,'
+        note1: 'thanks for using ETFS!'
+        note2: 'Create your free-of-charge account now!'
+        cta: 'Create account'
+        fineprint: 'By submitting this form, you agree to our privacy policy.'
+        login_text: 'Already have an account?'
+        login_cta: 'Sign in.'
+        continue_with: 'or continue with'
+        third_party_auth:
+            linkedin: 'Sign up with LinkedIn.'
+    verification_email:
+        subject: 'ETFS — Verify your email address'
+        greeting: "It's nearly done!"
+        text1: 'Thanks for creating your account.'
+        text2: 'Please click the button below to verify your email address.'
+        verify_cta: 'Confirm email'
+    please_verify_email_address:
+        greeting: 'A final step...'
+        note1: 'Please confirm your email address to activate your account.'
+        note2: 'Check your email inbox for our message and simply follow the instructions in the email.'
+        note3: 'Just to be safe, please also check your spam folder.'
+        mail_info: 'We have sent the confirmation email to address {email}.'
+
+email_verification:
+    email_has_been_verified: 'Your email address has been verified.'
+
+password:
+    change:
+        title: 'Change password'
+        note1: 'Please enter your new password:'
+        cta: 'Change password'
+        label:
+            plain_password: 'New password'
+            plain_password_repeat: 'New password (repeat)'
+        error:
+            not_identical: 'Passwords do not match.'
+            too_short: 'Passwords need to be at least 6 characters long.'
+        success_message: 'You have successfully changed your password.'
+
+auth_for_app:
+    success:
+        note: 'Please wait while we are authenticating your session for the desktop app...'

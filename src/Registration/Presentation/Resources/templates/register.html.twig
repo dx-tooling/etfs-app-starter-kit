@@ -1,0 +1,156 @@
+{% extends '@common.presentation/base_fullcontent.html.twig' %}
+
+{% block title %}Create Account{% endblock %}
+
+{% block body %}
+<div class="min-h-[70vh] flex items-center justify-center">
+    <div class="w-full max-w-md">
+        {# Card container with subtle gradient border effect #}
+        <div class="relative">
+            <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-primary-500 rounded-2xl blur opacity-20 dark:opacity-30"></div>
+            <div class="relative bg-white dark:bg-dark-800 rounded-2xl shadow-xl border border-dark-200/50 dark:border-dark-700/50 p-8 sm:p-10">
+                {# Header #}
+                <div class="text-center mb-8">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 mb-4 shadow-lg shadow-indigo-500/25">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                        </svg>
+                    </div>
+                    <h1 class="text-2xl font-bold text-dark-900 dark:text-white tracking-tight">Create your account</h1>
+                    <p class="mt-2 text-sm text-dark-500 dark:text-dark-400">Join us today and get started</p>
+                </div>
+
+                {# Registration Form #}
+                {{ form_start(registrationForm, {'attr': {'class': 'space-y-6', 'novalidate': 'novalidate'}}) }}
+                    {# Email Field #}
+                    <div>
+                        <label for="{{ registrationForm.email.vars.id }}" class="block text-sm font-semibold text-dark-700 dark:text-dark-300 mb-2">
+                            {{ registrationForm.email.vars.label }}
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-dark-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                                </svg>
+                            </div>
+                            {{ form_widget(registrationForm.email, {'attr': {
+                                'class': 'block w-full pl-11 pr-4 py-3 border rounded-xl bg-white dark:bg-dark-700 text-dark-900 dark:text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 ' ~ (registrationForm.email.vars.errors|length > 0 ? 'border-danger-500 dark:border-danger-500' : 'border-dark-300 dark:border-dark-600')
+                            }}) }}
+                        </div>
+                        {% if registrationForm.email.vars.errors|length > 0 %}
+                            <p class="mt-2 text-sm text-danger-600 dark:text-danger-400 flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                                {{ form_errors(registrationForm.email) }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    {# Password Field #}
+                    <div>
+                        <label for="{{ registrationForm.plainPassword.first.vars.id }}" class="block text-sm font-semibold text-dark-700 dark:text-dark-300 mb-2">
+                            {{ registrationForm.plainPassword.first.vars.label }}
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-dark-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
+                            {{ form_widget(registrationForm.plainPassword.first, {'attr': {
+                                'class': 'block w-full pl-11 pr-4 py-3 border rounded-xl bg-white dark:bg-dark-700 text-dark-900 dark:text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 ' ~ (registrationForm.plainPassword.vars.errors|length > 0 ? 'border-danger-500 dark:border-danger-500' : 'border-dark-300 dark:border-dark-600')
+                            }}) }}
+                        </div>
+                        {% if registrationForm.plainPassword.first.vars.errors|length > 0 %}
+                            <p class="mt-2 text-sm text-danger-600 dark:text-danger-400 flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                                {{ form_errors(registrationForm.plainPassword.first) }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    {# Confirm Password Field #}
+                    <div>
+                        <label for="{{ registrationForm.plainPassword.second.vars.id }}" class="block text-sm font-semibold text-dark-700 dark:text-dark-300 mb-2">
+                            {{ registrationForm.plainPassword.second.vars.label }}
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-dark-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                            </div>
+                            {{ form_widget(registrationForm.plainPassword.second, {'attr': {
+                                'class': 'block w-full pl-11 pr-4 py-3 border rounded-xl bg-white dark:bg-dark-700 text-dark-900 dark:text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 ' ~ (registrationForm.plainPassword.vars.errors|length > 0 ? 'border-danger-500 dark:border-danger-500' : 'border-dark-300 dark:border-dark-600')
+                            }}) }}
+                        </div>
+                        {% if registrationForm.plainPassword.vars.errors|length > 0 %}
+                            <p class="mt-2 text-sm text-danger-600 dark:text-danger-400 flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                                {{ form_errors(registrationForm.plainPassword) }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    {# Terms Agreement #}
+                    <div class="flex items-start">
+                        <div class="flex items-center h-5">
+                            {{ form_widget(registrationForm.agreeTerms, {'attr': {
+                                'class': 'h-4 w-4 text-primary-600 border-dark-300 dark:border-dark-600 rounded focus:ring-primary-500 bg-white dark:bg-dark-700'
+                            }}) }}
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="{{ registrationForm.agreeTerms.vars.id }}" class="text-dark-600 dark:text-dark-400">
+                                I agree to the <a href="#" class="text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 font-medium">Terms of Service</a> and <a href="#" class="text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 font-medium">Privacy Policy</a>
+                            </label>
+                            {% if registrationForm.agreeTerms.vars.errors|length > 0 %}
+                                <p class="mt-1 text-sm text-danger-600 dark:text-danger-400">
+                                    {{ form_errors(registrationForm.agreeTerms) }}
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-dark-800 transition-all duration-200 transform hover:scale-[1.02]"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Create account
+                    </button>
+                {{ form_end(registrationForm) }}
+
+                {# Divider #}
+                <div class="mt-8 relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-dark-200 dark:border-dark-700"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-4 bg-white dark:bg-dark-800 text-dark-500 dark:text-dark-400">Already have an account?</span>
+                    </div>
+                </div>
+
+                {# Login link #}
+                <div class="mt-6">
+                    <a
+                        href="{{ path('security.presentation.login') }}"
+                        class="w-full flex justify-center items-center gap-2 py-3 px-4 border-2 border-dark-200 dark:border-dark-600 rounded-xl text-sm font-semibold text-dark-700 dark:text-dark-300 bg-transparent hover:bg-dark-50 dark:hover:bg-dark-700/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-dark-800 transition-all duration-200"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                        </svg>
+                        Sign in instead
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

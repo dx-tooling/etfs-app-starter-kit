@@ -7,6 +7,8 @@ use App\Shared\Presentation\Service\MailService;
 use App\VideoBasedMarketing\Account\Infrastructure\Security\EmailVerifier;
 use App\VideoBasedMarketing\Account\Infrastructure\Service\RequestParametersBasedUserAuthService;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -15,15 +17,19 @@ use ValueError;
 
 readonly class AccountPresentationService
 {
-    public function __construct(
+    /*public function __construct(
         private MailService                           $mailService,
         private TranslatorInterface                   $translator,
         private EmailVerifier                         $emailVerifier,
         private RequestParametersBasedUserAuthService $requestParametersBasedUserAuthService,
         private EntityManagerInterface                $entityManager
     ) {
-    }
+    }*/
 
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     public function sendVerificationEmailForClaimedUser(
         User $user
     ): void {
@@ -39,7 +45,8 @@ readonly class AccountPresentationService
             );
         }
 
-        $this->emailVerifier->sendEmailAskingForVerification(
+        // @todo add this part
+        /*$this->emailVerifier->sendEmailAskingForVerification(
             'account.presentation.sign_up.email_verification',
             $user,
             new TemplatedEmail()
@@ -55,7 +62,7 @@ readonly class AccountPresentationService
                 ->htmlTemplate(
                     '@videobasedmarketing.account/claim_unregistered_user/verify_claimed_account.email.html.twig'
                 )
-        );
+        );*/
     }
 
     /**
@@ -71,7 +78,7 @@ readonly class AccountPresentationService
             return;
         }
 
-        $url = $this->requestParametersBasedUserAuthService->createUrl(
+        /*$url = $this->requestParametersBasedUserAuthService->createUrl(
             $user,
             'videobasedmarketing.account.presentation.password.change',
             [],
@@ -96,6 +103,6 @@ readonly class AccountPresentationService
                     '@videobasedmarketing.account/sign_in/forgot_password/reset_password.email.html.twig'
                 )
                 ->context($context)
-        );
+        );*/
     }
 }

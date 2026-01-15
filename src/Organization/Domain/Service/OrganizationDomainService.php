@@ -3,6 +3,7 @@
 namespace App\Organization\Domain\Service;
 
 use App\Account\Domain\Entity\User;
+use App\Account\Domain\Service\AccountDomainService;
 use App\Organization\Domain\Entity\Group;
 use App\Organization\Domain\Entity\Invitation;
 use App\Organization\Domain\Entity\Organization;

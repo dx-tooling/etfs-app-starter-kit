@@ -1,10 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Security\Presentation\Controller;
 
+use LogicException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
 {
@@ -12,8 +16,27 @@ class SecurityController extends AbstractController
         path: '/login',
         name: 'security.presentation.login'
     )]
-    public function login(): Response
+    public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        return $this->render('security/login.html.twig');
+        if ($this->getUser() !== null) {
+            return $this->redirectToRoute('content.presentation.homepage');
+        }
+
+        $error        = $authenticationUtils->getLastAuthenticationError();
+        $lastUsername = $authenticationUtils->getLastUsername();
+
+        return $this->render('@security.presentation/login.html.twig', [
+            'last_username' => $lastUsername,
+            'error'         => $error,
+        ]);
+    }
+
+    #[Route(
+        path: '/logout',
+        name: 'security.presentation.logout'
+    )]
+    public function logout(): never
+    {
+        throw new LogicException('This method should never be reached - it is intercepted by the logout key on your firewall.');
     }
 }

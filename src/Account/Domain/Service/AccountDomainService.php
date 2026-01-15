@@ -7,13 +7,11 @@ use App\Account\Domain\Enum\Role;
 use App\Account\Domain\SymfonyEvent\UnregisteredUserClaimedRegisteredUserSymfonyEvent;
 use App\Account\Domain\SymfonyEvent\UserCreatedSymfonyEvent;
 use App\Account\Infrastructure\SymfonyEvent\UserVerifiedSymfonyEvent;
+use App\Account\Presentation\Service\AccountPresentationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use LogicException;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Symfony\Component\Messenger\Exception\ExceptionInterface;
-use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
@@ -25,7 +23,6 @@ readonly class AccountDomainService
     public function __construct(
         private EntityManagerInterface      $entityManager,
         private AccountPresentationService  $presentationService,
-        private MessageBusInterface         $messageBus,
         private VerifyEmailHelperInterface  $verifyEmailHelper,
         private EventDispatcherInterface    $eventDispatcher,
         private UserPasswordHasherInterface $userPasswordHasher
@@ -125,7 +122,6 @@ readonly class AccountDomainService
 
     /**
      * @throws Exception
-     * @throws TransportExceptionInterface|ExceptionInterface
      */
     public function handleUnregisteredUserClaimsEmail(
         User    $claimingUser,
@@ -161,18 +157,6 @@ readonly class AccountDomainService
 
         $this->entityManager->persist($claimingUser);
         $this->entityManager->flush();
-
-        $contactTags = [];
-        if ($claimingUser->isExtensionOnly()) {
-            $contactTags[] = ActiveCampaignContactTag::RegisteredThroughTheChromeExtension;
-        }
-
-        $this->messageBus->dispatch(
-            new SyncUserToActiveCampaignCommandSymfonyMessage(
-                $claimingUser,
-                $contactTags
-            )
-        );
 
         $this
             ->presentationService

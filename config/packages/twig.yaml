@@ -4,6 +4,8 @@ twig:
     paths:
         "src/Common/Presentation/Resources/templates": "common.presentation"
         "src/Content/Presentation/Resources/templates": "content.presentation"
+        "src/Registration/Presentation/Resources/templates": "registration.presentation"
+        "src/Security/Presentation/Resources/templates": "security.presentation"
 
 when@test:
     twig:

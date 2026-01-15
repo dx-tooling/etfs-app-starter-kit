@@ -2,7 +2,6 @@
 
 namespace App\Account\Domain\Entity;
 
-
 interface UserOwnedEntityInterface
 {
     public function getId(): ?string;

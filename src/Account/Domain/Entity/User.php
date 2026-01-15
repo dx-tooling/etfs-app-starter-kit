@@ -196,6 +196,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->email = trim(mb_strtolower($email));
     }
 
+    #[ORM\Column(
+        type: Types::STRING,
+        length: 255,
+        nullable: true
+    )]
+    private ?string $name = null;
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(?string $name): void
+    {
+        $this->name = $name !== null ? trim($name) : null;
+    }
+
     #[ORM\Column(type: Types::JSON)]
     private array $roles = [];
 

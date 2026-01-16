@@ -3,12 +3,12 @@
 namespace App\Organization\Domain\Service;
 
 use App\Account\Domain\Entity\User;
-use App\Account\Domain\Service\AccountDomainService;
+use App\Account\Domain\Service\AccountDomainServiceInterface;
 use App\Organization\Domain\Entity\Group;
 use App\Organization\Domain\Entity\Invitation;
 use App\Organization\Domain\Entity\Organization;
 use App\Organization\Domain\Enum\AccessRight;
-use App\Organization\Presentation\Service\OrganizationPresentationService;
+use App\Organization\Presentation\Service\OrganizationPresentationServiceInterface;
 use App\Shared\Domain\Enum\Iso639_1Code;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,13 +18,13 @@ use Exception;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-readonly class OrganizationDomainService
+readonly class OrganizationDomainService implements OrganizationDomainServiceInterface
 {
     public function __construct(
-        private TranslatorInterface             $translator,
-        private EntityManagerInterface          $entityManager,
-        private OrganizationPresentationService $organizationPresentationService,
-        private AccountDomainService            $accountDomainService
+        private TranslatorInterface                      $translator,
+        private EntityManagerInterface                   $entityManager,
+        private OrganizationPresentationServiceInterface $organizationPresentationService,
+        private AccountDomainServiceInterface            $accountDomainService
     ) {
     }
 
@@ -446,6 +446,9 @@ readonly class OrganizationDomainService
         );
     }
 
+    /**
+     * @throws Exception
+     */
     public function switchOrganization(
         User         $user,
         Organization $organization

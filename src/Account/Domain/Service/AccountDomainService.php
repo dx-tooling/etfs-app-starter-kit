@@ -7,7 +7,7 @@ use App\Account\Domain\Enum\Role;
 use App\Account\Domain\SymfonyEvent\UnregisteredUserClaimedRegisteredUserSymfonyEvent;
 use App\Account\Domain\SymfonyEvent\UserCreatedSymfonyEvent;
 use App\Account\Infrastructure\SymfonyEvent\UserVerifiedSymfonyEvent;
-use App\Account\Presentation\Service\AccountPresentationService;
+use App\Account\Presentation\Service\AccountPresentationServiceInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use LogicException;
@@ -18,14 +18,14 @@ use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelperInterface;
 use ValueError;
 
-readonly class AccountDomainService
+readonly class AccountDomainService implements AccountDomainServiceInterface
 {
     public function __construct(
-        private EntityManagerInterface      $entityManager,
-        private AccountPresentationService  $presentationService,
-        private VerifyEmailHelperInterface  $verifyEmailHelper,
-        private EventDispatcherInterface    $eventDispatcher,
-        private UserPasswordHasherInterface $userPasswordHasher
+        private EntityManagerInterface              $entityManager,
+        private AccountPresentationServiceInterface $presentationService,
+        private VerifyEmailHelperInterface          $verifyEmailHelper,
+        private EventDispatcherInterface            $eventDispatcher,
+        private UserPasswordHasherInterface         $userPasswordHasher
     ) {
     }
 

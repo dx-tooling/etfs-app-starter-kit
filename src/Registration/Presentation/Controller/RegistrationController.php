@@ -6,7 +6,7 @@ namespace App\Registration\Presentation\Controller;
 
 use App\Account\Domain\Entity\User;
 use App\Account\Domain\Enum\Role;
-use App\Account\Infrastructure\Repository\UserRepository;
+use App\Account\Infrastructure\Repository\UserRepositoryInterface;
 use App\Registration\Presentation\Form\RegistrationFormType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -24,7 +24,7 @@ class RegistrationController extends AbstractController
     public function register(
         Request                     $request,
         UserPasswordHasherInterface $userPasswordHasher,
-        UserRepository              $userRepository,
+        UserRepositoryInterface     $userRepository,
         Security                    $security
     ): Response {
         if ($this->getUser() !== null) {

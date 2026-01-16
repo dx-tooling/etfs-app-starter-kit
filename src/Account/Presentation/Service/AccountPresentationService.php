@@ -3,33 +3,20 @@
 namespace App\Account\Presentation\Service;
 
 use App\Account\Domain\Entity\User;
-use App\Shared\Presentation\Service\MailService;
-use App\VideoBasedMarketing\Account\Infrastructure\Security\EmailVerifier;
-use App\VideoBasedMarketing\Account\Infrastructure\Service\RequestParametersBasedUserAuthService;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 use ValueError;
 
-readonly class AccountPresentationService
+readonly class AccountPresentationService implements AccountPresentationServiceInterface
 {
-    /*public function __construct(
-        private MailService                           $mailService,
+    public function __construct(
+        /*private MailService                           $mailService,
         private TranslatorInterface                   $translator,
         private EmailVerifier                         $emailVerifier,
-        private RequestParametersBasedUserAuthService $requestParametersBasedUserAuthService,
-        private EntityManagerInterface                $entityManager
+        private RequestParametersBasedUserAuthService $requestParametersBasedUserAuthService,*/
+        private EntityManagerInterface $entityManager
     ) {
-    }*/
+    }
 
-    /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
     public function sendVerificationEmailForClaimedUser(
         User $user
     ): void {
@@ -65,9 +52,6 @@ readonly class AccountPresentationService
         );*/
     }
 
-    /**
-     * @throws TransportExceptionInterface
-     */
     public function sendPasswordResetEmail(
         string $email
     ): void {

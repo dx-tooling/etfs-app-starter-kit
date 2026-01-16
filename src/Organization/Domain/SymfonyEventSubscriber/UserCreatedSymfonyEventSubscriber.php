@@ -3,17 +3,16 @@
 namespace App\Organization\Domain\SymfonyEventSubscriber;
 
 use App\Account\Domain\SymfonyEvent\UserCreatedSymfonyEvent;
-use App\Organization\Domain\Service\OrganizationDomainService;
+use App\Organization\Domain\Service\OrganizationDomainServiceInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Exception\ORMException;
 use Exception;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 readonly class UserCreatedSymfonyEventSubscriber implements EventSubscriberInterface
 {
     public function __construct(
-        private OrganizationDomainService $organizationDomainService,
-        private EntityManagerInterface    $entityManager
+        private OrganizationDomainServiceInterface $organizationDomainService,
+        private EntityManagerInterface             $entityManager
     ) {
     }
 
@@ -27,7 +26,7 @@ readonly class UserCreatedSymfonyEventSubscriber implements EventSubscriberInter
     }
 
     /**
-     * @throws Exception|ORMException
+     * @throws Exception
      */
     public function handle(
         UserCreatedSymfonyEvent $event

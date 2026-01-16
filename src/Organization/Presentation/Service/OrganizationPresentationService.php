@@ -3,7 +3,7 @@
 namespace App\Organization\Presentation\Service;
 
 use App\Organization\Domain\Entity\Invitation;
-use App\Shared\Presentation\Service\MailService;
+use App\Shared\Presentation\Service\MailServiceInterface;
 use Exception;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -11,12 +11,12 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-readonly class OrganizationPresentationService
+readonly class OrganizationPresentationService implements OrganizationPresentationServiceInterface
 {
     public function __construct(
-        private MailService         $mailService,
-        private TranslatorInterface $translator,
-        private RouterInterface     $router
+        private MailServiceInterface $mailService,
+        private TranslatorInterface  $translator,
+        private RouterInterface      $router
     ) {
     }
 

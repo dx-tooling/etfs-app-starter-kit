@@ -9,7 +9,7 @@ use App\Account\Domain\Entity\User;
 readonly class UserCreatedSymfonyEvent
 {
     public function __construct(
-        public User $user
+        public string $userId
     ) {
     }
 }

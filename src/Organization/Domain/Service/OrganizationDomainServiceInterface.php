@@ -2,7 +2,6 @@
 
 namespace App\Organization\Domain\Service;
 
-use App\Account\Domain\Entity\User;
 use App\Organization\Domain\Entity\Group;
 use App\Organization\Domain\Entity\Invitation;
 use App\Organization\Domain\Entity\Organization;
@@ -12,29 +11,18 @@ use App\Shared\Domain\Enum\Iso639_1Code;
 interface OrganizationDomainServiceInterface
 {
     public function getAllOrganizationsForUser(
-        User $user
+        string $userId
     ): array;
 
-    public function userJoinedOrganizations(
-        User $user
-    ): bool;
+    public function userHasJoinedOrganizations(string $userId): bool;
 
-    public function userJoinedOrganization(
-        User         $user,
-        Organization $organization
-    ): bool;
+    public function userHasJoinedOrganization(string $userId, string $organizationId): bool;
 
-    public function userCanCreateOrManageOrganization(
-        User $user
-    ): bool;
+    public function userCanCreateOrManageOrganization(string $userId): bool;
 
-    public function getCurrentlyActiveOrganizationOfUser(
-        User $user
-    ): Organization;
+    public function getOrganizationById(string $organizationId): ?Organization;
 
-    public function createOrganization(
-        User $owningUser
-    ): Organization;
+    public function createOrganization(string $userId): Organization;
 
     public function emailCanBeInvitedToOrganization(
         string       $email,
@@ -48,8 +36,8 @@ interface OrganizationDomainServiceInterface
 
     public function acceptInvitation(
         Invitation $invitation,
-        ?User      $user
-    ): ?User;
+        ?string    $userId
+    ): ?string;
 
     public function getOrganizationName(
         Organization  $organization,
@@ -64,9 +52,8 @@ interface OrganizationDomainServiceInterface
         Organization $organization
     ): array;
 
-    public function getAllUsersOfOrganization(
-        Organization $organization
-    ): array;
+    /** @return string[] */
+    public function getAllUserIdsForOrganization(Organization $organization): array;
 
     public function getGroupName(
         Group        $group,
@@ -78,46 +65,42 @@ interface OrganizationDomainServiceInterface
     ): array;
 
     public function getGroupsOfUserForCurrentlyActiveOrganization(
-        User $user
+        string $userId
     ): array;
 
     public function getDefaultGroupForNewMembers(
         Organization $organization
     ): Group;
 
-    public function getGroupMembers(
-        Group $group
-    ): array;
+    /** @return string[] */
+    public function getGroupMemberIds(Group $group): array;
 
     public function moveUserToAdministratorsGroup(
-        User         $user,
+        string       $userId,
         Organization $organization
     ): void;
 
     public function moveUserToTeamMembersGroup(
-        User         $user,
+        string       $userId,
         Organization $organization
     ): void;
 
     public function userHasAccessRight(
-        User        $user,
+        string      $userId,
         AccessRight $accessRight
     ): bool;
 
     public function currentlyActiveOrganizationIsOwnOrganization(
-        User $user
+        string $userId
     ): bool;
 
-    public function userCanSwitchOrganizations(
-        User $user
-    ): bool;
+    public function userCanSwitchOrganizations(string $userId): bool;
 
-    public function organizationsUserCanSwitchTo(
-        User $user
-    ): array;
+    /** @return Organization[] */
+    public function organizationsUserCanSwitchTo(string $userId): array;
 
     public function switchOrganization(
-        User         $user,
+        string       $userId,
         Organization $organization
     ): void;
 }

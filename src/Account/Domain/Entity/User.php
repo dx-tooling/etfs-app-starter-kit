@@ -1,13 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Account\Domain\Entity;
 
 use App\Account\Domain\Enum\Role;
 use App\Account\Infrastructure\Repository\UserRepository;
-use App\Organization\Domain\Entity\Organization;
 use DateTimeImmutable;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use EnterpriseToolingForSymfony\SharedBundle\DateAndTime\Service\DateAndTimeService;
@@ -16,7 +15,6 @@ use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use ValueError;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'users')]
@@ -31,9 +29,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function __construct()
     {
-        $this->createdAt           = DateAndTimeService::getDateTimeImmutable();
-        $this->ownedOrganizations  = new ArrayCollection();
-        $this->joinedOrganizations = new ArrayCollection();
+        $this->createdAt = DateAndTimeService::getDateTimeImmutable();
     }
 
     #[ORM\Id]
@@ -61,121 +57,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->createdAt;
     }
 
-    /** @var Organization[] */
-    #[ORM\OneToMany(
-        targetEntity: Organization::class,
-        mappedBy: 'owningUser',
-        cascade: ['persist']
-    )]
-    private array|Collection $ownedOrganizations;
-
-    public function getOwnedOrganizations(): array|Collection
-    {
-        return $this->ownedOrganizations;
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function addOwnedOrganization(
-        Organization $organization
-    ): void {
-        foreach ($this->ownedOrganizations as $ownedOrganization) {
-            if ($ownedOrganization->getId() === $organization->getId()) {
-                throw new ValueError(
-                    "Organization '{$organization->getId()}' already in list of owned organizations."
-                );
-            }
-        }
-        $this->ownedOrganizations->add($organization);
-    }
-
-    #[ORM\ManyToOne(
-        targetEntity: Organization::class,
-        cascade: ['persist']
-    )]
-    #[ORM\JoinColumn(
-        name: 'currently_active_organizations_id',
-        referencedColumnName: 'id',
+    #[ORM\Column(
+        type: Types::GUID,
+        unique: false,
         nullable: true,
-        onDelete: 'CASCADE'
     )]
-    private ?Organization $currentlyActiveOrganization = null;
+    private ?string $currentlyActiveOrganizationsId = null;
 
-    public function getCurrentlyActiveOrganization(): Organization
+    public function getCurrentlyActiveOrganizationsId(): ?string
     {
-        return $this->currentlyActiveOrganization;
+        return $this->currentlyActiveOrganizationsId;
     }
 
-    public function setCurrentlyActiveOrganization(
-        Organization $organization
-    ): void {
-        foreach ($this->ownedOrganizations as $ownedOrganization) {
-            if ($ownedOrganization->getId() === $organization->getId()) {
-                $this->currentlyActiveOrganization = $organization;
-
-                return;
-            }
-        }
-
-        foreach ($this->joinedOrganizations as $joinedOrganization) {
-            if ($joinedOrganization->getId() === $organization->getId()) {
-                $this->currentlyActiveOrganization = $organization;
-
-                return;
-            }
-        }
-
-        throw new ValueError(
-            "Cannot set organization '{$organization->getId()}' as currently active because it is neither owned nor joined."
-        );
-    }
-
-    public function ownsCurrentlyActiveOrganization(): bool
+    public function setCurrentlyActiveOrganizationsId(?string $currentlyActiveOrganizationsId): void
     {
-        return $this->getId() === $this->currentlyActiveOrganization->getOwningUser()->getId();
-    }
-
-    /**
-     * @var Collection|Organization[]
-     */
-    #[ORM\JoinTable(name: 'users_organizations')]
-    #[ORM\JoinColumn(
-        name: 'users_id',
-        referencedColumnName: 'id',
-        unique: false
-    )]
-    #[ORM\InverseJoinColumn(
-        name: 'organizations_id',
-        referencedColumnName: 'id',
-        unique: false
-    )]
-    #[ORM\ManyToMany(targetEntity: Organization::class, inversedBy: 'joinedUsers')]
-    private array|Collection $joinedOrganizations;
-
-    /**
-     * @return Collection|Organization[]
-     */
-    public function getJoinedOrganizations(): Collection|array
-    {
-        return $this->joinedOrganizations;
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function addJoinedOrganization(
-        Organization $organization
-    ): void {
-        foreach ($this->joinedOrganizations as $joinedOrganization) {
-            if ($joinedOrganization->getId() === $organization->getId()) {
-                throw new ValueError(
-                    "Organization '{$organization->getId()}' already in list of joined organizations."
-                );
-            }
-        }
-
-        $this->joinedOrganizations->add($organization);
+        $this->currentlyActiveOrganizationsId = $currentlyActiveOrganizationsId;
     }
 
     #[ORM\Column(

@@ -4,15 +4,16 @@ namespace App\Organization\Domain\SymfonyEventSubscriber;
 
 use App\Account\Domain\SymfonyEvent\UserCreatedSymfonyEvent;
 use App\Organization\Domain\Service\OrganizationDomainServiceInterface;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Organization\Domain\SymfonyEvent\CurrentlyActiveOrganizationChangedSymfonyEvent;
 use Exception;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 readonly class UserCreatedSymfonyEventSubscriber implements EventSubscriberInterface
 {
     public function __construct(
         private OrganizationDomainServiceInterface $organizationDomainService,
-        private EntityManagerInterface             $entityManager
+        private EventDispatcherInterface           $eventDispatcher
     ) {
     }
 
@@ -33,13 +34,13 @@ readonly class UserCreatedSymfonyEventSubscriber implements EventSubscriberInter
     ): void {
         $organization = $this
             ->organizationDomainService
-            ->createOrganization($event->user);
+            ->createOrganization($event->userId);
 
-        $event
-            ->user
-            ->setCurrentlyActiveOrganization($organization);
-
-        $this->entityManager->persist($event->user);
-        $this->entityManager->flush();
+        $this->eventDispatcher->dispatch(
+            new CurrentlyActiveOrganizationChangedSymfonyEvent(
+                $organization->getId(),
+                $event->userId
+            )
+        );
     }
 }

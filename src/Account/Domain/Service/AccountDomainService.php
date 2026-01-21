@@ -58,7 +58,6 @@ readonly class AccountDomainService implements AccountDomainServiceInterface
         }
 
         $user->addRole(Role::REGISTERED_USER);
-        $user->addRole(Role::EXTENSION_ONLY_USER);
 
         $user->setPassword(
             $this->userPasswordHasher->hashPassword(
@@ -84,9 +83,8 @@ readonly class AccountDomainService implements AccountDomainServiceInterface
     /**
      * @throws Exception
      */
-    public function createUnregisteredUser(
-        bool $asExtensionOnlyUser = false
-    ): User {
+    public function createUnregisteredUser(): User
+    {
         $user = new User();
         $user->setEmail(
             sha1(
@@ -99,10 +97,6 @@ readonly class AccountDomainService implements AccountDomainServiceInterface
 
         $user->addRole(Role::UNREGISTERED_USER);
 
-        if ($asExtensionOnlyUser) {
-            $user->addRole(Role::EXTENSION_ONLY_USER);
-        }
-
         $user->setPassword(
             password_hash(
                 random_int(PHP_INT_MIN, PHP_INT_MAX),
@@ -114,7 +108,7 @@ readonly class AccountDomainService implements AccountDomainServiceInterface
         $this->entityManager->flush();
 
         $this->eventDispatcher->dispatch(
-            new UserCreatedSymfonyEvent($user)
+            new UserCreatedSymfonyEvent($user->getId())
         );
 
         return $user;
@@ -154,6 +148,8 @@ readonly class AccountDomainService implements AccountDomainServiceInterface
                 )
             );
         }
+
+        $claimingUser->setIsVerified(true);
 
         $this->entityManager->persist($claimingUser);
         $this->entityManager->flush();

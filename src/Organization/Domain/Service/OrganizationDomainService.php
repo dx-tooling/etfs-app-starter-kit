@@ -3,19 +3,23 @@
 namespace App\Organization\Domain\Service;
 
 use App\Account\Domain\Entity\User;
-use App\Account\Domain\Service\AccountDomainServiceInterface;
+use App\Account\Facade\AccountFacadeInterface;
+use App\Account\Facade\Dto\UserCreationDto;
 use App\Organization\Domain\Entity\Group;
 use App\Organization\Domain\Entity\Invitation;
 use App\Organization\Domain\Entity\Organization;
 use App\Organization\Domain\Enum\AccessRight;
+use App\Organization\Domain\SymfonyEvent\CurrentlyActiveOrganizationChangedSymfonyEvent;
+use App\Organization\Infrastructure\Repository\OrganizationRepositoryInterface;
 use App\Organization\Presentation\Service\OrganizationPresentationServiceInterface;
 use App\Shared\Domain\Enum\Iso639_1Code;
+use App\Shared\Domain\ValueObject\EmailAddress;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\Persistence\ObjectRepository;
 use Exception;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class OrganizationDomainService implements OrganizationDomainServiceInterface
@@ -24,65 +28,50 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
         private TranslatorInterface                      $translator,
         private EntityManagerInterface                   $entityManager,
         private OrganizationPresentationServiceInterface $organizationPresentationService,
-        private AccountDomainServiceInterface            $accountDomainService
+        private OrganizationRepositoryInterface          $organizationRepository,
+        private AccountFacadeInterface                   $accountFacade,
+        private EventDispatcherInterface                 $eventDispatcher
     ) {
     }
 
     /** @return Organization[] */
-    public function getAllOrganizationsForUser(
-        User $user
-    ): array {
-        return array_merge(
-            $user->getOwnedOrganizations()->toArray(),
-            $user->getJoinedOrganizations()->toArray()
-        );
+    public function getAllOrganizationsForUser(string $userId): array
+    {
+        return $this->organizationRepository->getAllOrganizationsForUser($userId);
     }
 
-    public function userJoinedOrganizations(
-        User $user
-    ): bool {
-        return sizeof($user->getJoinedOrganizations()->toArray()) > 0;
+    public function userHasJoinedOrganizations(string $userId): bool
+    {
+        return $this->organizationRepository->userHasJoinedOrganizations($userId);
     }
 
-    /**
-     * @throws Exception
-     */
-    public function userJoinedOrganization(
-        User         $user,
-        Organization $organization
+    public function userHasJoinedOrganization(
+        string $userId,
+        string $organizationId
     ): bool {
-        foreach ($user->getJoinedOrganizations() as $joinedOrganization) {
-            if ($joinedOrganization->getId() === $organization->getId()) {
-                return true;
-            }
-        }
-
-        return false;
+        return $this->organizationRepository->userHasJoinedOrganization($userId, $organizationId);
     }
 
-    public function userCanCreateOrManageOrganization(
-        User $user
-    ): bool {
-        if (!$this->userJoinedOrganizations($user)) {
+    public function userCanCreateOrManageOrganization(string $userId): bool
+    {
+        if (!$this->userHasJoinedOrganizations($userId)) {
             return true;
         }
 
         return false;
     }
 
-    public function getCurrentlyActiveOrganizationOfUser(
-        User $user
-    ): Organization {
-        return $user->getCurrentlyActiveOrganization();
+    public function getOrganizationById(string $organizationId): ?Organization
+    {
+        return $this->organizationRepository->findById($organizationId);
     }
 
     /**
-     * @throws Exception|ORMException
+     * @throws Exception
      */
-    public function createOrganization(
-        User $owningUser
-    ): Organization {
-        $organization = new Organization($owningUser);
+    public function createOrganization(string $userId): Organization
+    {
+        $organization = new Organization($userId);
 
         $adminGroup = new Group(
             $organization,
@@ -104,7 +93,6 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
 
         $this->entityManager->persist($organization);
         $this->entityManager->flush();
-        $this->entityManager->refresh($owningUser);
 
         return $organization;
     }
@@ -113,33 +101,26 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
         string       $email,
         Organization $organization
     ): bool {
-        /** @var User|null $user */
-        $user = $this
-            ->entityManager
-            ->getRepository(User::class)
-            ->findOneBy(['email' => trim(mb_strtolower($email))]);
+        $userId = $this->accountFacade->getUserIdByEmail($email);
 
-        if (is_null($user)) {
+        if (is_null($userId)) {
             return true;
         }
 
-        foreach ($user->getJoinedOrganizations() as $joinedOrganization) {
-            if ($joinedOrganization->getId() === $organization->getId()) {
-                return false;
-            }
+        $userAlreadyOwnsOrganization = $organization->getOwningUsersId() === $userId;
+        if ($userAlreadyOwnsOrganization) {
+            return false;
         }
 
-        foreach ($user->getOwnedOrganizations() as $ownedOrganization) {
-            if ($ownedOrganization->getId() === $organization->getId()) {
-                return false;
-            }
+        if ($this->userHasJoinedOrganization($userId, $organization->getId())) {
+            return false;
         }
 
         return true;
     }
 
     /**
-     * @throws Exception|TransportExceptionInterface
+     * @throws Exception
      */
     public function inviteEmailToOrganization(
         string       $email,
@@ -176,28 +157,25 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
      */
     public function acceptInvitation(
         Invitation $invitation,
-        ?User      $user
-    ): ?User {
-        if (!is_null($user)) {
-            foreach ($user->getJoinedOrganizations() as $joinedOrganization) {
-                if ($joinedOrganization->getId() === $invitation->getOrganization()->getId()) {
-                    return $user;
-                }
+        ?string    $userId
+    ): ?string {
+        if ($this->accountFacade->userWithIdExists($userId)) {
+            if ($this->userHasJoinedOrganization($userId, $invitation->getOrganization()->getId())) {
+                return $userId;
             }
 
-            if ($user->isUnregistered()) {
-                $this->accountDomainService->handleUnregisteredUserClaimsEmail(
-                    $user,
-                    $invitation->getEmail(),
-                    null
-                );
-                $user->setIsVerified(true);
+            $result = $this->accountFacade->handleUserClaimsEmail($userId, $invitation->getEmail());
+
+            if (!$result->isSuccess) {
+                throw new Exception($result->errorMessage);
             }
         } else {
-            $user = $this->accountDomainService->createRegisteredUser(
-                $invitation->getEmail(),
-                null,
-                true
+            $user = $this->accountFacade->createRegisteredUser(
+                new UserCreationDto(
+                    EmailAddress::fromString($invitation->getEmail()),
+                    null,
+                    true
+                )
             );
         }
 
@@ -205,15 +183,19 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
             $invitation->getOrganization()
         );
 
-        $user->addJoinedOrganization($invitation->getOrganization());
-        $user->setCurrentlyActiveOrganization($invitation->getOrganization());
-        $invitation->getOrganization()->addJoinedUser($user);
-        $defaultGroup->addMember($user);
+        $this->organizationRepository->addUserToOrganization(
+            $userId,
+            $invitation->getOrganization()->getId()
+        );
 
-        $this->entityManager->persist($user);
-        $this->entityManager->persist($invitation->getOrganization());
-        $this->entityManager->persist($defaultGroup);
-        $this->entityManager->flush();
+        $this->eventDispatcher->dispatch(
+            new CurrentlyActiveOrganizationChangedSymfonyEvent(
+                $invitation->getOrganization()->getId(),
+                $userId
+            )
+        );
+
+        $this->organizationRepository->addMemberToGroup($userId, $defaultGroup->getId());
 
         $this->entityManager->refresh($invitation->getOrganization());
 
@@ -221,7 +203,7 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
         unset($invitation);
         $this->entityManager->flush();
 
-        return $user;
+        return $userId;
     }
 
     public function getOrganizationName(
@@ -263,12 +245,14 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
     }
 
     /** @return User[] */
-    public function getAllUsersOfOrganization(
-        Organization $organization
-    ): array {
+    /**
+     * @return string[]
+     */
+    public function getAllUserIdsForOrganization(Organization $organization): array
+    {
         return array_merge(
-            [$organization->getOwningUser()],
-            $organization->getJoinedUsers()->toArray()
+            [$organization->getOwningUsersId()],
+            $this->organizationRepository->getJoinedUserIdsForOrganization($organization->getId())
         );
     }
 
@@ -297,11 +281,21 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
         );
     }
 
-    /** @return Group[] */
+    /**
+     * @return Group[]
+     *
+     * @throws Exception
+     */
     public function getGroupsOfUserForCurrentlyActiveOrganization(
-        User $user
+        string $userId
     ): array {
-        $organization = $this->getCurrentlyActiveOrganizationOfUser($user);
+        $currentlyActiveOrganizationsId = $this->accountFacade->getCurrentlyActiveOrganizationsIdForUser($userId);
+
+        if (is_null($currentlyActiveOrganizationsId)) {
+            throw new Exception('No currently active organization found for user with id ' . $userId);
+        }
+
+        $organization = $this->getOrganizationById($currentlyActiveOrganizationsId);
 
         /** @var ObjectRepository<Group> $repo */
         $repo = $this->entityManager->getRepository(Group::class);
@@ -315,10 +309,8 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
         /** @var Group[] $foundGroups */
         $foundGroups = [];
         foreach ($allGroups as $group) {
-            foreach ($group->getMembers() as $member) {
-                if ($member->getId() === $user->getId()) {
-                    $foundGroups[] = $group;
-                }
+            if ($this->organizationRepository->userIsMemberOfGroup($userId, $group->getId())) {
+                $foundGroups[] = $group;
             }
         }
 
@@ -351,64 +343,68 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
         return $group;
     }
 
-    /** @return User[] */
-    public function getGroupMembers(
-        Group $group
-    ): array {
-        return $group->getMembers();
+    /**
+     * @return string[]
+     *
+     * @throws Exception
+     */
+    public function getGroupMemberIds(Group $group): array
+    {
+        return $this->organizationRepository->getMemberIdsOfGroup($group->getId());
     }
 
+    /**
+     * @throws Exception
+     */
     public function moveUserToAdministratorsGroup(
-        User         $user,
+        string       $userId,
         Organization $organization
     ): void {
-        $groups = $this->getGroups(
-            $organization
-        );
+        $groups = $this->getGroups($organization);
 
         foreach ($groups as $group) {
             if ($group->isAdministratorsGroup()) {
-                $group->addMember($user);
+                if (!$this->organizationRepository->userIsMemberOfGroup($userId, $group->getId())) {
+                    $this->organizationRepository->addMemberToGroup($userId, $group->getId());
+                }
             } else {
-                $group->removeMember($user);
+                $this->organizationRepository->removeMemberFromGroup($userId, $group->getId());
             }
-            $this->entityManager->persist($group);
         }
-
-        $this->entityManager->flush();
     }
 
+    /**
+     * @throws Exception
+     */
     public function moveUserToTeamMembersGroup(
-        User         $user,
+        string       $userId,
         Organization $organization
     ): void {
-        $groups = $this->getGroups(
-            $organization
-        );
+        $groups = $this->getGroups($organization);
 
         foreach ($groups as $group) {
             if ($group->isTeamMembersGroup()) {
-                $group->addMember($user);
+                if (!$this->organizationRepository->userIsMemberOfGroup($userId, $group->getId())) {
+                    $this->organizationRepository->addMemberToGroup($userId, $group->getId());
+                }
             } else {
-                $group->removeMember($user);
+                $this->organizationRepository->removeMemberFromGroup($userId, $group->getId());
             }
-            $this->entityManager->persist($group);
         }
-
-        $this->entityManager->flush();
     }
 
+    /**
+     * @throws Exception
+     */
     public function userHasAccessRight(
-        User        $user,
+        string      $userId,
         AccessRight $accessRight
     ): bool {
-        if ($this->getCurrentlyActiveOrganizationOfUser($user)->getOwningUser()->getId()
-            === $user->getId()
-        ) {
+        if ($this->currentlyActiveOrganizationIsOwnOrganization($userId)) {
             return true;
         }
 
-        foreach ($this->getGroupsOfUserForCurrentlyActiveOrganization($user) as $group) {
+        foreach ($this->getGroupsOfUserForCurrentlyActiveOrganization($userId) as $group) {
             foreach ($group->getAccessRights() as $groupAccessRight) {
                 if ($groupAccessRight    === AccessRight::FULL_ACCESS
                     || $groupAccessRight === $accessRight
@@ -421,43 +417,48 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
         return false;
     }
 
+    /**
+     * @throws Exception
+     */
     public function currentlyActiveOrganizationIsOwnOrganization(
-        User $user
+        string $userId
     ): bool {
-        return $user->getCurrentlyActiveOrganization()->getOwningUser()->getId()
-            === $user->getId();
+        $currentlyActiveOrganizationsId = $this->accountFacade->getCurrentlyActiveOrganizationsIdForUser($userId);
+
+        if (is_null($currentlyActiveOrganizationsId)) {
+            throw new Exception('No currently active organization found for user with id ' . $userId);
+        }
+
+        $organization = $this->getOrganizationById($currentlyActiveOrganizationsId);
+        return !is_null($organization) && $organization->getOwningUsersId() === $userId;
     }
 
-    public function userCanSwitchOrganizations(
-        User $user
-    ): bool {
-        return $user->getJoinedOrganizations()->count()
-            + $user->getOwnedOrganizations()->count()
-            > 1;
+    public function userCanSwitchOrganizations(string $userId): bool
+    {
+        return count($this->getAllOrganizationsForUser($userId)) > 1;
     }
 
     /** @return Organization[] */
-    public function organizationsUserCanSwitchTo(
-        User $user
-    ): array {
-        return array_merge(
-            $user->getJoinedOrganizations()->toArray(),
-            $user->getOwnedOrganizations()->toArray()
-        );
+    public function organizationsUserCanSwitchTo(string $userId): array
+    {
+        return $this->getAllOrganizationsForUser($userId);
     }
 
     /**
      * @throws Exception
      */
     public function switchOrganization(
-        User         $user,
+        string       $userId,
         Organization $organization
     ): void {
-        foreach ($this->organizationsUserCanSwitchTo($user) as $switchableOrganization) {
+        foreach ($this->organizationsUserCanSwitchTo($userId) as $switchableOrganization) {
             if ($switchableOrganization->getId() === $organization->getId()) {
-                $user->setCurrentlyActiveOrganization($organization);
-                $this->entityManager->persist($user);
-                $this->entityManager->flush();
+                $this->eventDispatcher->dispatch(
+                    new CurrentlyActiveOrganizationChangedSymfonyEvent(
+                        $organization->getId(),
+                        $userId
+                    )
+                );
 
                 return;
             }

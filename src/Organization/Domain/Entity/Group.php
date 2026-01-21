@@ -1,12 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Organization\Domain\Entity;
 
-use App\Account\Domain\Entity\User;
 use App\Organization\Domain\Enum\AccessRight;
 use DateTimeImmutable;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use EnterpriseToolingForSymfony\SharedBundle\DateAndTime\Service\DateAndTimeService;
@@ -38,8 +37,6 @@ class Group implements OrganizationOwnedEntityInterface
             }
         }
         $this->accessRights = $accessRights;
-
-        $this->members = new ArrayCollection();
 
         $this->isDefaultForNewMembers = $isDefaultForNewMembers;
 
@@ -118,49 +115,6 @@ class Group implements OrganizationOwnedEntityInterface
     public function getAccessRights(): array
     {
         return $this->accessRights;
-    }
-
-    /**
-     * @var Collection|User[]
-     */
-    #[ORM\JoinTable(name: 'users_organization_groups')]
-    #[ORM\JoinColumn(
-        name: 'users_id',
-        referencedColumnName: 'id'
-    )]
-    #[ORM\InverseJoinColumn(
-        name: 'organization_groups_id',
-        referencedColumnName: 'id',
-        unique: false
-    )]
-    #[ORM\ManyToMany(targetEntity: User::class)]
-    private array|Collection $members;
-
-    public function addMember(
-        User $user
-    ): void {
-        /** @var User $member */
-        foreach ($this->members as $member) {
-            if ($member->getId() === $user->getId()) {
-                throw new ValueError("User '{$user->getId()}' is already in group '{$this->getName()}'.");
-            }
-        }
-
-        $this->members->add($user);
-    }
-
-    public function removeMember(
-        User $user
-    ): void {
-        $this->members->removeElement($user);
-    }
-
-    /**
-     * @return User[]
-     */
-    public function getMembers(): array
-    {
-        return $this->members->toArray();
     }
 
     #[ORM\Column(

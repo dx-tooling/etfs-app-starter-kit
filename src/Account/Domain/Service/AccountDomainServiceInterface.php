@@ -14,9 +14,7 @@ interface AccountDomainServiceInterface
         ?User   $user = null
     ): User;
 
-    public function createUnregisteredUser(
-        bool $asExtensionOnlyUser = false
-    ): User;
+    public function createUnregisteredUser(): User;
 
     public function handleUnregisteredUserClaimsEmail(
         User    $claimingUser,

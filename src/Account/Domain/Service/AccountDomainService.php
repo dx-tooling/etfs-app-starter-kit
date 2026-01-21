@@ -149,7 +149,7 @@ readonly class AccountDomainService implements AccountDomainServiceInterface
             );
         }
 
-        $claimingUser->setIsVerified(true);
+        $this->makeUserVerified($claimingUser);
 
         $this->entityManager->persist($claimingUser);
         $this->entityManager->flush();

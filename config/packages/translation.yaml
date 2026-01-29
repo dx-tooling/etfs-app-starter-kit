@@ -1,7 +1,13 @@
 framework:
-    default_locale: en
+    default_locale: !php/enum App\Shared\Domain\Enum\Iso639_1Code::En->value
     translator:
-        default_path: "%kernel.project_dir%/translations"
+        default_path: '%kernel.project_dir%/translations'
+        paths:
+            - '%kernel.project_dir%/src/Shared/Presentation/Resources/translations'
+            - '%kernel.project_dir%/src/Account/Presentation/Resources/translations'
+            - '%kernel.project_dir%/src/Organization/Presentation/Resources/translations'
+            - '%kernel.project_dir%/src/Dashboard/Presentation/Resources/translations'
+            - '%kernel.project_dir%/src/Settings/Presentation/Resources/translations'
         fallbacks:
-            - en
-        providers:
+            - !php/enum App\Shared\Domain\Enum\Iso639_1Code::En->value
+            - !php/enum App\Shared\Domain\Enum\Iso639_1Code::De->value

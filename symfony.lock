@@ -396,6 +396,9 @@
     "symfonycasts/tailwind-bundle": {
         "version": "v0.6.1"
     },
+    "symfonycasts/verify-email-bundle": {
+        "version": "v1.17.4"
+    },
     "twig/extra-bundle": {
         "version": "v3.20.0"
     }

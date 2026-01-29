@@ -1,0 +1,46 @@
+<?php
+
+namespace App\Organization\Domain\SymfonyEventSubscriber;
+
+use App\Account\Domain\SymfonyEvent\UserCreatedSymfonyEvent;
+use App\Organization\Domain\Service\OrganizationDomainServiceInterface;
+use App\Organization\Domain\SymfonyEvent\CurrentlyActiveOrganizationChangedSymfonyEvent;
+use Exception;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
+readonly class UserCreatedSymfonyEventSubscriber implements EventSubscriberInterface
+{
+    public function __construct(
+        private OrganizationDomainServiceInterface $organizationDomainService,
+        private EventDispatcherInterface           $eventDispatcher
+    ) {
+    }
+
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            UserCreatedSymfonyEvent::class => [
+                ['handle']
+            ],
+        ];
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function handle(
+        UserCreatedSymfonyEvent $event
+    ): void {
+        $organization = $this
+            ->organizationDomainService
+            ->createOrganization($event->userId);
+
+        $this->eventDispatcher->dispatch(
+            new CurrentlyActiveOrganizationChangedSymfonyEvent(
+                $organization->getId(),
+                $event->userId
+            )
+        );
+    }
+}

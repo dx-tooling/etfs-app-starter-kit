@@ -1,0 +1,105 @@
+{% extends '@common.presentation/base_appshell.html.twig' %}
+
+{% block title %}Sign In{% endblock %}
+
+{% block body %}
+    <div class="min-h-[60vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="w-full max-w-md space-y-8">
+            {# Header #}
+            <div class="text-center">
+                <h1 class="etfswui-h1">
+                    Welcome back
+                </h1>
+                <p class="etfswui-text-small mt-2">
+                    Sign in to your account to continue
+                </p>
+            </div>
+
+            {# Flash Messages #}
+            {% for message in app.flashes('error') %}
+                <div class="etfswui-alert etfswui-alert-danger">
+                    <div class="etfswui-alert-body">
+                        <p class="etfswui-alert-danger-text">{{ message }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+
+            {% for message in app.flashes('success') %}
+                <div class="etfswui-alert etfswui-alert-success">
+                    <div class="etfswui-alert-body">
+                        <p class="etfswui-alert-success-text">{{ message }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+
+            {# Sign In Form #}
+            <div class="etfswui-card">
+                <div class="etfswui-card-content">
+                    <form action="{{ path('account.presentation.sign_in') }}" method="post" class="space-y-6">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                        {# Email Field #}
+                        <div>
+                            <label for="email" class="etfswui-form-label">
+                                Email address
+                            </label>
+                            <input
+                                id="email"
+                                name="email"
+                                type="email"
+                                autocomplete="email"
+                                required
+                                value="{{ last_username }}"
+                                placeholder="you@example.com"
+                                class="etfswui-form-input"
+                            >
+                        </div>
+
+                        {# Password Field #}
+                        <div>
+                            <label for="password" class="etfswui-form-label">
+                                Password
+                            </label>
+                            <input
+                                id="password"
+                                name="password"
+                                type="password"
+                                autocomplete="current-password"
+                                required
+                                placeholder="Enter your password"
+                                class="etfswui-form-input"
+                            >
+                        </div>
+
+                        {# Error Message #}
+                        {% if error %}
+                            <div class="etfswui-alert etfswui-alert-danger">
+                                <div class="etfswui-alert-body">
+                                    <p class="etfswui-alert-danger-text">
+                                        {{ error.messageKey|trans(error.messageData, 'security') }}
+                                    </p>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {# Submit Button #}
+                        <button
+                            type="submit"
+                            class="etfswui-button-default w-full justify-center"
+                        >
+                            Sign in
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {# Sign Up Link #}
+            <p class="text-center etfswui-text-small">
+                Don't have an account?
+                <a href="{{ path('account.presentation.sign_up') }}" class="etfswui-link-default font-semibold">
+                    Create one now
+                </a>
+            </p>
+        </div>
+    </div>
+{% endblock body %}

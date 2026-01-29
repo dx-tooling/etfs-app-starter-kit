@@ -1,0 +1,138 @@
+dateformat:
+    datetime_normal: "{date}"
+
+topnav:
+    features: 'List of all features'
+    sign_in: 'Sign in'
+    sign_up: 'Sign up'
+    sign_out: 'Sign out'
+    download_browser_extension_chrome: 'Get Chrome Extension'
+
+sidenav:
+    homepage: 'About'
+    features: 'Features'
+    pricing: 'Pricing'
+    dashboard: 'Dashboard'
+    presentationpages: 'Landingpages'
+    mailings: 'Mailings'
+    settings: 'Settings'
+    settings_custom_logo: 'Logo'
+    settings_custom_domain: 'Domain'
+    organization: 'Organization'
+    lingo_sync_promotion:
+        text1: 'AI-powered video translation'
+        text2: 'Upgrade your plan to get access to our LingoSync tool.'
+        text3: 'Click here!'
+
+footernav:
+    german: 'Deutsch'
+    english: 'English'
+    imprint: 'Imprint'
+    terms: 'Terms & Conditions'
+    contact: 'Contact'
+    privacy_policy: 'Privacy Policy'
+    cookie_settings: 'Cookies'
+    sign_in: 'Sign in'
+    sign_up: 'Sign up'
+    sign_out: 'Sign out'
+
+contentpages:
+    homepage:
+        title1: 'Increase sales'
+        title2: 'using Video.'
+        text: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.'
+        cta:
+            get_started: 'Get started'
+            live_demo: 'Live demo'
+    homepage_native_recorder:
+        block_1:
+            copy_1: 'Create'
+            copy_2: 'engaging video messages'
+            copy_3: 'that your customers love.'
+        cta:
+            download: 'Install the Chrome browser extension'
+    homepage_extension:
+        copy_1: 'From zero to an'
+        copy_2: 'AI-optimized video email'
+        copy_3: 'in three simple steps.'
+        title: 'The Fyyn.io Browser Extension'
+        text:
+            1: 'The Fyyn.io browser extension is a free plugin for Google Chrome that allows you to create screen and camera recordings directly from your browser.'
+            2: 'And when a recording has been done, create and send a professional video email with our AI-supported copywriting tool.'
+        cta:
+            download: 'Install the free Chrome browser extension now'
+            sign_in: 'Sign in'
+            sign_up: 'Sign up'
+        step1:
+            title: 'Step 1'
+            copy1: 'Record your'
+            highlight: 'screen & camera'
+            copy2: 'right from your web browser.'
+        step2:
+            title: 'Step 2'
+            copy1: 'Create professional copy using our'
+            highlight: 'AI powered'
+            copy2: 'text improvement tool.'
+        step3:
+            title: 'Step 3'
+            copy1: 'Send a'
+            highlight: 'video email'
+            copy2: 'that your customers will love.'
+    features:
+        title1: 'We provide'
+        title2: 'what you need.'
+        text: 'At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga.'
+        cta:
+            get_started: 'Get started'
+            live_demo: 'Live demo'
+    pricing:
+        title1: 'Price-performance'
+        title2: 'at its best.'
+        text: 'Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae.'
+        cta:
+            get_started: 'Get started'
+            live_demo: 'Live demo'
+
+    dashboard:
+        show:
+            your_info: 'Your data'
+            your_info_subtitle: 'Account information and content'
+            your_name: 'Full name'
+            your_email_address: 'E-mail address'
+            your_subscription: 'Current subscription'
+            subscription:
+                m:
+                    title: 'Package M'
+                    description: '$4.99/month — up to 10 recordings per month'
+            your_latest_videos: 'Newest videos'
+            your_presentationpages: 'Landingpage'
+            your_presentationpages.info: >-
+                {numberOfPresentationpages, plural,
+                  =0    {You do not yet have any presentation pages.}
+                  one   {You currently have one presentation page.}
+                  other {You currently have # presentation pages.}
+                }
+            cta:
+                manage_video: 'manage'
+
+    presentationpages:
+        overview:
+            title: >-
+                {numberOfPresentationpages, plural,
+                  =0    {You do not yet have any presentation pages}
+                  one   {You currently have one presentation page}
+                  other {You currently have # presentation pages}
+                }
+            subtitle: 'Landingpages allow you to present your video to your customers, embedded into additional content.'
+            cta:
+                add: 'Add presentation page'
+        add_form:
+            title: 'New presentation page'
+            subtitle: 'Fill in the required information to create a new presentation page.'
+            formfield:
+                title: 'Name for this presentation page'
+                bg_color: 'Background color'
+                text_color: 'Text color'
+                text_color_sample_headline: 'Example headline'
+                text_color_sample_paragraph: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam a commodo ipsum, sed hendrerit nulla. Donec at malesuada nisi. Etiam in egestas urna. Proin nec eleifend nibh, in dapibus libero.'
+                submit_cta: 'Create presentation page'

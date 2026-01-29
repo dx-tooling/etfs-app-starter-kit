@@ -7,8 +7,9 @@ use App\Organization\Domain\SymfonyEvent\CurrentlyActiveOrganizationChangedSymfo
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Exception;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-readonly class CurrentlyActiveOrganizationChangedSymfonyEventSubscriber
+readonly class CurrentlyActiveOrganizationChangedSymfonyEventSubscriber implements EventSubscriberInterface
 {
     public function __construct(
         private EntityManagerInterface $entityManager

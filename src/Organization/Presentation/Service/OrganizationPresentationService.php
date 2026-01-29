@@ -2,6 +2,7 @@
 
 namespace App\Organization\Presentation\Service;
 
+use App\Account\Facade\AccountFacadeInterface;
 use App\Organization\Domain\Entity\Invitation;
 use App\Shared\Presentation\Service\MailServiceInterface;
 use Exception;
@@ -14,9 +15,10 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 readonly class OrganizationPresentationService implements OrganizationPresentationServiceInterface
 {
     public function __construct(
-        private MailServiceInterface $mailService,
-        private TranslatorInterface  $translator,
-        private RouterInterface      $router
+        private MailServiceInterface    $mailService,
+        private TranslatorInterface     $translator,
+        private RouterInterface         $router,
+        private AccountFacadeInterface  $accountFacade
     ) {
     }
 
@@ -27,13 +29,16 @@ readonly class OrganizationPresentationService implements OrganizationPresentati
     public function sendInvitationMail(
         Invitation $invitation
     ): void {
+        $owningUserId = $invitation->getOrganization()->getOwningUsersId();
+        $owningUserName = $this->accountFacade->getUserNameOrEmailById($owningUserId) ?? 'Someone';
+
         $context = [
             'acceptUrl' => $this->router->generate(
-                'organization.invitation.accept',
+                'organization.presentation.accept_invitation',
                 ['invitationId' => $invitation->getId()],
                 UrlGeneratorInterface::ABSOLUTE_URL
             ),
-            'owningUserName' => $invitation->getOrganization()->getOwningUser()->getNameOrEmail()
+            'owningUserName' => $owningUserName
         ];
 
         $this->mailService->send(
@@ -43,12 +48,12 @@ readonly class OrganizationPresentationService implements OrganizationPresentati
                 ->subject(
                     $this->translator->trans(
                         'invitation.email.subject',
-                        ['owningUserName' => $invitation->getOrganization()->getOwningUser()->getNameOrEmail()],
+                        ['owningUserName' => $owningUserName],
                         'etfs.organization'
                     )
                 )
                 ->htmlTemplate(
-                    '@videobasedmarketing.organization/invitation/invitation.email.html.twig'
+                    '@organization.presentation/invitation_email.html.twig'
                 )
                 ->context($context)
         );

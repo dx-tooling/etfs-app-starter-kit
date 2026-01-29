@@ -73,9 +73,10 @@ class Invitation implements OrganizationOwnedEntityInterface
         type: Types::DATE_IMMUTABLE,
         nullable: false
     )]
-    private DateTimeImmutable $createdAt {
-        get {
-            return $this->createdAt;
-        }
+    private DateTimeImmutable $createdAt;
+
+    public function getCreatedAt(): DateTimeImmutable
+    {
+        return $this->createdAt;
     }
 }

@@ -4,7 +4,7 @@ namespace App\Organization\Domain\Service;
 
 use App\Account\Domain\Entity\User;
 use App\Account\Facade\AccountFacadeInterface;
-use App\Account\Facade\Dto\UserCreationDto;
+use App\Account\Facade\Dto\UserRegistrationDto;
 use App\Organization\Domain\Entity\Group;
 use App\Organization\Domain\Entity\Invitation;
 use App\Organization\Domain\Entity\Organization;
@@ -69,9 +69,13 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
     /**
      * @throws Exception
      */
-    public function createOrganization(string $userId): Organization
+    public function createOrganization(string $userId, ?string $name = null): Organization
     {
         $organization = new Organization($userId);
+
+        if ($name !== null && trim($name) !== '') {
+            $organization->setName($name);
+        }
 
         $adminGroup = new Group(
             $organization,
@@ -95,6 +99,13 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
         $this->entityManager->flush();
 
         return $organization;
+    }
+
+    public function renameOrganization(Organization $organization, ?string $name): void
+    {
+        $organization->setName($name);
+        $this->entityManager->persist($organization);
+        $this->entityManager->flush();
     }
 
     public function emailCanBeInvitedToOrganization(
@@ -159,48 +170,64 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
         Invitation $invitation,
         ?string    $userId
     ): ?string {
-        if ($this->accountFacade->userWithIdExists($userId)) {
-            if ($this->userHasJoinedOrganization($userId, $invitation->getOrganization()->getId())) {
+        $organizationId = $invitation->getOrganization()->getId();
+
+        // Check if user already exists by the invitation email
+        $existingUserId = $this->accountFacade->getUserIdByEmail($invitation->getEmail());
+
+        if ($existingUserId !== null) {
+            // User already exists
+            $userId = $existingUserId;
+
+            // Check if already joined
+            if ($this->userHasJoinedOrganization($userId, $organizationId)) {
+                // Already a member, just clean up invitation
+                $this->entityManager->remove($invitation);
+                $this->entityManager->flush();
                 return $userId;
             }
-
-            $result = $this->accountFacade->handleUserClaimsEmail($userId, $invitation->getEmail());
-
-            if (!$result->isSuccess) {
-                throw new Exception($result->errorMessage);
-            }
         } else {
-            $user = $this->accountFacade->createRegisteredUser(
-                new UserCreationDto(
+            // New user - register them (they'll get their own org via event)
+            $result = $this->accountFacade->register(
+                new UserRegistrationDto(
                     EmailAddress::fromString($invitation->getEmail()),
-                    null,
-                    true
+                    null
                 )
             );
+
+            if (!$result->isSuccess) {
+                throw new Exception($result->errorMessage ?? 'Registration failed');
+            }
+
+            $userId = $result->userId;
+
+            if ($userId === null) {
+                throw new Exception('Failed to get user ID after registration');
+            }
         }
 
-        $defaultGroup = $this->getDefaultGroupForNewMembers(
-            $invitation->getOrganization()
-        );
-
+        // Add user to the inviting organization
         $this->organizationRepository->addUserToOrganization(
             $userId,
-            $invitation->getOrganization()->getId()
+            $organizationId
         );
 
+        // Set the inviting organization as currently active
         $this->eventDispatcher->dispatch(
             new CurrentlyActiveOrganizationChangedSymfonyEvent(
-                $invitation->getOrganization()->getId(),
+                $organizationId,
                 $userId
             )
         );
 
+        // Add to default group
+        $defaultGroup = $this->getDefaultGroupForNewMembers(
+            $invitation->getOrganization()
+        );
         $this->organizationRepository->addMemberToGroup($userId, $defaultGroup->getId());
 
-        $this->entityManager->refresh($invitation->getOrganization());
-
+        // Clean up invitation
         $this->entityManager->remove($invitation);
-        unset($invitation);
         $this->entityManager->flush();
 
         return $userId;
@@ -242,6 +269,11 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
             ['organization' => $organization],
             ['createdAt' => Criteria::DESC]
         );
+    }
+
+    public function resendInvitation(Invitation $invitation): void
+    {
+        $this->organizationPresentationService->sendInvitationMail($invitation);
     }
 
     /** @return User[] */
@@ -353,6 +385,23 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
         return $this->organizationRepository->getMemberIdsOfGroup($group->getId());
     }
 
+    public function addUserToGroup(string $userId, Group $group): void
+    {
+        if (!$this->organizationRepository->userIsMemberOfGroup($userId, $group->getId())) {
+            $this->organizationRepository->addMemberToGroup($userId, $group->getId());
+        }
+    }
+
+    public function removeUserFromGroup(string $userId, Group $group): void
+    {
+        $this->organizationRepository->removeMemberFromGroup($userId, $group->getId());
+    }
+
+    public function getGroupById(string $groupId): ?Group
+    {
+        return $this->entityManager->getRepository(Group::class)->find($groupId);
+    }
+
     /**
      * @throws Exception
      */
@@ -430,6 +479,7 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
         }
 
         $organization = $this->getOrganizationById($currentlyActiveOrganizationsId);
+
         return !is_null($organization) && $organization->getOwningUsersId() === $userId;
     }
 

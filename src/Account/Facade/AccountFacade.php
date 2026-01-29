@@ -5,11 +5,12 @@ namespace App\Account\Facade;
 use App\Account\Domain\Entity\User;
 use App\Account\Domain\Service\AccountDomainServiceInterface;
 use App\Account\Facade\Dto\ResultDto;
-use App\Account\Facade\Dto\UserCreationDto;
+use App\Account\Facade\Dto\UserInfoDto;
+use App\Account\Facade\Dto\UserRegistrationDto;
 use Doctrine\ORM\EntityManagerInterface;
 use Throwable;
 
-readonly class AccountFacade
+readonly class AccountFacade implements AccountFacadeInterface
 {
     public function __construct(
         private AccountDomainServiceInterface $accountDomainService,
@@ -17,16 +18,15 @@ readonly class AccountFacade
     ) {
     }
 
-    public function createRegisteredUser(UserCreationDto $dto): ResultDto
+    public function register(UserRegistrationDto $dto): ResultDto
     {
         try {
-            $this->accountDomainService->createRegisteredUser(
+            $user = $this->accountDomainService->register(
                 $dto->emailAddress,
-                $dto->plainPassword,
-                $dto->isVerified
+                $dto->plainPassword
             );
 
-            return new ResultDto(true);
+            return new ResultDto(true, null, $user->getId());
         } catch (Throwable $t) {
             return new ResultDto(false, $t->getMessage());
         }
@@ -47,36 +47,6 @@ readonly class AccountFacade
         return $this->entityManager->getRepository(User::class)->find($userId) !== null;
     }
 
-    public function handleUserClaimsEmail(
-        string  $userId,
-        string  $claimedEmail,
-        ?string $password = null
-    ): ResultDto {
-        $user = $this->entityManager->getRepository(User::class)->find($userId);
-
-        if (is_null($user)) {
-            return new ResultDto(false, 'User not found');
-        }
-
-        if ($user->isRegistered()) {
-            return new ResultDto(true);
-        }
-
-        try {
-            $this
-                ->accountDomainService
-                ->handleUnregisteredUserClaimsEmail(
-                    $user,
-                    $claimedEmail,
-                    $password
-                );
-
-            return new ResultDto(true);
-        } catch (Throwable $t) {
-            return new ResultDto(false, $t->getMessage());
-        }
-    }
-
     public function getCurrentlyActiveOrganizationsIdForUser(string $userId): ?string
     {
         /** @var ?User $user */
@@ -87,5 +57,44 @@ readonly class AccountFacade
         }
 
         return $user->getCurrentlyActiveOrganizationsId();
+    }
+
+    public function getUserNameOrEmailById(string $userId): ?string
+    {
+        /** @var ?User $user */
+        $user = $this->entityManager->getRepository(User::class)->find($userId);
+
+        if ($user === null) {
+            return null;
+        }
+
+        return $user->getName() ?? $user->getEmail();
+    }
+
+    /**
+     * @param string[] $userIds
+     * @return UserInfoDto[]
+     */
+    public function getUserInfoByIds(array $userIds): array
+    {
+        if (empty($userIds)) {
+            return [];
+        }
+
+        $users = $this->entityManager
+            ->getRepository(User::class)
+            ->findBy(['id' => $userIds]);
+
+        $result = [];
+        foreach ($users as $user) {
+            $result[] = new UserInfoDto(
+                $user->getId(),
+                $user->getEmail(),
+                $user->getName(),
+                $user->getCreatedAt()
+            );
+        }
+
+        return $result;
     }
 }

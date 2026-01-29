@@ -49,7 +49,7 @@ class Organization
         unique: false,
         nullable: true
     )]
-    private ?string $name;
+    private ?string $name = null;
 
     public function setName(?string $name): void
     {

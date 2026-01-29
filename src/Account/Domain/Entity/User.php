@@ -30,6 +30,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct()
     {
         $this->createdAt = DateAndTimeService::getDateTimeImmutable();
+        $this->roles     = [Role::USER->value];
     }
 
     #[ORM\Id]
@@ -161,29 +162,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $password): void
     {
         $this->password = $password;
-    }
-
-    #[ORM\Column(type: Types::BOOLEAN)]
-    private bool $isVerified = false;
-
-    public function isVerified(): bool
-    {
-        return $this->isVerified;
-    }
-
-    public function setIsVerified(bool $isVerified): void
-    {
-        $this->isVerified = $isVerified;
-    }
-
-    public function isRegistered(): bool
-    {
-        return $this->hasRole(Role::REGISTERED_USER);
-    }
-
-    public function isUnregistered(): bool
-    {
-        return $this->hasRole(Role::UNREGISTERED_USER);
     }
 
     public function isAdmin(): bool

@@ -22,7 +22,9 @@ interface OrganizationDomainServiceInterface
 
     public function getOrganizationById(string $organizationId): ?Organization;
 
-    public function createOrganization(string $userId): Organization;
+    public function createOrganization(string $userId, ?string $name = null): Organization;
+
+    public function renameOrganization(Organization $organization, ?string $name): void;
 
     public function emailCanBeInvitedToOrganization(
         string       $email,
@@ -52,6 +54,8 @@ interface OrganizationDomainServiceInterface
         Organization $organization
     ): array;
 
+    public function resendInvitation(Invitation $invitation): void;
+
     /** @return string[] */
     public function getAllUserIdsForOrganization(Organization $organization): array;
 
@@ -74,6 +78,12 @@ interface OrganizationDomainServiceInterface
 
     /** @return string[] */
     public function getGroupMemberIds(Group $group): array;
+
+    public function addUserToGroup(string $userId, Group $group): void;
+
+    public function removeUserFromGroup(string $userId, Group $group): void;
+
+    public function getGroupById(string $groupId): ?Group;
 
     public function moveUserToAdministratorsGroup(
         string       $userId,

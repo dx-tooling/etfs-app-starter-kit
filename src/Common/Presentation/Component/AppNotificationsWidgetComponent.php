@@ -32,7 +32,7 @@ class AppNotificationsWidgetComponent extends AbstractController
     public bool $widgetIsOpen = false;
 
     /**
-     * @return AppNotification[]
+     * @return list<AppNotification>
      *
      * @throws Exception
      */

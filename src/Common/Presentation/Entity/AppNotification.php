@@ -8,6 +8,7 @@ use App\Common\Presentation\Enum\AppNotificationType;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use EnterpriseToolingForSymfony\SharedBundle\DateAndTime\Service\DateAndTimeService;
 use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
 
 #[ORM\Entity]
@@ -23,7 +24,7 @@ class AppNotification
         string              $message,
         string              $url
     ) {
-        $this->createdAt = new DateTimeImmutable();
+        $this->createdAt = DateAndTimeService::getDateTimeImmutable();
         $this->type      = $type;
         $this->message   = $message;
         $this->url       = $url;

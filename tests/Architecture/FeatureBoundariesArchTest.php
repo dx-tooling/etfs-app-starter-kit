@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-namespace Tests\Architecture;
-
 $features = array_filter(
     array_map(
         static fn (
@@ -13,7 +11,7 @@ $features = array_filter(
     ),
     static fn (
         string $dir
-    ): bool => true // Use this to filter out directories as needed, e.g. `$dir !== 'Common'`
+    ): bool => true
 );
 
 foreach ($features as $from) {
@@ -32,6 +30,6 @@ foreach ($features as $from) {
                 "App\\{$to}\\Presentation",
                 "App\\{$to}\\TestHarness",
             ])
-            ->group('architecture');
+                 ->group('architecture');
     }
 }

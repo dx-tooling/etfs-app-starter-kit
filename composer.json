@@ -1,23 +1,22 @@
 {
     "type": "project",
     "license": "proprietary",
-    "minimum-stability": "stable",
+    "minimum-stability": "beta",
     "prefer-stable": true,
     "require": {
-        "php": "^8.4",
+        "php-64bit": "^8.4",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-mbstring": "*",
-        "doctrine/dbal": "^4.3",
-        "doctrine/doctrine-bundle": "^2.16.2",
-        "doctrine/doctrine-migrations-bundle": "^3.4.2",
-        "doctrine/orm": "^3.5.2",
+        "doctrine/dbal": "^4.3.4",
+        "doctrine/doctrine-bundle": "^3.0",
+        "doctrine/doctrine-migrations-bundle": "^3.7.0",
+        "doctrine/orm": "^3.5.7",
         "enterprise-tooling-for-symfony/shared-bundle": "dev-main",
         "enterprise-tooling-for-symfony/webui-bundle": "dev-main",
         "googleads/google-ads-php": "^25.0",
         "orhanerday/open-ai": "^5.3",
-        "phpdocumentor/reflection-docblock": "^5.6.3",
-        "phpstan/phpdoc-parser": "^2.3.0",
+        "phpdocumentor/reflection-docblock": "^5.6.4",
         "sensiolabs/minify-bundle": "^0.9.5",
         "sensiolabs/typescript-bundle": "^0.2.2",
         "symfony/asset": "7.4.*",
@@ -26,7 +25,7 @@
         "symfony/doctrine-messenger": "7.4.*",
         "symfony/dotenv": "7.4.*",
         "symfony/expression-language": "7.4.*",
-        "symfony/flex": "^2.8.2",
+        "symfony/flex": "^2.10.0",
         "symfony/form": "7.4.*",
         "symfony/framework-bundle": "7.4.*",
         "symfony/http-client": "7.4.*",
@@ -42,20 +41,19 @@
         "symfony/runtime": "7.4.*",
         "symfony/security-bundle": "7.4.*",
         "symfony/serializer": "7.4.*",
-        "symfony/stimulus-bundle": "^2.30.0",
+        "symfony/stimulus-bundle": "^2.31.0",
         "symfony/string": "7.4.*",
         "symfony/translation": "7.4.*",
         "symfony/twig-bundle": "7.4.*",
         "symfony/uid": "7.4.*",
-        "symfony/ux-live-component": "^2.30.0",
+        "symfony/ux-live-component": "^2.31.0",
         "symfony/validator": "7.4.*",
         "symfony/web-link": "7.4.*",
         "symfony/yaml": "7.4.*",
         "symfonycasts/tailwind-bundle": "^0.10.1",
-        "symfonycasts/verify-email-bundle": "*",
-        "twig/extra-bundle": "^2.12|^3.21",
-        "twig/intl-extra": "^3.21",
-        "twig/twig": "^2.12|^3.21.1"
+        "twig/extra-bundle": "^2.12|^3.22.1",
+        "twig/intl-extra": "^3.22.1",
+        "twig/twig": "^2.12|^3.22.0"
     },
     "config": {
         "allow-plugins": {
@@ -110,41 +108,15 @@
             "require": "7.4.*"
         }
     },
-    "require-dev": {
-        "ergebnis/phpstan-rules": "^2.12.0",
-        "erickskrauch/php-cs-fixer-custom-fixers": "^1.3",
-        "friendsofphp/php-cs-fixer": "^3.88.2",
-        "pestphp/pest": "^4.1",
-        "pestphp/pest-plugin-arch": "^4.0",
-        "phpstan/extension-installer": "^1.4.3",
-        "phpstan/phpstan-doctrine": "^2.0.6",
-        "phpstan/phpstan-phpunit": "^2.0.7",
-        "phpstan/phpstan-symfony": "^2.0.8",
-        "symfony/browser-kit": "7.4.*",
-        "symfony/css-selector": "7.4.*",
-        "symfony/debug-bundle": "7.4.*",
-        "symfony/maker-bundle": "^1.64.0",
-        "symfony/phpunit-bridge": "^7.4.0",
-        "symfony/stopwatch": "7.4.*",
-        "symfony/web-profiler-bundle": "7.4.*",
-        "tomasvotruba/type-coverage": "^2.0.2"
-    },
+    "require-dev": {},
     "repositories": [
         {
-            "name": "enterprise-tooling-for-symfony/shared-bundle:path",
-            "type": "path",
-            "url": "../etfs-shared-bundle",
-            "options": {
-                "symlink": true
-            }
+            "type": "vcs",
+            "url": "https://github.com/dx-tooling/etfs-shared-bundle.git"
         },
         {
-            "name": "enterprise-tooling-for-symfony/webui-bundle:path",
-            "type": "path",
-            "url": "../etfs-webui-bundle",
-            "options": {
-                "symlink": true
-            }
+            "type": "vcs",
+            "url": "https://github.com/dx-tooling/etfs-webui-bundle.git"
         }
     ]
 }

@@ -72,6 +72,11 @@ class Group implements OrganizationOwnedEntityInterface
     )]
     private readonly Organization $organization;
 
+    public function getOrganizationId(): string
+    {
+        return $this->organization->getId();
+    }
+
     public function getOrganization(): Organization
     {
         return $this->organization;

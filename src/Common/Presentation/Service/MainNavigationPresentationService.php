@@ -6,6 +6,7 @@ namespace App\Common\Presentation\Service;
 
 use EnterpriseToolingForSymfony\WebuiBundle\Entity\MainNavigationEntry;
 use EnterpriseToolingForSymfony\WebuiBundle\Service\AbstractMainNavigationService;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
@@ -17,6 +18,7 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
         RouterInterface               $router,
         RequestStack                  $requestStack,
         private ParameterBagInterface $parameterBag,
+        private Security              $security,
     ) {
         $symfonyEnvironment = $this->parameterBag->get('kernel.environment');
 
@@ -46,19 +48,43 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
      */
     public function getPrimaryMainNavigationEntries(): array
     {
-        $entries = [
-            $this->generateEntry(
-                'Home',
-                'content.presentation.homepage',
-            )
-        ];
+        $entries = [];
+
+        if (!$this->security->isGranted('ROLE_USER')) {
+            $entries = [
+                $this->generateEntry(
+                    'Sign In',
+                    'account.presentation.sign_in',
+                ),
+                $this->generateEntry(
+                    'Sign Up',
+                    'account.presentation.sign_up',
+                ),
+            ];
+        }
+
+        if ($this->security->isGranted('ROLE_USER')) {
+            $entries[] = $this->generateEntry(
+                'Your Account',
+                'account.presentation.dashboard',
+            );
+            $entries[] = $this->generateEntry(
+                'Organization',
+                'organization.presentation.dashboard',
+            );
+        }
+
+        $entries[] = $this->generateEntry(
+            'Home',
+            'content.presentation.homepage',
+        );
 
         return $entries;
     }
 
     public function getSecondaryMainNavigationTitle(): string
     {
-        return 'Other';
+        return 'Quick Links';
     }
 
     /**
@@ -66,14 +92,7 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
      */
     protected function getSecondaryMainNavigationEntries(): array
     {
-        $entries = [
-            $this->generateEntry(
-                'About',
-                'content.presentation.about',
-            )
-        ];
-
-        return $entries;
+        return [];
     }
 
     /**
@@ -98,7 +117,7 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
             $this->generateEntry(
                 'Living Styleguide',
                 'webui.living_styleguide.show',
-            )
+            ),
         ];
 
         return $entries;
@@ -106,6 +125,6 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
 
     public function getBrandLogoHtml(): string
     {
-        return '<strong>EtfsAppStarterKit</strong>';
+        return '<strong>ETFS Starter Kit</strong>';
     }
 }

@@ -30,6 +30,145 @@ final class OrganizationController extends AbstractController
     }
 
     #[Route(
+        path: '/organization',
+        name: 'organization.presentation.dashboard',
+        methods: [Request::METHOD_GET]
+    )]
+    public function dashboardAction(): Response
+    {
+        /** @var User|null $user */
+        $user = $this->getUser();
+
+        if ($user === null) {
+            return $this->redirectToRoute('account.presentation.sign_in');
+        }
+
+        $userId = $user->getId();
+
+        $organizationName = null;
+        $currentOrganization = null;
+        $currentlyActiveOrganizationsId = $user->getCurrentlyActiveOrganizationsId();
+
+        if ($currentlyActiveOrganizationsId !== null) {
+            $currentOrganization = $this->organizationDomainService->getOrganizationById($currentlyActiveOrganizationsId);
+            if ($currentOrganization !== null) {
+                $organizationName = $this->organizationDomainService->getOrganizationName($currentOrganization, null);
+            }
+        }
+
+        // Get all organizations for switching
+        $allOrganizations = $this->organizationDomainService->getAllOrganizationsForUser($userId);
+
+        // Check if user can rename/invite for current organization (owner of active org)
+        $canRenameCurrentOrganization = false;
+        $canInviteToCurrentOrganization = false;
+        $currentOrganizationRawName = null;
+        $pendingInvitations = [];
+        $members = [];
+
+        if ($currentOrganization !== null) {
+            $isOwner = $currentOrganization->getOwningUsersId() === $userId;
+            $canRenameCurrentOrganization = $isOwner;
+            $canInviteToCurrentOrganization = $isOwner;
+            $currentOrganizationRawName = $currentOrganization->getName();
+
+            // Get pending invitations if owner
+            if ($isOwner) {
+                $invitations = $this->organizationDomainService->getPendingInvitations($currentOrganization);
+                foreach ($invitations as $invitation) {
+                    $pendingInvitations[] = [
+                        'id' => $invitation->getId(),
+                        'email' => $invitation->getEmail(),
+                        'createdAt' => $invitation->getCreatedAt(),
+                    ];
+                }
+            }
+
+            // Get members of the organization
+            $memberIds = $this->organizationDomainService->getAllUserIdsForOrganization($currentOrganization);
+            $ownerUserId = $currentOrganization->getOwningUsersId();
+
+            // Include owner in the list if not already
+            if (!in_array($ownerUserId, $memberIds, true)) {
+                $memberIds[] = $ownerUserId;
+            }
+
+            // Get all groups for this organization
+            $orgGroups = $this->organizationDomainService->getGroups($currentOrganization);
+
+            // Build a map of userId -> groupIds for quick lookup
+            $userGroupMap = [];
+            foreach ($orgGroups as $group) {
+                $groupMemberIds = $this->organizationDomainService->getGroupMemberIds($group);
+                foreach ($groupMemberIds as $memberId) {
+                    if (!isset($userGroupMap[$memberId])) {
+                        $userGroupMap[$memberId] = [];
+                    }
+                    $userGroupMap[$memberId][] = $group->getId();
+                }
+            }
+
+            $memberInfos = $this->accountFacade->getUserInfoByIds($memberIds);
+            foreach ($memberInfos as $memberInfo) {
+                $members[] = [
+                    'id' => $memberInfo->id,
+                    'displayName' => $memberInfo->getDisplayName(),
+                    'email' => $memberInfo->email,
+                    'isOwner' => $memberInfo->id === $ownerUserId,
+                    'isCurrentUser' => $memberInfo->id === $userId,
+                    'joinedAt' => $memberInfo->createdAt,
+                    'groupIds' => $userGroupMap[$memberInfo->id] ?? [],
+                ];
+            }
+
+            // Sort: owner first, then by display name
+            usort($members, function ($a, $b) {
+                if ($a['isOwner'] !== $b['isOwner']) {
+                    return $a['isOwner'] ? -1 : 1;
+                }
+                return strcasecmp($a['displayName'], $b['displayName']);
+            });
+        }
+
+        // Build organization list with names
+        $organizations = [];
+        foreach ($allOrganizations as $org) {
+            $organizations[] = [
+                'id' => $org->getId(),
+                'name' => $this->organizationDomainService->getOrganizationName($org, null),
+                'isOwned' => $org->getOwningUsersId() === $userId,
+                'isActive' => $currentOrganization !== null && $org->getId() === $currentOrganization->getId(),
+            ];
+        }
+
+        // Build groups list
+        $groups = [];
+        if ($currentOrganization !== null) {
+            $orgGroups = $this->organizationDomainService->getGroups($currentOrganization);
+            foreach ($orgGroups as $group) {
+                $groups[] = [
+                    'id' => $group->getId(),
+                    'name' => $group->getName(),
+                    'isDefault' => $group->isDefaultForNewMembers(),
+                ];
+            }
+        }
+
+        return $this->render('@organization.presentation/organization_dashboard.html.twig', [
+            'organizationName' => $organizationName,
+            'organizations' => $organizations,
+            'currentOrganizationId' => $currentlyActiveOrganizationsId,
+            'canRenameCurrentOrganization' => $canRenameCurrentOrganization,
+            'canInviteToCurrentOrganization' => $canInviteToCurrentOrganization,
+            'currentOrganizationRawName' => $currentOrganizationRawName,
+            'pendingInvitations' => $pendingInvitations,
+            'members' => $members,
+            'groups' => $groups,
+            'isOrganizationOwner' => $currentOrganization !== null && $currentOrganization->getOwningUsersId() === $userId,
+        ]);
+    }
+
+    #[Route(
         path: '/organization/create',
         name: 'organization.presentation.create',
         methods: [Request::METHOD_POST]
@@ -49,7 +188,7 @@ final class OrganizationController extends AbstractController
 
             if ($name === null) {
                 $this->addFlash('error', 'Please provide a name for the organization.');
-                return $this->redirectToRoute('account.presentation.dashboard');
+                return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             $organization = $this->organizationDomainService->createOrganization($user->getId(), $name);
@@ -68,7 +207,7 @@ final class OrganizationController extends AbstractController
             $this->addFlash('error', 'Failed to create organization: ' . $e->getMessage());
         }
 
-        return $this->redirectToRoute('account.presentation.dashboard');
+        return $this->redirectToRoute('organization.presentation.dashboard');
     }
 
     #[Route(
@@ -89,7 +228,7 @@ final class OrganizationController extends AbstractController
 
         if ($organizationId === null) {
             $this->addFlash('error', 'No active organization to rename.');
-            return $this->redirectToRoute('account.presentation.dashboard');
+            return $this->redirectToRoute('organization.presentation.dashboard');
         }
 
         try {
@@ -97,13 +236,13 @@ final class OrganizationController extends AbstractController
 
             if ($organization === null) {
                 $this->addFlash('error', 'Organization not found.');
-                return $this->redirectToRoute('account.presentation.dashboard');
+                return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             // Only owner can rename
             if ($organization->getOwningUsersId() !== $user->getId()) {
                 $this->addFlash('error', 'Only the organization owner can rename it.');
-                return $this->redirectToRoute('account.presentation.dashboard');
+                return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             $name = $request->request->get('name');
@@ -117,7 +256,7 @@ final class OrganizationController extends AbstractController
             $this->addFlash('error', 'Failed to rename organization: ' . $e->getMessage());
         }
 
-        return $this->redirectToRoute('account.presentation.dashboard');
+        return $this->redirectToRoute('organization.presentation.dashboard');
     }
 
     #[Route(
@@ -139,7 +278,7 @@ final class OrganizationController extends AbstractController
 
             if ($organization === null) {
                 $this->addFlash('error', 'Organization not found.');
-                return $this->redirectToRoute('account.presentation.dashboard');
+                return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             $this->organizationDomainService->switchOrganization($user->getId(), $organization);
@@ -150,7 +289,7 @@ final class OrganizationController extends AbstractController
             $this->addFlash('error', 'Failed to switch organization: ' . $e->getMessage());
         }
 
-        return $this->redirectToRoute('account.presentation.dashboard');
+        return $this->redirectToRoute('organization.presentation.dashboard');
     }
 
     #[Route(
@@ -171,7 +310,7 @@ final class OrganizationController extends AbstractController
 
         if ($organizationId === null) {
             $this->addFlash('error', 'No active organization to invite to.');
-            return $this->redirectToRoute('account.presentation.dashboard');
+            return $this->redirectToRoute('organization.presentation.dashboard');
         }
 
         try {
@@ -179,13 +318,13 @@ final class OrganizationController extends AbstractController
 
             if ($organization === null) {
                 $this->addFlash('error', 'Organization not found.');
-                return $this->redirectToRoute('account.presentation.dashboard');
+                return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             // Only owner can invite
             if ($organization->getOwningUsersId() !== $user->getId()) {
                 $this->addFlash('error', 'Only the organization owner can invite members.');
-                return $this->redirectToRoute('account.presentation.dashboard');
+                return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             $email = $request->request->get('email');
@@ -193,13 +332,13 @@ final class OrganizationController extends AbstractController
 
             if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $this->addFlash('error', 'Please provide a valid email address.');
-                return $this->redirectToRoute('account.presentation.dashboard');
+                return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             // Check if can be invited
             if (!$this->organizationDomainService->emailCanBeInvitedToOrganization($email, $organization)) {
                 $this->addFlash('error', 'This email is already a member of this organization or is the owner.');
-                return $this->redirectToRoute('account.presentation.dashboard');
+                return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             $invitation = $this->organizationDomainService->inviteEmailToOrganization($email, $organization);
@@ -213,7 +352,7 @@ final class OrganizationController extends AbstractController
             $this->addFlash('error', 'Failed to send invitation: ' . $e->getMessage());
         }
 
-        return $this->redirectToRoute('account.presentation.dashboard');
+        return $this->redirectToRoute('organization.presentation.dashboard');
     }
 
     #[Route(
@@ -235,7 +374,7 @@ final class OrganizationController extends AbstractController
 
             if ($invitation === null) {
                 $this->addFlash('error', 'Invitation not found.');
-                return $this->redirectToRoute('account.presentation.dashboard');
+                return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             $organization = $invitation->getOrganization();
@@ -243,7 +382,7 @@ final class OrganizationController extends AbstractController
             // Only owner can resend invitations
             if ($organization->getOwningUsersId() !== $user->getId()) {
                 $this->addFlash('error', 'Only the organization owner can resend invitations.');
-                return $this->redirectToRoute('account.presentation.dashboard');
+                return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             $this->organizationDomainService->resendInvitation($invitation);
@@ -253,7 +392,7 @@ final class OrganizationController extends AbstractController
             $this->addFlash('error', 'Failed to resend invitation: ' . $e->getMessage());
         }
 
-        return $this->redirectToRoute('account.presentation.dashboard');
+        return $this->redirectToRoute('organization.presentation.dashboard');
     }
 
     #[Route(
@@ -306,7 +445,7 @@ final class OrganizationController extends AbstractController
             }
 
             $this->addFlash('success', "You've successfully joined \"$organizationName\".");
-            return $this->redirectToRoute('account.presentation.dashboard');
+            return $this->redirectToRoute('organization.presentation.dashboard');
         } catch (Throwable $e) {
             $this->addFlash('error', 'Failed to accept invitation: ' . $e->getMessage());
             return $this->redirectToRoute('content.presentation.homepage');
@@ -331,7 +470,7 @@ final class OrganizationController extends AbstractController
 
         if ($organizationId === null) {
             $this->addFlash('error', 'No active organization.');
-            return $this->redirectToRoute('account.presentation.dashboard');
+            return $this->redirectToRoute('organization.presentation.dashboard');
         }
 
         try {
@@ -339,27 +478,27 @@ final class OrganizationController extends AbstractController
 
             if ($organization === null) {
                 $this->addFlash('error', 'Organization not found.');
-                return $this->redirectToRoute('account.presentation.dashboard');
+                return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             // Only owner can manage groups
             if ($organization->getOwningUsersId() !== $user->getId()) {
                 $this->addFlash('error', 'Only the organization owner can manage group membership.');
-                return $this->redirectToRoute('account.presentation.dashboard');
+                return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             $group = $this->organizationDomainService->getGroupById($groupId);
 
             if ($group === null || $group->getOrganization()->getId() !== $organizationId) {
                 $this->addFlash('error', 'Group not found.');
-                return $this->redirectToRoute('account.presentation.dashboard');
+                return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             $memberId = $request->request->get('member_id');
 
             if (!is_string($memberId) || $memberId === '') {
                 $this->addFlash('error', 'Invalid member ID.');
-                return $this->redirectToRoute('account.presentation.dashboard');
+                return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             $this->organizationDomainService->addUserToGroup($memberId, $group);
@@ -368,7 +507,7 @@ final class OrganizationController extends AbstractController
             $this->addFlash('error', 'Failed to add member to group: ' . $e->getMessage());
         }
 
-        return $this->redirectToRoute('account.presentation.dashboard');
+        return $this->redirectToRoute('organization.presentation.dashboard');
     }
 
     #[Route(
@@ -389,7 +528,7 @@ final class OrganizationController extends AbstractController
 
         if ($organizationId === null) {
             $this->addFlash('error', 'No active organization.');
-            return $this->redirectToRoute('account.presentation.dashboard');
+            return $this->redirectToRoute('organization.presentation.dashboard');
         }
 
         try {
@@ -397,27 +536,27 @@ final class OrganizationController extends AbstractController
 
             if ($organization === null) {
                 $this->addFlash('error', 'Organization not found.');
-                return $this->redirectToRoute('account.presentation.dashboard');
+                return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             // Only owner can manage groups
             if ($organization->getOwningUsersId() !== $user->getId()) {
                 $this->addFlash('error', 'Only the organization owner can manage group membership.');
-                return $this->redirectToRoute('account.presentation.dashboard');
+                return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             $group = $this->organizationDomainService->getGroupById($groupId);
 
             if ($group === null || $group->getOrganization()->getId() !== $organizationId) {
                 $this->addFlash('error', 'Group not found.');
-                return $this->redirectToRoute('account.presentation.dashboard');
+                return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             $memberId = $request->request->get('member_id');
 
             if (!is_string($memberId) || $memberId === '') {
                 $this->addFlash('error', 'Invalid member ID.');
-                return $this->redirectToRoute('account.presentation.dashboard');
+                return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             $this->organizationDomainService->removeUserFromGroup($memberId, $group);
@@ -426,6 +565,6 @@ final class OrganizationController extends AbstractController
             $this->addFlash('error', 'Failed to remove member from group: ' . $e->getMessage());
         }
 
-        return $this->redirectToRoute('account.presentation.dashboard');
+        return $this->redirectToRoute('organization.presentation.dashboard');
     }
 }

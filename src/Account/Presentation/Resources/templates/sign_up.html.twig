@@ -7,94 +7,100 @@
         <div class="w-full max-w-md space-y-8">
             {# Header #}
             <div class="text-center">
-                <h1 class="text-3xl font-bold tracking-tight text-dark-900 dark:text-white">
+                <h1 class="etfswui-h1">
                     Create your account
                 </h1>
-                <p class="mt-2 text-sm text-dark-600 dark:text-dark-400">
+                <p class="etfswui-text-small mt-2">
                     Get started with your free account today
                 </p>
             </div>
 
             {# Flash Messages #}
             {% for message in app.flashes('error') %}
-                <div class="rounded-lg bg-red-50 dark:bg-red-900/20 p-4 border border-red-200 dark:border-red-800">
-                    <p class="text-sm text-red-800 dark:text-red-300">{{ message }}</p>
+                <div class="etfswui-alert etfswui-alert-danger">
+                    <div class="etfswui-alert-body">
+                        <p class="etfswui-alert-danger-text">{{ message }}</p>
+                    </div>
                 </div>
             {% endfor %}
 
             {% for message in app.flashes('success') %}
-                <div class="rounded-lg bg-green-50 dark:bg-green-900/20 p-4 border border-green-200 dark:border-green-800">
-                    <p class="text-sm text-green-800 dark:text-green-300">{{ message }}</p>
+                <div class="etfswui-alert etfswui-alert-success">
+                    <div class="etfswui-alert-body">
+                        <p class="etfswui-alert-success-text">{{ message }}</p>
+                    </div>
                 </div>
             {% endfor %}
 
             {# Sign Up Form #}
-            <div class="bg-white dark:bg-dark-800 rounded-xl shadow-lg border border-dark-200 dark:border-dark-700 p-8">
-                <form action="{{ path('account.presentation.sign_up') }}" method="post" class="space-y-6">
-                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('sign_up') }}">
+            <div class="etfswui-card">
+                <div class="etfswui-card-content">
+                    <form action="{{ path('account.presentation.sign_up') }}" method="post" class="space-y-6">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('sign_up') }}">
 
-                    {# Email Field #}
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                            Email address
-                        </label>
-                        <input
-                            id="email"
-                            name="email"
-                            type="email"
-                            autocomplete="email"
-                            required
-                            placeholder="you@example.com"
-                            class="w-full px-4 py-3 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-700 text-dark-900 dark:text-white placeholder-dark-400 dark:placeholder-dark-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                        {# Email Field #}
+                        <div>
+                            <label for="email" class="etfswui-form-label">
+                                Email address
+                            </label>
+                            <input
+                                id="email"
+                                name="email"
+                                type="email"
+                                autocomplete="email"
+                                required
+                                placeholder="you@example.com"
+                                class="etfswui-form-input"
+                            >
+                        </div>
+
+                        {# Password Field #}
+                        <div>
+                            <label for="password" class="etfswui-form-label">
+                                Password
+                            </label>
+                            <input
+                                id="password"
+                                name="password"
+                                type="password"
+                                autocomplete="new-password"
+                                required
+                                placeholder="Create a strong password"
+                                class="etfswui-form-input"
+                            >
+                        </div>
+
+                        {# Confirm Password Field #}
+                        <div>
+                            <label for="password_confirm" class="etfswui-form-label">
+                                Confirm password
+                            </label>
+                            <input
+                                id="password_confirm"
+                                name="password_confirm"
+                                type="password"
+                                autocomplete="new-password"
+                                required
+                                placeholder="Confirm your password"
+                                class="etfswui-form-input"
+                            >
+                        </div>
+
+                        {# Submit Button #}
+                        <button
+                            type="submit"
+                            class="etfswui-button-default w-full justify-center"
                         >
-                    </div>
-
-                    {# Password Field #}
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                            Password
-                        </label>
-                        <input
-                            id="password"
-                            name="password"
-                            type="password"
-                            autocomplete="new-password"
-                            required
-                            placeholder="Create a strong password"
-                            class="w-full px-4 py-3 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-700 text-dark-900 dark:text-white placeholder-dark-400 dark:placeholder-dark-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
-                        >
-                    </div>
-
-                    {# Confirm Password Field #}
-                    <div>
-                        <label for="password_confirm" class="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                            Confirm password
-                        </label>
-                        <input
-                            id="password_confirm"
-                            name="password_confirm"
-                            type="password"
-                            autocomplete="new-password"
-                            required
-                            placeholder="Confirm your password"
-                            class="w-full px-4 py-3 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-700 text-dark-900 dark:text-white placeholder-dark-400 dark:placeholder-dark-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
-                        >
-                    </div>
-
-                    {# Submit Button #}
-                    <button
-                        type="submit"
-                        class="w-full py-3 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-semibold shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-dark-800 transition-all"
-                    >
-                        Create account
-                    </button>
-                </form>
+                            Create account
+                        </button>
+                    </form>
+                </div>
             </div>
 
             {# Sign In Link #}
-            <p class="text-center text-sm text-dark-600 dark:text-dark-400">
+            <p class="text-center etfswui-text-small">
                 Already have an account?
-                <a href="{{ path('account.presentation.sign_in') }}" class="font-semibold text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 transition-colors">
+                <a href="{{ path('account.presentation.sign_in') }}" class="etfswui-link-default font-semibold">
                     Sign in instead
                 </a>
             </p>
@@ -102,9 +108,9 @@
             {# Terms Notice #}
             <p class="text-center text-xs text-dark-500 dark:text-dark-500">
                 By creating an account, you agree to our
-                <a href="#" class="underline hover:text-dark-700 dark:hover:text-dark-300">Terms of Service</a>
+                <a href="#" class="etfswui-link-secondary">Terms of Service</a>
                 and
-                <a href="#" class="underline hover:text-dark-700 dark:hover:text-dark-300">Privacy Policy</a>.
+                <a href="#" class="etfswui-link-secondary">Privacy Policy</a>.
             </p>
         </div>
     </div>

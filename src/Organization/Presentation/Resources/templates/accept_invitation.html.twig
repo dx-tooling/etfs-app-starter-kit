@@ -12,43 +12,45 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
                     </svg>
                 </div>
-                <h1 class="text-3xl font-bold tracking-tight text-dark-900 dark:text-white">
+                <h1 class="etfswui-h1">
                     Join Organization
                 </h1>
-                <p class="mt-2 text-sm text-dark-600 dark:text-dark-400">
+                <p class="etfswui-text-small mt-2">
                     You've been invited to join an organization
                 </p>
             </div>
 
             {# Invitation Card #}
-            <div class="bg-white dark:bg-dark-800 rounded-xl shadow-lg border border-dark-200 dark:border-dark-700 p-8">
-                <div class="text-center mb-6">
-                    <p class="text-lg text-dark-900 dark:text-white mb-2">
-                        <span class="font-semibold">{{ ownerName }}</span> has invited you to join their organization.
-                    </p>
-                    {% if organizationName %}
-                        <p class="text-dark-600 dark:text-dark-400">
-                            Organization: <span class="font-medium text-dark-900 dark:text-white">{{ organizationName }}</span>
+            <div class="etfswui-card">
+                <div class="etfswui-card-content">
+                    <div class="text-center mb-6">
+                        <p class="etfswui-text mb-2">
+                            <span class="font-semibold">{{ ownerName }}</span> has invited you to join their organization.
                         </p>
-                    {% endif %}
+                        {% if organizationName %}
+                            <p class="etfswui-text-small">
+                                Organization: <span class="font-medium text-dark-900 dark:text-white">{{ organizationName }}</span>
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <form action="{{ path('organization.presentation.accept_invitation', { invitationId: invitationId }) }}" method="post" class="space-y-4">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('accept_invitation') }}">
+
+                        <button type="submit" class="etfswui-button-default w-full justify-center">
+                            Accept Invitation
+                        </button>
+                    </form>
+
+                    <p class="etfswui-text-small mt-4 text-center">
+                        By accepting, you'll join this organization and can collaborate with its members.
+                    </p>
                 </div>
-
-                <form action="{{ path('organization.presentation.accept_invitation', { invitationId: invitationId }) }}" method="post" class="space-y-4">
-                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('accept_invitation') }}">
-                    
-                    <button type="submit" class="w-full py-3 px-4 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-dark-800 transition-all">
-                        Accept Invitation
-                    </button>
-                </form>
-
-                <p class="mt-4 text-center text-sm text-dark-500 dark:text-dark-400">
-                    By accepting, you'll join this organization and can collaborate with its members.
-                </p>
             </div>
 
             {# Back link #}
-            <p class="text-center text-sm text-dark-600 dark:text-dark-400">
-                <a href="{{ path('content.presentation.homepage') }}" class="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 transition-colors">
+            <p class="text-center etfswui-text-small">
+                <a href="{{ path('content.presentation.homepage') }}" class="etfswui-link-default font-medium">
                     Go to homepage
                 </a>
             </p>

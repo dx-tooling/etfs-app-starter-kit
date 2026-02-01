@@ -1,0 +1,62 @@
+---
+description: "TypeScript over JS, Stimulus controllers, assets, Tailwind, mise quality for frontend. Use when editing TS/JS/CSS or Twig."
+globs: ["assets/**/*.ts", "assets/**/*.js", "assets/**/*.css", "src/**/Resources/**/*.twig", "tailwind.config.js", "tsconfig.json"]
+alwaysApply: false
+---
+
+# Frontend Development
+
+**Reference**: See `docs/archbook.md` section on "Client-Side Organization", `docs/frontendbook.md` for Stimulus (build, integration, controller structure).
+
+## TypeScript Over JavaScript
+
+- **Always** prefer TypeScript over JavaScript
+- Use TypeScript's type system extensively
+- Generate `.ts` files, not `.js` files
+- Only use JavaScript when TypeScript is not available for a specific library
+
+## Stimulus Controllers
+
+- Stimulus controllers are colocated with verticals: `src/FeatureName/Presentation/Resources/assets/controllers/`
+- Keep frontend code aligned with vertical boundaries
+- Use TypeScript for Stimulus controllers when possible
+
+## Asset Organization
+
+- Frontend assets in `assets/` directory
+- Vendor assets managed through Symfony AssetMapper (importmaps)
+- See `docs/techbook.md` for dependency management details
+
+## Code Quality
+
+- Run `mise quality` to check frontend code (Prettier, ESLint, TypeScript compiler)
+- All frontend code must pass ESLint and TypeScript type checking
+- Format code with Prettier (automatically runs in `mise quality`)
+
+## Polling Pattern (Non-Overlapping)
+
+**Always use `setTimeout` with scheduling after completion**, never `setInterval` for polling:
+
+```ts
+// WRONG - requests can overlap if slow
+this.intervalId = setInterval(() => this.poll(), 1000);
+
+// CORRECT - next poll only after current completes
+private async poll(): Promise<void> {
+    try {
+        await fetch(this.url);
+    } finally {
+        if (this.isActive) {
+            this.timeoutId = setTimeout(() => this.poll(), 1000);
+        }
+    }
+}
+```
+
+This prevents request pile-up on slow connections and is more resilient to network latency.
+
+## Building Frontend
+
+- Use `mise run frontend` to build frontend assets (see `docs/devbook.md`)
+- Frontend builds are handled by Symfony AssetMapper and TailwindCSS
+- Don't manually edit built files in `public/assets/`

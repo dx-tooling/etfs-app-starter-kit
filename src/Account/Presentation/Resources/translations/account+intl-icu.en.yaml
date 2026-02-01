@@ -51,5 +51,6 @@ dashboard:
 flash:
     error:
         missing_credentials: "Please provide both email and password."
+        passwords_mismatch: "Passwords do not match."
     success:
         registration_complete: "Registration successful. Please sign in."

@@ -8,6 +8,7 @@ use App\Account\Domain\Entity\AccountCore;
 use App\Account\Domain\Service\AccountDomainService;
 use App\Organization\Facade\OrganizationFacadeInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -20,7 +21,8 @@ final class AccountController extends AbstractController
     public function __construct(
         private readonly AccountDomainService        $accountService,
         private readonly OrganizationFacadeInterface $organizationFacade,
-        private readonly TranslatorInterface         $translator
+        private readonly TranslatorInterface         $translator,
+        private readonly Security                    $security
     ) {
     }
 
@@ -55,27 +57,44 @@ final class AccountController extends AbstractController
             return $this->redirectToRoute('account.presentation.dashboard');
         }
 
+        $formData = [
+            'email'    => '',
+            'password' => '',
+        ];
+
         if ($request->isMethod(Request::METHOD_POST)) {
-            $email    = $request->request->get('email');
-            $password = $request->request->get('password');
+            $email           = $request->request->get('email');
+            $password        = $request->request->get('password');
+            $passwordConfirm = $request->request->get('password_confirm');
+
+            $formData['email']    = (string) $email;
+            $formData['password'] = (string) $password;
 
             if (!$email || !$password) {
                 $this->addFlash('error', $this->translator->trans('flash.error.missing_credentials', [], 'account'));
 
-                return $this->render('@account.presentation/sign_up.html.twig');
+                return $this->render('@account.presentation/sign_up.html.twig', $formData);
+            }
+
+            if ($password !== $passwordConfirm) {
+                $this->addFlash('error', $this->translator->trans('flash.error.passwords_mismatch', [], 'account'));
+
+                return $this->render('@account.presentation/sign_up.html.twig', $formData);
             }
 
             try {
-                $this->accountService->register((string) $email, (string) $password);
-                $this->addFlash('success', $this->translator->trans('flash.success.registration_complete', [], 'account'));
+                $accountCore = $this->accountService->register((string) $email, (string) $password);
+                $this->security->login($accountCore, 'form_login', 'main');
 
-                return $this->redirectToRoute('account.presentation.sign_in');
+                return $this->redirectToRoute('account.presentation.dashboard');
             } catch (Throwable $e) {
                 $this->addFlash('error', $e->getMessage());
+
+                return $this->render('@account.presentation/sign_up.html.twig', $formData);
             }
         }
 
-        return $this->render('@account.presentation/sign_up.html.twig');
+        return $this->render('@account.presentation/sign_up.html.twig', $formData);
     }
 
     #[Route(

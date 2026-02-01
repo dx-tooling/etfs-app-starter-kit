@@ -22,8 +22,6 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then ARCHITECTURE=amd64; elif [ "$
     && echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg arch=${ARCHITECTURE}] https://mise.jdx.dev/deb stable main" | tee /etc/apt/sources.list.d/mise.list
 RUN apt-get update -y
 RUN apt-get install -y mise
-RUN echo 'eval "$(/usr/bin/env mise activate bash)"' >> ~/.bashrc
-RUN cd /var/www && mise trust
 
 # Clean up to reduce image size
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -44,6 +42,7 @@ RUN docker-php-ext-install \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 COPY ./docker/app/php.ini /usr/local/etc/php/conf.d/custom.ini
+COPY ./docker/app/www.conf /usr/local/etc/php-fpm.d/zzz-www.conf
 
 # Set working directory
 WORKDIR /var/www
@@ -54,6 +53,39 @@ CMD ["php-fpm"]
 # Document that we use port 9000
 EXPOSE 9000
 
-RUN mkdir -p ~/.local/state/mise/trusted-configs
-RUN ln -s /var/www ~/.local/state/mise/trusted-configs/
+# Mise configuration - use /opt/mise for shared volume mount at runtime
+# These directories will be mounted as a Docker volume shared between containers
+ENV MISE_DATA_DIR=/opt/mise/data
+ENV MISE_CACHE_DIR=/opt/mise/cache
+ENV MISE_STATE_DIR=/opt/mise/state
+
+# Create mise directories and pre-install Node
+# This ensures Node is available without runtime installation (which can fail with lock issues)
+RUN mkdir -p /opt/mise/data /opt/mise/cache /opt/mise/state && \
+    chmod -R 777 /opt/mise && \
+    mise install node@24
+
+# Shell activation for interactive use (debugging)
+RUN echo 'eval "$(/usr/bin/env mise activate bash)"' >> ~/.bashrc
 RUN echo 'eval "$(/usr/bin/env mise activate zsh)"' >> ~/.zshrc
+
+# Create container home directory structure for runtime cache/config directories
+# This prevents polluting the mounted /var/www directory
+# Note: mise directories are now in /opt/mise (shared volume), not here
+RUN mkdir -p /tmp/container-home/.cache \
+    /tmp/container-home/.config \
+    /tmp/container-home/.local/share \
+    /tmp/container-home/.gnupg \
+    /tmp/container-home/.npm && \
+    chmod -R 777 /tmp/container-home
+
+# Configure Git to trust all directories (needed for workspace git operations)
+# Workspaces may be created by different users/processes, causing "dubious ownership" errors
+# Using --system to write to /etc/gitconfig which persists regardless of HOME setting
+RUN git config --system --add safe.directory '*'
+
+# Configure git to always use HTTPS instead of SSH for GitHub
+# This prevents composer from failing when GitHub API rate limits cause SSH fallback
+# (SSH requires authentication even for public repos)
+RUN git config --system --add url."https://github.com/".insteadOf "git@github.com:" && \
+    git config --system --add url."https://github.com/".insteadOf "ssh://git@github.com/"

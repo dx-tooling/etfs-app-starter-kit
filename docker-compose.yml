@@ -6,6 +6,19 @@ services:
         container_name: etfs_${ETFS_PROJECT_NAME}_app
         volumes:
             - .:/var/www
+            - mise_data:/opt/mise
+        environment:
+            # Redirect cache and config directories to /tmp to avoid polluting the mounted project directory
+            HOME: /tmp/container-home
+            XDG_CACHE_HOME: /tmp/container-home/.cache
+            XDG_CONFIG_HOME: /tmp/container-home/.config
+            XDG_DATA_HOME: /tmp/container-home/.local/share
+            NPM_CONFIG_CACHE: /tmp/container-home/.npm
+            GNUPGHOME: /tmp/container-home/.gnupg
+            # Mise uses dedicated directories in the shared volume
+            MISE_DATA_DIR: /opt/mise/data
+            MISE_CACHE_DIR: /opt/mise/cache
+            MISE_STATE_DIR: /opt/mise/state
         networks:
             - default
         depends_on:
@@ -27,7 +40,7 @@ services:
         restart: unless-stopped
 
     mariadb:
-        image: mariadb:12.0.2
+        image: mariadb:12.1.2
         container_name: etfs_${ETFS_PROJECT_NAME}_mariadb
         environment:
             MYSQL_ROOT_PASSWORD: secret
@@ -48,3 +61,5 @@ networks:
 volumes:
     mariadb_data:
         name: etfs_${ETFS_PROJECT_NAME}_mariadb_data
+    mise_data:
+        name: etfs_${ETFS_PROJECT_NAME}_mise_data

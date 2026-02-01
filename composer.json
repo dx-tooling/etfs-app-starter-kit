@@ -1,22 +1,23 @@
 {
     "type": "project",
     "license": "proprietary",
-    "minimum-stability": "beta",
+    "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
+        "php": "^8.4",
         "php-64bit": "^8.4",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-mbstring": "*",
-        "doctrine/dbal": "^4.3.4",
-        "doctrine/doctrine-bundle": "^3.0",
+        "doctrine/dbal": "^4.4.1",
+        "doctrine/doctrine-bundle": "^3.2.2",
         "doctrine/doctrine-migrations-bundle": "^3.7.0",
-        "doctrine/orm": "^3.5.7",
+        "doctrine/orm": "^3.6.2",
         "enterprise-tooling-for-symfony/shared-bundle": "dev-main",
         "enterprise-tooling-for-symfony/webui-bundle": "dev-main",
         "googleads/google-ads-php": "^25.0",
         "orhanerday/open-ai": "^5.3",
-        "phpdocumentor/reflection-docblock": "^5.6.4",
+        "phpdocumentor/reflection-docblock": "^5.6.6",
         "sensiolabs/minify-bundle": "^0.9.5",
         "sensiolabs/typescript-bundle": "^0.2.2",
         "symfony/asset": "7.4.*",
@@ -33,7 +34,7 @@
         "symfony/lock": "7.4.*",
         "symfony/mailer": "7.4.*",
         "symfony/mime": "7.4.*",
-        "symfony/monolog-bundle": "^3.10",
+        "symfony/monolog-bundle": "^3.11.1",
         "symfony/notifier": "7.4.*",
         "symfony/process": "7.4.*",
         "symfony/property-access": "7.4.*",
@@ -41,19 +42,19 @@
         "symfony/runtime": "7.4.*",
         "symfony/security-bundle": "7.4.*",
         "symfony/serializer": "7.4.*",
-        "symfony/stimulus-bundle": "^2.31.0",
+        "symfony/stimulus-bundle": "^2.32.0",
         "symfony/string": "7.4.*",
         "symfony/translation": "7.4.*",
         "symfony/twig-bundle": "7.4.*",
         "symfony/uid": "7.4.*",
-        "symfony/ux-live-component": "^2.31.0",
+        "symfony/ux-live-component": "^2.32.0",
         "symfony/validator": "7.4.*",
         "symfony/web-link": "7.4.*",
         "symfony/yaml": "7.4.*",
         "symfonycasts/tailwind-bundle": "^0.10.1",
-        "twig/extra-bundle": "^2.12|^3.22.1",
-        "twig/intl-extra": "^3.22.1",
-        "twig/twig": "^2.12|^3.22.0"
+        "twig/extra-bundle": "^2.12|^3.23.0",
+        "twig/intl-extra": "^3.23.0",
+        "twig/twig": "^2.12|^3.23.0"
     },
     "config": {
         "allow-plugins": {
@@ -108,7 +109,11 @@
             "require": "7.4.*"
         }
     },
-    "require-dev": {},
+    "require-dev": {
+        "pestphp/pest": "^4.3.2",
+        "pestphp/pest-plugin-type-coverage": "^4.0.3",
+        "phpunit/phpunit": "^12.5.8"
+    },
     "repositories": [
         {
             "type": "vcs",

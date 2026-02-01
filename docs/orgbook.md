@@ -75,11 +75,11 @@ A user can belong to multiple organizations (their own + any they've joined via 
 
 ### User Registration → Organization Creation
 
-When a new user registers, the `UserCreatedSymfonyEvent` triggers automatic creation of their personal organization:
+When a new user registers, the `AccountCoreCreatedSymfonyEvent` triggers automatic creation of their personal organization:
 
 ```
 User Created
-  → UserCreatedSymfonyEventSubscriber
+  → AccountCoreCreatedSymfonyEventSubscriber
     → createOrganization(userId)
     → dispatch CurrentlyActiveOrganizationChangedSymfonyEvent
       → set user's currentlyActiveOrganizationId
@@ -98,9 +98,12 @@ User Created
       → Added to default group
       → currentlyActiveOrganizationId updated
    b) If new user:
-      → Account created (triggers own org creation)
-      → Then added to inviting organization
+      → Auto-registered with mustSetPassword=true
+      → Personal organization created (via AccountCoreCreatedSymfonyEvent)
+      → Added to inviting organization
+      → Added to default group
       → currentlyActiveOrganizationId set to inviting org
+      → Redirected to set password page
 
 3. Invitation deleted after acceptance
 ```
@@ -167,7 +170,7 @@ The Organization vertical follows the standard ETFS architecture:
 ```
 src/Organization/
 ├── Domain/
-│   ├── Entity/           # Organization, Group, Invitation
+│   ├── Entity/           # Organization, Group, Invitation, OrganizationMember, GroupMember
 │   ├── Enum/             # AccessRight
 │   ├── Service/          # OrganizationDomainService
 │   └── SymfonyEventSubscriber/

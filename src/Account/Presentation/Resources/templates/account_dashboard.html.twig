@@ -1,0 +1,87 @@
+{% extends '@common.presentation/base_appshell.html.twig' %}
+
+{% block title %}{{ 'dashboard.title'|trans({}, 'account') }}{% endblock %}
+
+{% block body %}
+    <div class="max-w-2xl mx-auto py-8">
+        <h1 class="etfswui-pagetitle">
+            {{ 'dashboard.heading'|trans({}, 'account') }}
+        </h1>
+
+        {# Flash Messages #}
+        {% for message in app.flashes('success') %}
+            <div class="etfswui-alert etfswui-alert-success mb-6">
+                <div class="etfswui-alert-body">
+                    <p class="etfswui-alert-success-text">{{ message }}</p>
+                </div>
+            </div>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <div class="etfswui-alert etfswui-alert-danger mb-6">
+                <div class="etfswui-alert-body">
+                    <p class="etfswui-alert-danger-text">{{ message }}</p>
+                </div>
+            </div>
+        {% endfor %}
+
+        {# Account Info Card #}
+        <div class="etfswui-card">
+            <div class="etfswui-card-content">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-primary-600 dark:text-primary-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="etfswui-h3">{{ 'dashboard.details.title'|trans({}, 'account') }}</h2>
+                        <p class="etfswui-text-small">{{ 'dashboard.details.description'|trans({}, 'account') }}</p>
+                    </div>
+                </div>
+
+                <dl class="space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:gap-4">
+                        <dt class="etfswui-text-small font-medium sm:w-32">{{ 'dashboard.details.email'|trans({}, 'account') }}</dt>
+                        <dd class="text-dark-900 dark:text-white">{{ app.user.email }}</dd>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:gap-4">
+                        <dt class="etfswui-text-small font-medium sm:w-32">{{ 'dashboard.details.member_since'|trans({}, 'account') }}</dt>
+                        <dd class="text-dark-900 dark:text-white">{{ app.user.createdAt|date('F j, Y') }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        {# Current Organization Card #}
+        {% if organizationName %}
+        <div class="etfswui-card mt-6">
+            <div class="etfswui-card-content">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="etfswui-h4">{{ 'dashboard.organization.title'|trans({}, 'account') }}</h3>
+                        <p class="text-dark-900 dark:text-white font-medium">{{ organizationName }}</p>
+                    </div>
+                </div>
+                <a href="{{ path('organization.presentation.dashboard') }}" class="etfswui-link-default">
+                    {{ 'dashboard.organization.manage_link'|trans({}, 'account') }}
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        {# Sign Out #}
+        <div class="mt-8 pt-6 border-t border-dark-200 dark:border-dark-700">
+            <form action="{{ path('account.presentation.sign_out') }}" method="post" class="inline">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
+                <button type="submit" class="etfswui-button-as-link-danger">
+                    {{ 'dashboard.sign_out'|trans({}, 'account') }}
+                </button>
+            </form>
+        </div>
+    </div>
+{% endblock body %}

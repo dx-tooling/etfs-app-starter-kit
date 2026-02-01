@@ -6,9 +6,11 @@ namespace App\Common\Presentation\Service;
 
 use EnterpriseToolingForSymfony\WebuiBundle\Entity\MainNavigationEntry;
 use EnterpriseToolingForSymfony\WebuiBundle\Service\AbstractMainNavigationService;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use ValueError;
 
 readonly class MainNavigationPresentationService extends AbstractMainNavigationService
@@ -17,6 +19,8 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
         RouterInterface               $router,
         RequestStack                  $requestStack,
         private ParameterBagInterface $parameterBag,
+        private Security              $security,
+        private TranslatorInterface   $translator,
     ) {
         $symfonyEnvironment = $this->parameterBag->get('kernel.environment');
 
@@ -38,7 +42,7 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
 
     public function getPrimaryMainNavigationTitle(): string
     {
-        return 'Main';
+        return $this->translator->trans('navigation.primary_title', [], 'messages');
     }
 
     /**
@@ -46,19 +50,43 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
      */
     public function getPrimaryMainNavigationEntries(): array
     {
-        $entries = [
-            $this->generateEntry(
-                'Home',
-                'content.presentation.homepage',
-            )
-        ];
+        $entries = [];
+
+        if (!$this->security->isGranted('ROLE_USER')) {
+            $entries = [
+                $this->generateEntry(
+                    $this->translator->trans('navigation.entries.sign_in', [], 'messages'),
+                    'account.presentation.sign_in',
+                ),
+                $this->generateEntry(
+                    $this->translator->trans('navigation.entries.sign_up', [], 'messages'),
+                    'account.presentation.sign_up',
+                ),
+            ];
+        }
+
+        if ($this->security->isGranted('ROLE_USER')) {
+            $entries[] = $this->generateEntry(
+                $this->translator->trans('navigation.entries.your_account', [], 'messages'),
+                'account.presentation.dashboard',
+            );
+            $entries[] = $this->generateEntry(
+                $this->translator->trans('navigation.entries.organization', [], 'messages'),
+                'organization.presentation.dashboard',
+            );
+        }
+
+        $entries[] = $this->generateEntry(
+            $this->translator->trans('navigation.entries.home', [], 'messages'),
+            'content.presentation.homepage',
+        );
 
         return $entries;
     }
 
     public function getSecondaryMainNavigationTitle(): string
     {
-        return 'Other';
+        return $this->translator->trans('navigation.secondary_title', [], 'messages');
     }
 
     /**
@@ -66,14 +94,7 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
      */
     protected function getSecondaryMainNavigationEntries(): array
     {
-        $entries = [
-            $this->generateEntry(
-                'About',
-                'content.presentation.about',
-            )
-        ];
-
-        return $entries;
+        return [];
     }
 
     /**
@@ -86,7 +107,7 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
 
     public function getTertiaryMainNavigationTitle(): string
     {
-        return 'Utilities';
+        return $this->translator->trans('navigation.tertiary_title', [], 'messages');
     }
 
     /**
@@ -96,9 +117,9 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
     {
         $entries = [
             $this->generateEntry(
-                'Living Styleguide',
+                $this->translator->trans('navigation.entries.living_styleguide', [], 'messages'),
                 'webui.living_styleguide.show',
-            )
+            ),
         ];
 
         return $entries;
@@ -106,6 +127,6 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
 
     public function getBrandLogoHtml(): string
     {
-        return '<strong>EtfsAppStarterKit</strong>';
+        return '<strong>' . $this->translator->trans('navigation.brand', [], 'messages') . '</strong>';
     }
 }

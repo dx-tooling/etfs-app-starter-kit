@@ -51,10 +51,10 @@
                 <table class="border-separate border-spacing-y-2">
                     {% for notification in this.latestAppNotifications %}
                         <tr>
-                            <td class="text-dark-500">{{ notification.createdAt|date('d.m., H:i') }} Uhr:</td>
+                            <td class="text-dark-500">{{ notification.createdAt|date('d.m., H:i') }} {{ 'notifications.time_suffix'|trans({}, 'messages') }}</td>
                             <td class="pl-2">
                                 <a
-                                        class="jm-link-default"
+                                        class="etfswui-link-default"
                                         href="{{ notification.url }}"
                                 >
                                     {{ notification.message }}
@@ -64,7 +64,7 @@
                     {% endfor %}
                 </table>
             {% else %}
-                No unread notifications.
+                {{ 'notifications.no_unread'|trans({}, 'messages') }}
             {% endif %}
         </div>
     {% endif %}

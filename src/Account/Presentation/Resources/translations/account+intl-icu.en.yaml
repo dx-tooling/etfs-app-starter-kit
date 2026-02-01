@@ -1,0 +1,70 @@
+# Sign In Page
+sign_in:
+    title: "Sign In"
+    heading: "Welcome back"
+    subheading: "Sign in to your account to continue"
+    form:
+        email_label: "Email address"
+        email_placeholder: "you@example.com"
+        password_label: "Password"
+        password_placeholder: "Enter your password"
+        submit: "Sign in"
+    no_account: "Don't have an account?"
+    create_account_link: "Create one now"
+
+# Sign Up Page
+sign_up:
+    title: "Create Account"
+    heading: "Create your account"
+    subheading: "Get started with your free account today"
+    form:
+        email_label: "Email address"
+        email_placeholder: "you@example.com"
+        password_label: "Password"
+        password_placeholder: "Create a strong password"
+        password_confirm_label: "Confirm password"
+        password_confirm_placeholder: "Confirm your password"
+        submit: "Create account"
+    has_account: "Already have an account?"
+    sign_in_link: "Sign in instead"
+    terms:
+        intro: "By creating an account, you agree to our"
+        tos: "Terms of Service"
+        and: "and"
+        privacy: "Privacy Policy"
+
+# Account Dashboard
+dashboard:
+    title: "Your Account"
+    heading: "Your Account"
+    details:
+        title: "Account Details"
+        description: "Your personal account information"
+        email: "Email"
+        member_since: "Member since"
+    organization:
+        title: "Current Organization"
+        manage_link: "Manage organization →"
+    sign_out: "Sign out"
+
+# Set Password Page
+set_password:
+    title: "Set Your Password"
+    heading: "Set your password"
+    subheading: "Please create a password to secure your account"
+    form:
+        password_label: "Password"
+        password_placeholder: "Create a strong password"
+        password_confirm_label: "Confirm password"
+        password_confirm_placeholder: "Confirm your password"
+        submit: "Set password"
+
+# Flash Messages
+flash:
+    error:
+        missing_credentials: "Please provide both email and password."
+        passwords_mismatch: "Passwords do not match."
+        password_required: "Please enter a password."
+    success:
+        registration_complete: "Registration successful. Please sign in."
+        password_set: "Your password has been set successfully."

@@ -1,0 +1,22 @@
+# Navigation - Section Titles
+navigation:
+    primary_title: "Main"
+    secondary_title: "Quick Links"
+    tertiary_title: "Utilities"
+    entries:
+        sign_in: "Sign In"
+        sign_up: "Sign Up"
+        your_account: "Your Account"
+        organization: "Organization"
+        home: "Home"
+        living_styleguide: "Living Styleguide"
+    brand: "ETFS Starter Kit"
+
+# Notifications Widget
+notifications:
+    time_suffix: "o'clock:"
+    no_unread: "No unread notifications."
+
+# Content Pages
+content:
+    hello_world: "Hello, World."

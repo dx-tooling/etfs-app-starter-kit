@@ -15,7 +15,7 @@ class Organization
     public function __construct(
         string $owningUsersId
     ) {
-        $this->owningUsersId  = $owningUsersId;
+        $this->owningUsersId = $owningUsersId;
     }
 
     #[ORM\Id]

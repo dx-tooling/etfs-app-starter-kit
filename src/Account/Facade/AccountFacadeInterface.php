@@ -20,6 +20,7 @@ interface AccountFacadeInterface
 
     /**
      * @param string[] $userIds
+     *
      * @return UserInfoDto[]
      */
     public function getUserInfoByIds(array $userIds): array;

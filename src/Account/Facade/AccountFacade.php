@@ -73,6 +73,7 @@ readonly class AccountFacade implements AccountFacadeInterface
 
     /**
      * @param string[] $userIds
+     *
      * @return UserInfoDto[]
      */
     public function getUserInfoByIds(array $userIds): array

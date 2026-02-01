@@ -184,6 +184,7 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
                 // Already a member, just clean up invitation
                 $this->entityManager->remove($invitation);
                 $this->entityManager->flush();
+
                 return $userId;
             }
         } else {
@@ -247,9 +248,9 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
                 'etfs.organization',
                 $iso639_1Code->value,
             );
-        } else {
-            return $organization->getName();
         }
+
+        return $organization->getName();
     }
 
     public function hasPendingInvitations(

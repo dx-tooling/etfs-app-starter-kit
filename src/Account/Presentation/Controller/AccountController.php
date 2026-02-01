@@ -9,11 +9,11 @@ use App\Account\Domain\Service\AccountDomainService;
 use App\Account\Facade\AccountFacadeInterface;
 use App\Organization\Domain\Service\OrganizationDomainServiceInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Throwable;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Throwable;
 
 final class AccountController extends AbstractController
 {
@@ -102,7 +102,7 @@ final class AccountController extends AbstractController
             return $this->redirectToRoute('account.presentation.sign_in');
         }
 
-        $organizationName = null;
+        $organizationName               = null;
         $currentlyActiveOrganizationsId = $user->getCurrentlyActiveOrganizationsId();
 
         if ($currentlyActiveOrganizationsId !== null) {

@@ -15,10 +15,10 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 readonly class OrganizationPresentationService implements OrganizationPresentationServiceInterface
 {
     public function __construct(
-        private MailServiceInterface    $mailService,
-        private TranslatorInterface     $translator,
-        private RouterInterface         $router,
-        private AccountFacadeInterface  $accountFacade
+        private MailServiceInterface   $mailService,
+        private TranslatorInterface    $translator,
+        private RouterInterface        $router,
+        private AccountFacadeInterface $accountFacade
     ) {
     }
 
@@ -29,7 +29,7 @@ readonly class OrganizationPresentationService implements OrganizationPresentati
     public function sendInvitationMail(
         Invitation $invitation
     ): void {
-        $owningUserId = $invitation->getOrganization()->getOwningUsersId();
+        $owningUserId   = $invitation->getOrganization()->getOwningUsersId();
         $owningUserName = $this->accountFacade->getUserNameOrEmailById($owningUserId) ?? 'Someone';
 
         $context = [

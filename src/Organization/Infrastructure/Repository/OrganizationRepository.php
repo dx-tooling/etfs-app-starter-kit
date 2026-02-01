@@ -17,6 +17,7 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
 
     /**
      * @return Organization[]
+     *
      * @throws Exception
      */
     public function getAllOrganizationsForUser(string $userId): array
@@ -51,12 +52,12 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
     /** @throws Exception */
     public function userHasJoinedOrganizations(string $userId): bool
     {
-        $sql = "
+        $sql = '
             SELECT 1
             FROM users_organizations uo
             WHERE uo.users_id = :userId
             LIMIT 1
-        ";
+        ';
 
         $connection = $this->entityManager->getConnection();
         $result     = $connection->executeQuery($sql, ['userId' => $userId]);
@@ -67,13 +68,13 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
     /** @throws Exception */
     public function userHasJoinedOrganization(string $userId, string $organizationId): bool
     {
-        $sql = "
+        $sql = '
             SELECT 1
             FROM users_organizations uo
             WHERE uo.users_id = :userId
               AND uo.organizations_id = :organizationId
             LIMIT 1
-        ";
+        ';
 
         $connection = $this->entityManager->getConnection();
         $result     = $connection->executeQuery($sql, [
@@ -92,10 +93,10 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
     /** @throws Exception */
     public function addUserToOrganization(string $userId, string $organizationId): void
     {
-        $sql = "
+        $sql = '
             INSERT INTO users_organizations (users_id, organizations_id)
             VALUES (:userId, :organizationId)
-        ";
+        ';
 
         $this->entityManager->getConnection()->executeStatement($sql, [
             'userId'         => $userId,
@@ -106,10 +107,10 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
     /** @throws Exception */
     public function addMemberToGroup(string $userId, string $groupId): void
     {
-        $sql = "
+        $sql = '
             INSERT INTO users_organization_groups (users_id, organization_groups_id)
             VALUES (:userId, :groupId)
-        ";
+        ';
 
         $this->entityManager->getConnection()->executeStatement($sql, [
             'userId'  => $userId,
@@ -120,11 +121,11 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
     /** @throws Exception */
     public function removeMemberFromGroup(string $userId, string $groupId): void
     {
-        $sql = "
+        $sql = '
             DELETE FROM users_organization_groups
             WHERE users_id = :userId
               AND organization_groups_id = :groupId
-        ";
+        ';
 
         $this->entityManager->getConnection()->executeStatement($sql, [
             'userId'  => $userId,
@@ -134,15 +135,16 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
 
     /**
      * @return string[]
+     *
      * @throws Exception
      */
     public function getMemberIdsOfGroup(string $groupId): array
     {
-        $sql = "
+        $sql = '
             SELECT users_id
             FROM users_organization_groups
             WHERE organization_groups_id = :groupId
-        ";
+        ';
 
         $result = $this->entityManager->getConnection()->executeQuery($sql, [
             'groupId' => $groupId,
@@ -154,13 +156,13 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
     /** @throws Exception */
     public function userIsMemberOfGroup(string $userId, string $groupId): bool
     {
-        $sql = "
+        $sql = '
             SELECT 1
             FROM users_organization_groups
             WHERE users_id = :userId
               AND organization_groups_id = :groupId
             LIMIT 1
-        ";
+        ';
 
         $result = $this->entityManager->getConnection()->executeQuery($sql, [
             'userId'  => $userId,
@@ -172,15 +174,16 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
 
     /**
      * @return string[]
+     *
      * @throws Exception
      */
     public function getGroupIdsOfUser(string $userId): array
     {
-        $sql = "
+        $sql = '
             SELECT organization_groups_id
             FROM users_organization_groups
             WHERE users_id = :userId
-        ";
+        ';
 
         $result = $this->entityManager->getConnection()->executeQuery($sql, [
             'userId' => $userId,
@@ -191,15 +194,16 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
 
     /**
      * @return string[]
+     *
      * @throws Exception
      */
     public function getJoinedUserIdsForOrganization(string $organizationId): array
     {
-        $sql = "
+        $sql = '
             SELECT users_id
             FROM users_organizations
             WHERE organizations_id = :organizationId
-        ";
+        ';
 
         $result = $this->entityManager->getConnection()->executeQuery($sql, [
             'organizationId' => $organizationId,

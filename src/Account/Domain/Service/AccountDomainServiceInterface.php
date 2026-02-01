@@ -4,33 +4,32 @@ declare(strict_types=1);
 
 namespace App\Account\Domain\Service;
 
-use App\Account\Domain\Entity\User;
+use App\Account\Domain\Entity\AccountCore;
 
 interface AccountDomainServiceInterface
 {
     public function register(
         string  $email,
-        ?string $plainPassword = null,
-        ?User   $user = null
-    ): User;
+        ?string $plainPassword = null
+    ): AccountCore;
 
-    public function findByEmail(string $email): ?User;
+    public function findByEmail(string $email): ?AccountCore;
 
     public function verifyPassword(
-        User   $user,
-        string $plainPassword
+        AccountCore $accountCore,
+        string      $plainPassword
     ): bool;
 
     public function updatePassword(
-        User   $user,
-        string $plainPassword
+        AccountCore $accountCore,
+        string      $plainPassword
     ): void;
 
-    public function userCanSignIn(?User $user): bool;
+    public function accountCoreCanSignIn(?AccountCore $accountCore): bool;
 
-    public function userCanSignUp(?User $user): bool;
+    public function accountCoreCanSignUp(?AccountCore $accountCore): bool;
 
-    public function userCanSignOut(?User $user): bool;
+    public function accountCoreCanSignOut(?AccountCore $accountCore): bool;
 
-    public function userIsSignedIn(?User $user): bool;
+    public function accountCoreIsSignedIn(?AccountCore $accountCore): bool;
 }

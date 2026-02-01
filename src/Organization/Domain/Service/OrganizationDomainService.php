@@ -113,7 +113,7 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
         string       $email,
         Organization $organization
     ): bool {
-        $userId = $this->accountFacade->getUserIdByEmail($email);
+        $userId = $this->accountFacade->getAccountCoreIdByEmail($email);
 
         if (is_null($userId)) {
             return true;
@@ -174,7 +174,7 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
         $organizationId = $invitation->getOrganization()->getId();
 
         // Check if user already exists by the invitation email
-        $existingUserId = $this->accountFacade->getUserIdByEmail($invitation->getEmail());
+        $existingUserId = $this->accountFacade->getAccountCoreIdByEmail($invitation->getEmail());
 
         if ($existingUserId !== null) {
             // User already exists
@@ -324,7 +324,7 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
     public function getGroupsOfUserForCurrentlyActiveOrganization(
         string $userId
     ): array {
-        $currentlyActiveOrganizationId = $this->accountFacade->getCurrentlyActiveOrganizationIdForUser($userId);
+        $currentlyActiveOrganizationId = $this->accountFacade->getCurrentlyActiveOrganizationIdForAccountCore($userId);
 
         if (is_null($currentlyActiveOrganizationId)) {
             throw new Exception('No currently active organization found for user with id ' . $userId);
@@ -476,7 +476,7 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
     public function currentlyActiveOrganizationIsOwnOrganization(
         string $userId
     ): bool {
-        $currentlyActiveOrganizationId = $this->accountFacade->getCurrentlyActiveOrganizationIdForUser($userId);
+        $currentlyActiveOrganizationId = $this->accountFacade->getCurrentlyActiveOrganizationIdForAccountCore($userId);
 
         if (is_null($currentlyActiveOrganizationId)) {
             throw new Exception('No currently active organization found for user with id ' . $userId);

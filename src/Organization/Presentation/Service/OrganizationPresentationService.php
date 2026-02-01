@@ -32,7 +32,7 @@ readonly class OrganizationPresentationService implements OrganizationPresentati
         Invitation $invitation
     ): void {
         $owningUserId   = $invitation->getOrganization()->getOwningUsersId();
-        $owningUserName = $this->accountFacade->getUserNameOrEmailById($owningUserId) ?? 'Someone';
+        $owningUserName = $this->accountFacade->getAccountCoreEmailById($owningUserId) ?? 'Someone';
 
         $context = [
             'acceptUrl' => $this->router->generate(

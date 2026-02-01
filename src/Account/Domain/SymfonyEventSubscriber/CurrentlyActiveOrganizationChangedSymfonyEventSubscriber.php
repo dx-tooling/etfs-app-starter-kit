@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Account\Domain\SymfonyEventSubscriber;
 
-use App\Account\Domain\Entity\User;
+use App\Account\Domain\Entity\AccountCore;
 use App\Organization\Facade\SymfonyEvent\CurrentlyActiveOrganizationChangedSymfonyEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
@@ -25,17 +25,17 @@ readonly class CurrentlyActiveOrganizationChangedSymfonyEventSubscriber
     public function handle(
         CurrentlyActiveOrganizationChangedSymfonyEvent $event
     ): void {
-        $user = $this->entityManager->find(User::class, $event->affectedUserId);
+        $accountCore = $this->entityManager->find(AccountCore::class, $event->affectedUserId);
 
-        if (is_null($user)) {
+        if (is_null($accountCore)) {
             throw new Exception(
-                'User with id ' . $event->affectedUserId . ' not found to set currently active organization with id ' . $event->organizationId . ' to.'
+                'AccountCore with id ' . $event->affectedUserId . ' not found to set currently active organization with id ' . $event->organizationId . ' to.'
             );
         }
 
-        $user->setCurrentlyActiveOrganizationId($event->organizationId);
+        $accountCore->setCurrentlyActiveOrganizationId($event->organizationId);
 
-        $this->entityManager->persist($user);
+        $this->entityManager->persist($accountCore);
         $this->entityManager->flush();
     }
 }

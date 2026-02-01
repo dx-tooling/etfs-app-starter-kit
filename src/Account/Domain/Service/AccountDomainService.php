@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Account\Domain\Service;
 
-use App\Account\Domain\Entity\User;
-use App\Account\Facade\SymfonyEvent\UserCreatedSymfonyEvent;
+use App\Account\Domain\Entity\AccountCore;
+use App\Account\Facade\SymfonyEvent\AccountCoreCreatedSymfonyEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -26,89 +26,82 @@ readonly class AccountDomainService implements AccountDomainServiceInterface
      */
     public function register(
         string  $email,
-        ?string $plainPassword = null,
-        ?User   $user = null
-    ): User {
-        $email        = trim(mb_strtolower($email));
-        $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(
+        ?string $plainPassword = null
+    ): AccountCore {
+        $email               = trim(mb_strtolower($email));
+        $existingAccountCore = $this->entityManager->getRepository(AccountCore::class)->findOneBy(
             ['email' => $email]
         );
 
-        if (!is_null($existingUser)) {
-            throw new ValueError("User with email '$email' already exists.");
+        if (!is_null($existingAccountCore)) {
+            throw new ValueError("Account with email '$email' already exists.");
         }
-
-        if (is_null($user)) {
-            $user = new User();
-        }
-
-        $user->setEmail($email);
 
         if (is_null($plainPassword)) {
             $plainPassword = (string) random_int(PHP_INT_MIN, PHP_INT_MAX);
         }
 
-        $user->setPassword(
-            $this->userPasswordHasher->hashPassword(
-                $user,
-                $plainPassword
-            )
-        );
+        // Create a temporary AccountCore to hash the password (hasher needs UserInterface)
+        $tempAccountCore = new AccountCore($email, '');
+        $hashedPassword  = $this->userPasswordHasher->hashPassword($tempAccountCore, $plainPassword);
 
-        $this->entityManager->persist($user);
+        // Create the real AccountCore with the hashed password
+        $accountCore = new AccountCore($email, $hashedPassword);
+
+        $this->entityManager->persist($accountCore);
         $this->entityManager->flush();
 
         $this->eventDispatcher->dispatch(
-            new UserCreatedSymfonyEvent((string) $user->getId())
+            new AccountCoreCreatedSymfonyEvent((string) $accountCore->getId())
         );
 
-        return $user;
+        return $accountCore;
     }
 
-    public function findByEmail(string $email): ?User
+    public function findByEmail(string $email): ?AccountCore
     {
-        /* @var User|null */
-        return $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+        /* @var AccountCore|null */
+        return $this->entityManager->getRepository(AccountCore::class)->findOneBy(['email' => $email]);
     }
 
     public function verifyPassword(
-        User   $user,
-        string $plainPassword
+        AccountCore $accountCore,
+        string      $plainPassword
     ): bool {
-        return $this->userPasswordHasher->isPasswordValid($user, $plainPassword);
+        return $this->userPasswordHasher->isPasswordValid($accountCore, $plainPassword);
     }
 
     public function updatePassword(
-        User   $user,
-        string $plainPassword
+        AccountCore $accountCore,
+        string      $plainPassword
     ): void {
-        $user->setPassword(
+        $accountCore->setPasswordHash(
             $this->userPasswordHasher->hashPassword(
-                $user,
+                $accountCore,
                 $plainPassword
             )
         );
-        $this->entityManager->persist($user);
+        $this->entityManager->persist($accountCore);
         $this->entityManager->flush();
     }
 
-    public function userCanSignIn(?User $user): bool
+    public function accountCoreCanSignIn(?AccountCore $accountCore): bool
     {
-        return is_null($user);
+        return is_null($accountCore);
     }
 
-    public function userCanSignUp(?User $user): bool
+    public function accountCoreCanSignUp(?AccountCore $accountCore): bool
     {
-        return $this->userCanSignIn($user);
+        return $this->accountCoreCanSignIn($accountCore);
     }
 
-    public function userCanSignOut(?User $user): bool
+    public function accountCoreCanSignOut(?AccountCore $accountCore): bool
     {
-        return !is_null($user);
+        return !is_null($accountCore);
     }
 
-    public function userIsSignedIn(?User $user): bool
+    public function accountCoreIsSignedIn(?AccountCore $accountCore): bool
     {
-        return $this->userCanSignOut($user);
+        return $this->accountCoreCanSignOut($accountCore);
     }
 }

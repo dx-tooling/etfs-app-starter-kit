@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Account\Presentation\Service;
 
-use App\Account\Domain\Entity\User;
+use App\Account\Domain\Entity\AccountCore;
 use Doctrine\ORM\EntityManagerInterface;
 use ValueError;
 
@@ -19,28 +19,28 @@ readonly class AccountPresentationService implements AccountPresentationServiceI
     ) {
     }
 
-    public function sendVerificationEmailForClaimedUser(
-        User $user
+    public function sendVerificationEmailForClaimedAccountCore(
+        AccountCore $accountCore
     ): void {
-        if (!$user->isRegistered()) {
+        if (!$accountCore->isRegistered()) {
             throw new ValueError(
-                'User is not registered.'
+                'Account is not registered.'
             );
         }
 
-        if ($user->isVerified()) {
+        if ($accountCore->isVerified()) {
             throw new ValueError(
-                'User is already verified.'
+                'Account is already verified.'
             );
         }
 
         // @todo add this part
         /*$this->emailVerifier->sendEmailAskingForVerification(
             'account.presentation.sign_up.email_verification',
-            $user,
+            $accountCore,
             new TemplatedEmail()
                 ->from($this->mailService->getDefaultSenderAddress())
-                ->to($user->getEmail())
+                ->to($accountCore->getEmail())
                 ->subject(
                     $this->translator->trans(
                         'claim_unregistered_user.form.cta',
@@ -57,15 +57,15 @@ readonly class AccountPresentationService implements AccountPresentationServiceI
     public function sendPasswordResetEmail(
         string $email
     ): void {
-        /** @var User|null $user */
-        $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+        /** @var AccountCore|null $accountCore */
+        $accountCore = $this->entityManager->getRepository(AccountCore::class)->findOneBy(['email' => $email]);
 
-        if (is_null($user)) {
+        if (is_null($accountCore)) {
             return;
         }
 
         /*$url = $this->requestParametersBasedUserAuthService->createUrl(
-            $user,
+            $accountCore,
             'videobasedmarketing.account.presentation.password.change',
             [],
             UrlGeneratorInterface::ABSOLUTE_URL,
@@ -77,7 +77,7 @@ readonly class AccountPresentationService implements AccountPresentationServiceI
         $this->mailService->send(
             new TemplatedEmail()
                 ->from($this->mailService->getDefaultSenderAddress())
-                ->to($user->getEmail())
+                ->to($accountCore->getEmail())
                 ->subject(
                     $this->translator->trans(
                         'sign_in.forgot_password.reset_password_email.subject',

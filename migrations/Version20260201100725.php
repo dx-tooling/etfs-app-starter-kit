@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20260201094103 extends AbstractMigration
+final class Version20260201100725 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -20,6 +20,18 @@ final class Version20260201094103 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
+        $this->addSql(<<<'SQL'
+            CREATE TABLE account_cores (
+              id CHAR(36) NOT NULL,
+              created_at DATETIME NOT NULL,
+              currently_active_organization_id CHAR(36) DEFAULT NULL,
+              email VARCHAR(1024) NOT NULL,
+              roles JSON NOT NULL,
+              password_hash VARCHAR(1024) NOT NULL,
+              UNIQUE INDEX UNIQ_CB89C7FEE7927C74 (email),
+              PRIMARY KEY (id)
+            ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`
+        SQL);
         $this->addSql(<<<'SQL'
             CREATE TABLE app_notifications (
               id CHAR(36) NOT NULL,
@@ -91,19 +103,6 @@ final class Version20260201094103 extends AbstractMigration
             ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`
         SQL);
         $this->addSql(<<<'SQL'
-            CREATE TABLE users (
-              id CHAR(36) NOT NULL,
-              created_at DATETIME DEFAULT NULL,
-              currently_active_organization_id CHAR(36) DEFAULT NULL,
-              email VARCHAR(180) NOT NULL,
-              name VARCHAR(255) DEFAULT NULL,
-              roles JSON NOT NULL,
-              password VARCHAR(255) NOT NULL,
-              UNIQUE INDEX UNIQ_1483A5E9E7927C74 (email),
-              PRIMARY KEY (id)
-            ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`
-        SQL);
-        $this->addSql(<<<'SQL'
             CREATE TABLE messenger_messages (
               id BIGINT AUTO_INCREMENT NOT NULL,
               body LONGTEXT NOT NULL,
@@ -156,13 +155,13 @@ final class Version20260201094103 extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE organization_groups DROP FOREIGN KEY FK_F5E3E98586288A55');
         $this->addSql('ALTER TABLE organization_invitations DROP FOREIGN KEY FK_137BB4D586288A55');
+        $this->addSql('DROP TABLE account_cores');
         $this->addSql('DROP TABLE app_notifications');
         $this->addSql('DROP TABLE etfs_shared_bundle_command_run_summaries');
         $this->addSql('DROP TABLE etfs_shared_bundle_signals');
         $this->addSql('DROP TABLE organization_groups');
         $this->addSql('DROP TABLE organization_invitations');
         $this->addSql('DROP TABLE organizations');
-        $this->addSql('DROP TABLE users');
         $this->addSql('DROP TABLE messenger_messages');
         $this->addSql('DROP TABLE sessions');
         $this->addSql('DROP TABLE lock_keys');

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Account\Presentation\Service;
 
-use App\Account\Domain\Entity\User;
+use App\Account\Domain\Entity\AccountCore;
 
 interface AccountPresentationServiceInterface
 {
-    public function sendVerificationEmailForClaimedUser(
-        User $user
+    public function sendVerificationEmailForClaimedAccountCore(
+        AccountCore $accountCore
     ): void;
 
     public function sendPasswordResetEmail(

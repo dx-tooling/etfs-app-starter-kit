@@ -6,12 +6,15 @@ namespace App\Account\Facade\Dto;
 
 use DateTimeImmutable;
 
-final readonly class UserInfoDto
+final readonly class AccountInfoDto
 {
+    /**
+     * @param list<string> $roles
+     */
     public function __construct(
         public string            $id,
         public string            $email,
-        public ?string           $name,
+        public array             $roles,
         public DateTimeImmutable $createdAt,
         public ?string           $currentlyActiveOrganizationId = null
     ) {
@@ -19,6 +22,6 @@ final readonly class UserInfoDto
 
     public function getDisplayName(): string
     {
-        return $this->name ?? $this->email;
+        return $this->email;
     }
 }

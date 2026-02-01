@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace App\Account\Facade;
 
-use App\Account\Domain\Entity\User;
+use App\Account\Domain\Entity\AccountCore;
 use App\Account\Domain\Service\AccountDomainServiceInterface;
+use App\Account\Facade\Dto\AccountInfoDto;
 use App\Account\Facade\Dto\ResultDto;
-use App\Account\Facade\Dto\UserInfoDto;
 use App\Account\Facade\Dto\UserRegistrationDto;
 use Doctrine\ORM\EntityManagerInterface;
-use EnterpriseToolingForSymfony\SharedBundle\DateAndTime\Service\DateAndTimeService;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Throwable;
 
@@ -25,112 +24,112 @@ readonly class AccountFacade implements AccountFacadeInterface
     public function register(UserRegistrationDto $dto): ResultDto
     {
         try {
-            $user = $this->accountDomainService->register(
+            $accountCore = $this->accountDomainService->register(
                 (string) $dto->emailAddress,
                 $dto->plainPassword
             );
 
-            return new ResultDto(true, null, $user->getId());
+            return new ResultDto(true, null, $accountCore->getId());
         } catch (Throwable $t) {
             return new ResultDto(false, $t->getMessage());
         }
     }
 
-    public function getUserIdByEmail(string $email): ?string
+    public function getAccountCoreIdByEmail(string $email): ?string
     {
-        /** @var User|null $user */
-        $user = $this
+        /** @var AccountCore|null $accountCore */
+        $accountCore = $this
             ->entityManager
-            ->getRepository(User::class)
+            ->getRepository(AccountCore::class)
             ->findOneBy(['email' => trim(mb_strtolower($email))]);
 
-        return $user?->getId();
+        return $accountCore?->getId();
     }
 
-    public function userWithIdExists(string $userId): bool
+    public function accountCoreWithIdExists(string $accountCoreId): bool
     {
-        return $this->entityManager->getRepository(User::class)->find($userId) !== null;
+        return $this->entityManager->getRepository(AccountCore::class)->find($accountCoreId) !== null;
     }
 
-    public function getCurrentlyActiveOrganizationIdForUser(string $userId): ?string
+    public function getCurrentlyActiveOrganizationIdForAccountCore(string $accountCoreId): ?string
     {
-        /** @var ?User $user */
-        $user = $this->entityManager->getRepository(User::class)->find($userId);
+        /** @var ?AccountCore $accountCore */
+        $accountCore = $this->entityManager->getRepository(AccountCore::class)->find($accountCoreId);
 
-        if (is_null($user)) {
+        if (is_null($accountCore)) {
             return null;
         }
 
-        return $user->getCurrentlyActiveOrganizationId();
+        return $accountCore->getCurrentlyActiveOrganizationId();
     }
 
-    public function getUserNameOrEmailById(string $userId): ?string
+    public function getAccountCoreEmailById(string $accountCoreId): ?string
     {
-        /** @var ?User $user */
-        $user = $this->entityManager->getRepository(User::class)->find($userId);
+        /** @var ?AccountCore $accountCore */
+        $accountCore = $this->entityManager->getRepository(AccountCore::class)->find($accountCoreId);
 
-        if ($user === null) {
+        if ($accountCore === null) {
             return null;
         }
 
-        return $user->getName() ?? $user->getEmail();
+        return $accountCore->getEmail();
     }
 
     /**
-     * @param list<string> $userIds
+     * @param list<string> $accountCoreIds
      *
-     * @return list<UserInfoDto>
+     * @return list<AccountInfoDto>
      */
-    public function getUserInfoByIds(array $userIds): array
+    public function getAccountCoreInfoByIds(array $accountCoreIds): array
     {
-        if (empty($userIds)) {
+        if (empty($accountCoreIds)) {
             return [];
         }
 
-        /** @var list<User> $users */
-        $users = $this->entityManager
-            ->getRepository(User::class)
-            ->findBy(['id' => $userIds]);
+        /** @var list<AccountCore> $accountCores */
+        $accountCores = $this->entityManager
+            ->getRepository(AccountCore::class)
+            ->findBy(['id' => $accountCoreIds]);
 
         $result = [];
-        foreach ($users as $user) {
-            $result[] = new UserInfoDto(
-                (string) $user->getId(),
-                (string) $user->getEmail(),
-                $user->getName(),
-                $user->getCreatedAt() ?? DateAndTimeService::getDateTimeImmutable(),
-                $user->getCurrentlyActiveOrganizationId()
+        foreach ($accountCores as $accountCore) {
+            $result[] = new AccountInfoDto(
+                (string) $accountCore->getId(),
+                $accountCore->getEmail(),
+                $accountCore->getRoles(),
+                $accountCore->getCreatedAt(),
+                $accountCore->getCurrentlyActiveOrganizationId()
             );
         }
 
         return $result;
     }
 
-    public function getUserForLogin(string $userId): ?UserInterface
+    public function getAccountCoreForLogin(string $accountCoreId): ?UserInterface
     {
-        return $this->entityManager->getRepository(User::class)->find($userId);
+        return $this->entityManager->getRepository(AccountCore::class)->find($accountCoreId);
     }
 
-    public function getLoggedInUserInfo(UserInterface $user): ?UserInfoDto
+    public function getLoggedInAccountCoreInfo(UserInterface $user): ?AccountInfoDto
     {
         $email = $user->getUserIdentifier();
 
-        /** @var User|null $userEntity */
-        $userEntity = $this
+        /** @var AccountCore|null $accountCore */
+        $accountCore = $this
             ->entityManager
-            ->getRepository(User::class)
+            ->getRepository(AccountCore::class)
             ->findOneBy(['email' => trim(mb_strtolower($email))]);
 
-        if ($userEntity === null) {
+        if ($accountCore === null) {
             return null;
         }
 
-        return new UserInfoDto(
-            (string) $userEntity->getId(),
-            (string) $userEntity->getEmail(),
-            $userEntity->getName(),
-            $userEntity->getCreatedAt() ?? DateAndTimeService::getDateTimeImmutable(),
-            $userEntity->getCurrentlyActiveOrganizationId()
+        return new AccountInfoDto(
+            (string) $accountCore->getId(),
+            $accountCore->getEmail(),
+            $accountCore->getRoles(),
+            $accountCore->getCreatedAt(),
+            $accountCore->getCurrentlyActiveOrganizationId()
         );
     }
 }

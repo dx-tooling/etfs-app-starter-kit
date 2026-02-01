@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Organization\Presentation\Controller;
 
 use App\Account\Facade\AccountFacadeInterface;
-use App\Account\Facade\Dto\UserInfoDto;
+use App\Account\Facade\Dto\AccountInfoDto;
 use App\Organization\Domain\Entity\Invitation;
 use App\Organization\Domain\Service\OrganizationDomainServiceInterface;
 use App\Organization\Facade\SymfonyEvent\CurrentlyActiveOrganizationChangedSymfonyEvent;
@@ -31,15 +31,15 @@ final class OrganizationController extends AbstractController
     ) {
     }
 
-    private function getUserInfo(UserInterface $user): UserInfoDto
+    private function getAccountInfo(UserInterface $user): AccountInfoDto
     {
-        $userInfo = $this->accountFacade->getLoggedInUserInfo($user);
+        $accountInfo = $this->accountFacade->getLoggedInAccountCoreInfo($user);
 
-        if ($userInfo === null) {
+        if ($accountInfo === null) {
             throw new RuntimeException('Account not found for authenticated user');
         }
 
-        return $userInfo;
+        return $accountInfo;
     }
 
     #[Route(
@@ -55,11 +55,11 @@ final class OrganizationController extends AbstractController
             return $this->redirectToRoute('account.presentation.sign_in');
         }
 
-        $userInfo                      = $this->getUserInfo($user);
-        $userId                        = $userInfo->id;
+        $accountInfo                   = $this->getAccountInfo($user);
+        $userId                        = $accountInfo->id;
         $organizationName              = null;
         $currentOrganization           = null;
-        $currentlyActiveOrganizationId = $userInfo->currentlyActiveOrganizationId;
+        $currentlyActiveOrganizationId = $accountInfo->currentlyActiveOrganizationId;
 
         if ($currentlyActiveOrganizationId !== null) {
             $currentOrganization = $this->organizationDomainService->getOrganizationById($currentlyActiveOrganizationId);
@@ -121,7 +121,7 @@ final class OrganizationController extends AbstractController
                 }
             }
 
-            $memberInfos = $this->accountFacade->getUserInfoByIds($memberIds);
+            $memberInfos = $this->accountFacade->getAccountCoreInfoByIds($memberIds);
             foreach ($memberInfos as $memberInfo) {
                 $members[] = [
                     'id'            => $memberInfo->id,
@@ -195,8 +195,8 @@ final class OrganizationController extends AbstractController
             return $this->redirectToRoute('account.presentation.sign_in');
         }
 
-        $userInfo = $this->getUserInfo($user);
-        $userId   = $userInfo->id;
+        $accountInfo = $this->getAccountInfo($user);
+        $userId      = $accountInfo->id;
 
         try {
             $name = $request->request->get('name');
@@ -240,9 +240,9 @@ final class OrganizationController extends AbstractController
             return $this->redirectToRoute('account.presentation.sign_in');
         }
 
-        $userInfo       = $this->getUserInfo($user);
-        $userId         = $userInfo->id;
-        $organizationId = $userInfo->currentlyActiveOrganizationId;
+        $accountInfo    = $this->getAccountInfo($user);
+        $userId         = $accountInfo->id;
+        $organizationId = $accountInfo->currentlyActiveOrganizationId;
 
         if ($organizationId === null) {
             $this->addFlash('error', 'No active organization to rename.');
@@ -293,8 +293,8 @@ final class OrganizationController extends AbstractController
             return $this->redirectToRoute('account.presentation.sign_in');
         }
 
-        $userInfo = $this->getUserInfo($user);
-        $userId   = $userInfo->id;
+        $accountInfo = $this->getAccountInfo($user);
+        $userId      = $accountInfo->id;
 
         try {
             $organization = $this->organizationDomainService->getOrganizationById($organizationId);
@@ -329,9 +329,9 @@ final class OrganizationController extends AbstractController
             return $this->redirectToRoute('account.presentation.sign_in');
         }
 
-        $userInfo       = $this->getUserInfo($user);
-        $userId         = $userInfo->id;
-        $organizationId = $userInfo->currentlyActiveOrganizationId;
+        $accountInfo    = $this->getAccountInfo($user);
+        $userId         = $accountInfo->id;
+        $organizationId = $accountInfo->currentlyActiveOrganizationId;
 
         if ($organizationId === null) {
             $this->addFlash('error', 'No active organization to invite to.');
@@ -398,8 +398,8 @@ final class OrganizationController extends AbstractController
             return $this->redirectToRoute('account.presentation.sign_in');
         }
 
-        $userInfo = $this->getUserInfo($user);
-        $userId   = $userInfo->id;
+        $accountInfo = $this->getAccountInfo($user);
+        $userId      = $accountInfo->id;
 
         try {
             $invitation = $this->entityManager->getRepository(Invitation::class)->find($invitationId);
@@ -446,7 +446,7 @@ final class OrganizationController extends AbstractController
         }
 
         $organization     = $invitation->getOrganization();
-        $ownerName        = $this->accountFacade->getUserNameOrEmailById($organization->getOwningUsersId()) ?? 'Someone';
+        $ownerName        = $this->accountFacade->getAccountCoreEmailById($organization->getOwningUsersId()) ?? 'Someone';
         $organizationName = $this->organizationDomainService->getOrganizationName($organization, null);
 
         // GET request - show the acceptance page
@@ -462,7 +462,7 @@ final class OrganizationController extends AbstractController
         try {
             $currentUser = $this->getUser();
             $userId      = $currentUser !== null
-                ? $this->getUserInfo($currentUser)->id
+                ? $this->getAccountInfo($currentUser)->id
                 : null;
 
             $newUserId = $this->organizationDomainService->acceptInvitation($invitation, $userId);
@@ -475,7 +475,7 @@ final class OrganizationController extends AbstractController
 
             // If user wasn't logged in and we created a new one, log them in
             if ($currentUser === null) {
-                $newUser = $this->accountFacade->getUserForLogin($newUserId);
+                $newUser = $this->accountFacade->getAccountCoreForLogin($newUserId);
                 if ($newUser !== null) {
                     $this->security->login($newUser, 'form_login', 'main');
                 }
@@ -504,9 +504,9 @@ final class OrganizationController extends AbstractController
             return $this->redirectToRoute('account.presentation.sign_in');
         }
 
-        $userInfo       = $this->getUserInfo($user);
-        $userId         = $userInfo->id;
-        $organizationId = $userInfo->currentlyActiveOrganizationId;
+        $accountInfo    = $this->getAccountInfo($user);
+        $userId         = $accountInfo->id;
+        $organizationId = $accountInfo->currentlyActiveOrganizationId;
 
         if ($organizationId === null) {
             $this->addFlash('error', 'No active organization.');
@@ -568,9 +568,9 @@ final class OrganizationController extends AbstractController
             return $this->redirectToRoute('account.presentation.sign_in');
         }
 
-        $userInfo       = $this->getUserInfo($user);
-        $userId         = $userInfo->id;
-        $organizationId = $userInfo->currentlyActiveOrganizationId;
+        $accountInfo    = $this->getAccountInfo($user);
+        $userId         = $accountInfo->id;
+        $organizationId = $accountInfo->currentlyActiveOrganizationId;
 
         if ($organizationId === null) {
             $this->addFlash('error', 'No active organization.');

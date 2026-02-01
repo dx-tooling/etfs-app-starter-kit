@@ -6,7 +6,7 @@ security:
     providers:
         app_user_provider:
             entity:
-                class: App\Account\Domain\Entity\User
+                class: App\Account\Domain\Entity\AccountCore
                 property: email
     firewalls:
         dev:

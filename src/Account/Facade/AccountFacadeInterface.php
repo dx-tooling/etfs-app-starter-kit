@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Account\Facade;
 
+use App\Account\Facade\Dto\AccountInfoDto;
 use App\Account\Facade\Dto\ResultDto;
-use App\Account\Facade\Dto\UserInfoDto;
 use App\Account\Facade\Dto\UserRegistrationDto;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -13,29 +13,29 @@ interface AccountFacadeInterface
 {
     public function register(UserRegistrationDto $dto): ResultDto;
 
-    public function getUserIdByEmail(string $email): ?string;
+    public function getAccountCoreIdByEmail(string $email): ?string;
 
-    public function userWithIdExists(string $userId): bool;
+    public function accountCoreWithIdExists(string $accountCoreId): bool;
 
-    public function getCurrentlyActiveOrganizationIdForUser(string $userId): ?string;
+    public function getCurrentlyActiveOrganizationIdForAccountCore(string $accountCoreId): ?string;
 
-    public function getUserNameOrEmailById(string $userId): ?string;
+    public function getAccountCoreEmailById(string $accountCoreId): ?string;
 
     /**
-     * @param list<string> $userIds
+     * @param list<string> $accountCoreIds
      *
-     * @return list<UserInfoDto>
+     * @return list<AccountInfoDto>
      */
-    public function getUserInfoByIds(array $userIds): array;
+    public function getAccountCoreInfoByIds(array $accountCoreIds): array;
 
     /**
      * Returns a UserInterface for login purposes.
      */
-    public function getUserForLogin(string $userId): ?UserInterface;
+    public function getAccountCoreForLogin(string $accountCoreId): ?UserInterface;
 
     /**
-     * Get user info for the currently logged-in user.
-     * Returns null if user not found (should not happen for authenticated users).
+     * Get account info for the currently logged-in user.
+     * Returns null if account not found (should not happen for authenticated users).
      */
-    public function getLoggedInUserInfo(UserInterface $user): ?UserInfoDto;
+    public function getLoggedInAccountCoreInfo(UserInterface $user): ?AccountInfoDto;
 }

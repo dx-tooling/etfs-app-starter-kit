@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Account\Infrastructure\SymfonyEvent;
 
-use App\Account\Domain\Entity\User;
+use App\Account\Domain\Entity\AccountCore;
 
-readonly class UserVerifiedSymfonyEvent
+readonly class AccountCoreVerifiedSymfonyEvent
 {
     public function __construct(
-        private(set) User $user
+        private(set) AccountCore $accountCore
     ) {
     }
 }

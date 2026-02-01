@@ -5,32 +5,38 @@ declare(strict_types=1);
 namespace App\Account\Domain\Entity;
 
 use App\Account\Domain\Enum\Role;
-use App\Account\Infrastructure\Repository\UserRepository;
+use App\Account\Infrastructure\Repository\AccountCoreRepository;
 use DateTimeImmutable;
+use Deprecated;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use EnterpriseToolingForSymfony\SharedBundle\DateAndTime\Service\DateAndTimeService;
 use Exception;
+use LogicException;
 use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-#[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: 'users')]
+#[ORM\Entity(repositoryClass: AccountCoreRepository::class)]
+#[ORM\Table(name: 'account_cores')]
 #[UniqueEntity(
     fields: ['email'],
     message: 'There is already an account with this email'
 )]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class AccountCore implements UserInterface, PasswordAuthenticatedUserInterface
 {
     /**
      * @throws Exception
      */
-    public function __construct()
-    {
-        $this->createdAt = DateAndTimeService::getDateTimeImmutable();
-        $this->roles     = [Role::USER->value];
+    public function __construct(
+        string $email,
+        string $passwordHash
+    ) {
+        $this->email        = trim(mb_strtolower($email));
+        $this->passwordHash = $passwordHash;
+        $this->createdAt    = DateAndTimeService::getDateTimeImmutable();
+        $this->roles        = [Role::USER->value];
     }
 
     #[ORM\Id]
@@ -49,11 +55,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(
         type: Types::DATETIME_IMMUTABLE,
-        nullable: true
+        nullable: false
     )]
-    private ?DateTimeImmutable $createdAt;
+    private readonly DateTimeImmutable $createdAt;
 
-    public function getCreatedAt(): ?DateTimeImmutable
+    public function getCreatedAt(): DateTimeImmutable
     {
         return $this->createdAt;
     }
@@ -77,37 +83,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(
         type: Types::STRING,
-        length: 180,
+        length: 1024,
         unique: true,
         nullable: false
     )]
-    private string $email = '';
+    private readonly string $email;
 
     public function getEmail(): string
     {
         return $this->email;
-    }
-
-    public function setEmail(string $email): void
-    {
-        $this->email = trim(mb_strtolower($email));
-    }
-
-    #[ORM\Column(
-        type: Types::STRING,
-        length: 255,
-        nullable: true
-    )]
-    private ?string $name = null;
-
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
-
-    public function setName(?string $name): void
-    {
-        $this->name = $name !== null ? trim($name) : null;
     }
 
     /** @var list<string> */
@@ -125,6 +109,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return array_values(array_unique($roles));
     }
 
+    /**
+     * @param list<string> $roles
+     */
+    public function setRoles(array $roles): void
+    {
+        $this->roles = $roles;
+    }
+
     public function hasRole(Role $role): bool
     {
         return in_array(
@@ -136,11 +128,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function addRole(Role $role): void
     {
-        $role = $role->value;
-        $role = strtoupper($role);
+        $roleValue = strtoupper($role->value);
 
-        if (!in_array($role, $this->roles, true)) {
-            $this->roles[] = $role;
+        if (!in_array($roleValue, $this->roles, true)) {
+            $this->roles[] = $roleValue;
         }
     }
 
@@ -155,17 +146,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->roles = $remainingRoles;
     }
 
-    #[ORM\Column(type: Types::STRING)]
-    private string $password;
+    #[ORM\Column(
+        name: 'password_hash',
+        type: Types::STRING,
+        length: 1024
+    )]
+    private string $passwordHash;
 
-    public function getPassword(): string
+    public function getPasswordHash(): string
     {
-        return $this->password;
+        return $this->passwordHash;
     }
 
-    public function setPassword(string $password): void
+    public function setPasswordHash(string $passwordHash): void
     {
-        $this->password = $password;
+        $this->passwordHash = $passwordHash;
+    }
+
+    /**
+     * Required by PasswordAuthenticatedUserInterface.
+     */
+    public function getPassword(): string
+    {
+        return $this->passwordHash;
     }
 
     public function isAdmin(): bool
@@ -174,7 +177,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * Returns true if the user has been registered (has an email set).
+     * Returns true if the account has been registered (has an email set).
      */
     public function isRegistered(): bool
     {
@@ -182,32 +185,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * Returns true if the user has been verified.
-     * Note: Verification flow not yet implemented, defaults to true for registered users.
+     * Returns true if the account has been verified.
+     * Note: Verification flow not yet implemented, defaults to true for registered accounts.
      */
     public function isVerified(): bool
     {
         return $this->isRegistered();
     }
 
-    /**
-     * @return non-empty-string
-     */
     public function getUserIdentifier(): string
     {
-        if ($this->email !== '') {
-            return $this->email;
+        if ($this->email === '') {
+            throw new LogicException('User identifier (email) must not be empty.');
         }
 
-        if ($this->id !== null && $this->id !== '') {
-            return $this->id;
-        }
-
-        // This should never happen in practice - every persisted user has an ID
-        return 'uninitialized-user';
+        return $this->email;
     }
 
+    #[Deprecated]
     public function eraseCredentials(): void
     {
+        // No temporary sensitive data stored on this entity
     }
 }

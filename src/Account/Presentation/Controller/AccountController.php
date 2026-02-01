@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Account\Presentation\Controller;
 
-use App\Account\Domain\Entity\User;
+use App\Account\Domain\Entity\AccountCore;
 use App\Account\Domain\Service\AccountDomainService;
 use App\Organization\Facade\OrganizationFacadeInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -93,14 +93,14 @@ final class AccountController extends AbstractController
     )]
     public function dashboardAction(): Response
     {
-        /** @var User|null $user */
-        $user = $this->getUser();
+        /** @var AccountCore|null $accountCore */
+        $accountCore = $this->getUser();
 
-        if ($user === null) {
+        if ($accountCore === null) {
             return $this->redirectToRoute('account.presentation.sign_in');
         }
 
-        $currentlyActiveOrganizationId = $user->getCurrentlyActiveOrganizationId();
+        $currentlyActiveOrganizationId = $accountCore->getCurrentlyActiveOrganizationId();
         $organizationName              = null;
 
         if ($currentlyActiveOrganizationId !== null) {

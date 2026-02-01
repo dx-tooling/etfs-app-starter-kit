@@ -84,8 +84,8 @@ RUN mkdir -p /tmp/container-home/.cache \
 # Using --system to write to /etc/gitconfig which persists regardless of HOME setting
 RUN git config --system --add safe.directory '*'
 
-# Add GitHub SSH host keys to known_hosts
-# This allows composer to clone via SSH when GitHub API rate limits are hit
-RUN mkdir -p /root/.ssh && \
-    ssh-keyscan -t ed25519,rsa github.com >> /root/.ssh/known_hosts 2>/dev/null && \
-    chmod 600 /root/.ssh/known_hosts
+# Configure git to always use HTTPS instead of SSH for GitHub
+# This prevents composer from failing when GitHub API rate limits cause SSH fallback
+# (SSH requires authentication even for public repos)
+RUN git config --system --add url."https://github.com/".insteadOf "git@github.com:" && \
+    git config --system --add url."https://github.com/".insteadOf "ssh://git@github.com/"

@@ -2,8 +2,10 @@ twig:
     file_name_pattern: "*.twig"
 
     paths:
+        "src/Account/Presentation/Resources/templates": "account.presentation"
         "src/Common/Presentation/Resources/templates": "common.presentation"
         "src/Content/Presentation/Resources/templates": "content.presentation"
+        "src/Organization/Presentation/Resources/templates": "organization.presentation"
 
 when@test:
     twig:

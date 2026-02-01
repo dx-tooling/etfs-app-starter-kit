@@ -31,9 +31,9 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
 
             UNION
 
-            SELECT uo.organizations_id
-            FROM users_organizations uo
-            WHERE uo.users_id = :userId
+            SELECT om.organizations_id
+            FROM organization_members om
+            WHERE om.account_cores_id = :userId
         ";
 
         $connection      = $this->entityManager->getConnection();
@@ -54,8 +54,8 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
     {
         $sql = '
             SELECT 1
-            FROM users_organizations uo
-            WHERE uo.users_id = :userId
+            FROM organization_members om
+            WHERE om.account_cores_id = :userId
             LIMIT 1
         ';
 
@@ -70,9 +70,9 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
     {
         $sql = '
             SELECT 1
-            FROM users_organizations uo
-            WHERE uo.users_id = :userId
-              AND uo.organizations_id = :organizationId
+            FROM organization_members om
+            WHERE om.account_cores_id = :userId
+              AND om.organizations_id = :organizationId
             LIMIT 1
         ';
 
@@ -94,7 +94,7 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
     public function addUserToOrganization(string $userId, string $organizationId): void
     {
         $sql = '
-            INSERT INTO users_organizations (users_id, organizations_id)
+            INSERT INTO organization_members (account_cores_id, organizations_id)
             VALUES (:userId, :organizationId)
         ';
 
@@ -108,7 +108,7 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
     public function addMemberToGroup(string $userId, string $groupId): void
     {
         $sql = '
-            INSERT INTO users_organization_groups (users_id, organization_groups_id)
+            INSERT INTO organization_group_members (account_cores_id, organization_groups_id)
             VALUES (:userId, :groupId)
         ';
 
@@ -122,8 +122,8 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
     public function removeMemberFromGroup(string $userId, string $groupId): void
     {
         $sql = '
-            DELETE FROM users_organization_groups
-            WHERE users_id = :userId
+            DELETE FROM organization_group_members
+            WHERE account_cores_id = :userId
               AND organization_groups_id = :groupId
         ';
 
@@ -141,8 +141,8 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
     public function getMemberIdsOfGroup(string $groupId): array
     {
         $sql = '
-            SELECT users_id
-            FROM users_organization_groups
+            SELECT account_cores_id
+            FROM organization_group_members
             WHERE organization_groups_id = :groupId
         ';
 
@@ -161,8 +161,8 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
     {
         $sql = '
             SELECT 1
-            FROM users_organization_groups
-            WHERE users_id = :userId
+            FROM organization_group_members
+            WHERE account_cores_id = :userId
               AND organization_groups_id = :groupId
             LIMIT 1
         ';
@@ -184,8 +184,8 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
     {
         $sql = '
             SELECT organization_groups_id
-            FROM users_organization_groups
-            WHERE users_id = :userId
+            FROM organization_group_members
+            WHERE account_cores_id = :userId
         ';
 
         $result = $this->entityManager->getConnection()->executeQuery($sql, [
@@ -206,8 +206,8 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
     public function getJoinedUserIdsForOrganization(string $organizationId): array
     {
         $sql = '
-            SELECT users_id
-            FROM users_organizations
+            SELECT account_cores_id
+            FROM organization_members
             WHERE organizations_id = :organizationId
         ';
 

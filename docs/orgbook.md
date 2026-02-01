@@ -134,26 +134,30 @@ return false;
 - `organizations` - Organization entities
 - `organization_groups` - Group entities
 - `organization_invitations` - Pending invitations
-- `users_organizations` - Join table: users who have joined (not owned) an organization
-- `users_organization_groups` - Join table: group membership
+- `organization_members` - Join table: accounts that have joined (not owned) an organization
+- `organization_group_members` - Join table: group membership
+
+**Note:** The join tables store `account_cores_id` as a plain GUID without FK constraint. This maintains strict vertical isolation at the persistence layer—the Organization vertical has no database-level dependency on the Account vertical.
 
 ### Key Relationships
 
 ```sql
--- User owns organization (1:N)
-organizations.owning_users_id → users.id
+-- Account owns organization (1:N, cross-vertical reference via GUID)
+organizations.owning_users_id → account_cores.id (no FK)
 
--- User's active context
-users.currently_active_organization_id → organizations.id
+-- Account's active context (cross-vertical reference via GUID)
+account_cores.currently_active_organization_id → organizations.id (no FK)
 
--- Groups belong to organization (cascade delete)
-organization_groups.organizations_id → organizations.id
+-- Groups belong to organization (cascade delete, same vertical)
+organization_groups.organizations_id → organizations.id (FK)
 
--- User joins organization (many-to-many)
-users_organizations(users_id, organizations_id)
+-- Account joins organization (many-to-many, cross-vertical)
+organization_members(account_cores_id, organizations_id)
+  └─ FK only to organizations (same vertical)
 
--- User is member of group (many-to-many)
-users_organization_groups(users_id, organization_groups_id)
+-- Account is member of group (many-to-many, cross-vertical)
+organization_group_members(account_cores_id, organization_groups_id)
+  └─ FK only to organization_groups (same vertical)
 ```
 
 ## Vertical Structure

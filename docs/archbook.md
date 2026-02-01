@@ -48,6 +48,18 @@ Implication for ETFS apps:
 - Cross-vertical dependencies must go through **Facade** interfaces.
 - Direct coupling between internal layers of different verticals is forbidden.
 
+## Persistence Layer Isolation
+
+**Vertical isolation extends to the database layer.** Each vertical's persistence is fully decoupled from other verticals, enabling different verticals to potentially use different storage backends (MySQL, PostgreSQL, MongoDB, etc.).
+
+Rules:
+
+- **No cross-vertical foreign keys.** Never create FK constraints between tables owned by different verticals.
+- **Cross-vertical references use plain GUIDs.** Store IDs from other verticals as `CHAR(36)` columns without FK constraints.
+- **FK constraints are allowed within the same vertical.** Tables in the same vertical may have FK relationships with cascade rules.
+- **Join tables belong to the owning vertical.** When tracking relationships between entities from different verticals, the join table belongs to the vertical that semantically "owns" the relationship. For example, `organization_members` belongs to the Organization vertical (not Account).
+- **Index cross-vertical ID columns.** Since there's no FK to provide an index, add explicit indexes on cross-vertical ID columns for query performance.
+
 ## Layer Responsibilities (Recap)
 
 - **Facade**: Interfaces + DTOs + thin orchestration for other verticals.

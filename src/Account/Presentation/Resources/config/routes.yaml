@@ -1,0 +1,3 @@
+account.infrastructure.sign_out:
+    path: /account/sign-out
+    methods: [POST]

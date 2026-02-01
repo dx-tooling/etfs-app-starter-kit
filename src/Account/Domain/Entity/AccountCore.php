@@ -1,0 +1,210 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Account\Domain\Entity;
+
+use App\Account\Domain\Enum\Role;
+use App\Account\Infrastructure\Repository\AccountCoreRepository;
+use DateTimeImmutable;
+use Deprecated;
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
+use EnterpriseToolingForSymfony\SharedBundle\DateAndTime\Service\DateAndTimeService;
+use Exception;
+use LogicException;
+use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+
+#[ORM\Entity(repositoryClass: AccountCoreRepository::class)]
+#[ORM\Table(name: 'account_cores')]
+#[UniqueEntity(
+    fields: ['email'],
+    message: 'There is already an account with this email'
+)]
+class AccountCore implements UserInterface, PasswordAuthenticatedUserInterface
+{
+    /**
+     * @throws Exception
+     */
+    public function __construct(
+        string $email,
+        string $passwordHash
+    ) {
+        $this->email        = trim(mb_strtolower($email));
+        $this->passwordHash = $passwordHash;
+        $this->createdAt    = DateAndTimeService::getDateTimeImmutable();
+        $this->roles        = [Role::USER->value];
+    }
+
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
+    #[ORM\CustomIdGenerator(class: UuidGenerator::class)]
+    #[ORM\Column(
+        type: Types::GUID,
+        unique: true
+    )]
+    private ?string $id = null;
+
+    public function getId(): ?string
+    {
+        return $this->id;
+    }
+
+    #[ORM\Column(
+        type: Types::DATETIME_IMMUTABLE,
+        nullable: false
+    )]
+    private readonly DateTimeImmutable $createdAt;
+
+    public function getCreatedAt(): DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    #[ORM\Column(
+        type: Types::GUID,
+        unique: false,
+        nullable: true,
+    )]
+    private ?string $currentlyActiveOrganizationId = null;
+
+    public function getCurrentlyActiveOrganizationId(): ?string
+    {
+        return $this->currentlyActiveOrganizationId;
+    }
+
+    public function setCurrentlyActiveOrganizationId(?string $currentlyActiveOrganizationId): void
+    {
+        $this->currentlyActiveOrganizationId = $currentlyActiveOrganizationId;
+    }
+
+    #[ORM\Column(
+        type: Types::STRING,
+        length: 1024,
+        unique: true,
+        nullable: false
+    )]
+    private readonly string $email;
+
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
+
+    /** @var list<string> */
+    #[ORM\Column(type: Types::JSON)]
+    private array $roles = [];
+
+    /**
+     * @return list<string>
+     */
+    public function getRoles(): array
+    {
+        $roles   = $this->roles;
+        $roles[] = Role::USER->value;
+
+        return array_values(array_unique($roles));
+    }
+
+    /**
+     * @param list<string> $roles
+     */
+    public function setRoles(array $roles): void
+    {
+        $this->roles = $roles;
+    }
+
+    public function hasRole(Role $role): bool
+    {
+        return in_array(
+            strtoupper($role->value),
+            $this->getRoles(),
+            true
+        );
+    }
+
+    public function addRole(Role $role): void
+    {
+        $roleValue = strtoupper($role->value);
+
+        if (!in_array($roleValue, $this->roles, true)) {
+            $this->roles[] = $roleValue;
+        }
+    }
+
+    public function removeRole(Role $roleToRemove): void
+    {
+        $remainingRoles = [];
+        foreach ($this->roles as $role) {
+            if ($role !== $roleToRemove->value) {
+                $remainingRoles[] = $role;
+            }
+        }
+        $this->roles = $remainingRoles;
+    }
+
+    #[ORM\Column(
+        name: 'password_hash',
+        type: Types::STRING,
+        length: 1024
+    )]
+    private string $passwordHash;
+
+    public function getPasswordHash(): string
+    {
+        return $this->passwordHash;
+    }
+
+    public function setPasswordHash(string $passwordHash): void
+    {
+        $this->passwordHash = $passwordHash;
+    }
+
+    /**
+     * Required by PasswordAuthenticatedUserInterface.
+     */
+    public function getPassword(): string
+    {
+        return $this->passwordHash;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->hasRole(Role::ADMIN);
+    }
+
+    /**
+     * Returns true if the account has been registered (has an email set).
+     */
+    public function isRegistered(): bool
+    {
+        return $this->email !== '';
+    }
+
+    /**
+     * Returns true if the account has been verified.
+     * Note: Verification flow not yet implemented, defaults to true for registered accounts.
+     */
+    public function isVerified(): bool
+    {
+        return $this->isRegistered();
+    }
+
+    public function getUserIdentifier(): string
+    {
+        if ($this->email === '') {
+            throw new LogicException('User identifier (email) must not be empty.');
+        }
+
+        return $this->email;
+    }
+
+    #[Deprecated]
+    public function eraseCredentials(): void
+    {
+        // No temporary sensitive data stored on this entity
+    }
+}

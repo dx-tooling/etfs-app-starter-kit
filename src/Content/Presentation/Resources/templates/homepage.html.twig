@@ -1,5 +1,5 @@
 {% extends '@common.presentation/base_appshell.html.twig' %}
 
 {% block body %}
-    Hello, World.
+    {{ 'content.hello_world'|trans({}, 'messages') }}
 {% endblock %}

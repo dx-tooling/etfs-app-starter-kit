@@ -32,7 +32,7 @@ readonly class OrganizationPresentationService implements OrganizationPresentati
         Invitation $invitation
     ): void {
         $owningUserId   = $invitation->getOrganization()->getOwningUsersId();
-        $owningUserName = $this->accountFacade->getAccountCoreEmailById($owningUserId) ?? 'Someone';
+        $owningUserName = $this->accountFacade->getAccountCoreEmailById($owningUserId) ?? $this->translator->trans('fallback.someone', [], 'organization');
 
         $context = [
             'acceptUrl' => $this->router->generate(
@@ -51,7 +51,7 @@ readonly class OrganizationPresentationService implements OrganizationPresentati
                     $this->translator->trans(
                         'invitation.email.subject',
                         ['owningUserName' => $owningUserName],
-                        'etfs.organization'
+                        'organization'
                     )
                 )
                 ->htmlTemplate(

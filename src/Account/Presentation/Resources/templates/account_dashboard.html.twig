@@ -1,11 +1,11 @@
 {% extends '@common.presentation/base_appshell.html.twig' %}
 
-{% block title %}Your Account{% endblock %}
+{% block title %}{{ 'dashboard.title'|trans({}, 'account') }}{% endblock %}
 
 {% block body %}
     <div class="max-w-2xl mx-auto py-8">
         <h1 class="etfswui-pagetitle">
-            Your Account
+            {{ 'dashboard.heading'|trans({}, 'account') }}
         </h1>
 
         {# Flash Messages #}
@@ -34,26 +34,20 @@
                         </svg>
                     </div>
                     <div>
-                        <h2 class="etfswui-h3">Account Details</h2>
-                        <p class="etfswui-text-small">Your personal account information</p>
+                        <h2 class="etfswui-h3">{{ 'dashboard.details.title'|trans({}, 'account') }}</h2>
+                        <p class="etfswui-text-small">{{ 'dashboard.details.description'|trans({}, 'account') }}</p>
                     </div>
                 </div>
 
                 <dl class="space-y-4">
                     <div class="flex flex-col sm:flex-row sm:gap-4">
-                        <dt class="etfswui-text-small font-medium sm:w-32">Email</dt>
+                        <dt class="etfswui-text-small font-medium sm:w-32">{{ 'dashboard.details.email'|trans({}, 'account') }}</dt>
                         <dd class="text-dark-900 dark:text-white">{{ app.user.email }}</dd>
                     </div>
                     <div class="flex flex-col sm:flex-row sm:gap-4">
-                        <dt class="etfswui-text-small font-medium sm:w-32">Member since</dt>
+                        <dt class="etfswui-text-small font-medium sm:w-32">{{ 'dashboard.details.member_since'|trans({}, 'account') }}</dt>
                         <dd class="text-dark-900 dark:text-white">{{ app.user.createdAt|date('F j, Y') }}</dd>
                     </div>
-                    {% if app.user.name %}
-                    <div class="flex flex-col sm:flex-row sm:gap-4">
-                        <dt class="etfswui-text-small font-medium sm:w-32">Name</dt>
-                        <dd class="text-dark-900 dark:text-white">{{ app.user.name }}</dd>
-                    </div>
-                    {% endif %}
                 </dl>
             </div>
         </div>
@@ -69,12 +63,12 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="etfswui-h4">Current Organization</h3>
+                        <h3 class="etfswui-h4">{{ 'dashboard.organization.title'|trans({}, 'account') }}</h3>
                         <p class="text-dark-900 dark:text-white font-medium">{{ organizationName }}</p>
                     </div>
                 </div>
                 <a href="{{ path('organization.presentation.dashboard') }}" class="etfswui-link-default">
-                    Manage organization →
+                    {{ 'dashboard.organization.manage_link'|trans({}, 'account') }}
                 </a>
             </div>
         </div>
@@ -85,7 +79,7 @@
             <form action="{{ path('account.presentation.sign_out') }}" method="post" class="inline">
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
                 <button type="submit" class="etfswui-button-as-link-danger">
-                    Sign out
+                    {{ 'dashboard.sign_out'|trans({}, 'account') }}
                 </button>
             </form>
         </div>

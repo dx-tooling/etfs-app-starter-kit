@@ -10,6 +10,7 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use ValueError;
 
 readonly class MainNavigationPresentationService extends AbstractMainNavigationService
@@ -19,6 +20,7 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
         RequestStack                  $requestStack,
         private ParameterBagInterface $parameterBag,
         private Security              $security,
+        private TranslatorInterface   $translator,
     ) {
         $symfonyEnvironment = $this->parameterBag->get('kernel.environment');
 
@@ -40,7 +42,7 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
 
     public function getPrimaryMainNavigationTitle(): string
     {
-        return 'Main';
+        return $this->translator->trans('navigation.primary_title', [], 'messages');
     }
 
     /**
@@ -53,11 +55,11 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
         if (!$this->security->isGranted('ROLE_USER')) {
             $entries = [
                 $this->generateEntry(
-                    'Sign In',
+                    $this->translator->trans('navigation.entries.sign_in', [], 'messages'),
                     'account.presentation.sign_in',
                 ),
                 $this->generateEntry(
-                    'Sign Up',
+                    $this->translator->trans('navigation.entries.sign_up', [], 'messages'),
                     'account.presentation.sign_up',
                 ),
             ];
@@ -65,17 +67,17 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
 
         if ($this->security->isGranted('ROLE_USER')) {
             $entries[] = $this->generateEntry(
-                'Your Account',
+                $this->translator->trans('navigation.entries.your_account', [], 'messages'),
                 'account.presentation.dashboard',
             );
             $entries[] = $this->generateEntry(
-                'Organization',
+                $this->translator->trans('navigation.entries.organization', [], 'messages'),
                 'organization.presentation.dashboard',
             );
         }
 
         $entries[] = $this->generateEntry(
-            'Home',
+            $this->translator->trans('navigation.entries.home', [], 'messages'),
             'content.presentation.homepage',
         );
 
@@ -84,7 +86,7 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
 
     public function getSecondaryMainNavigationTitle(): string
     {
-        return 'Quick Links';
+        return $this->translator->trans('navigation.secondary_title', [], 'messages');
     }
 
     /**
@@ -105,7 +107,7 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
 
     public function getTertiaryMainNavigationTitle(): string
     {
-        return 'Utilities';
+        return $this->translator->trans('navigation.tertiary_title', [], 'messages');
     }
 
     /**
@@ -115,7 +117,7 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
     {
         $entries = [
             $this->generateEntry(
-                'Living Styleguide',
+                $this->translator->trans('navigation.entries.living_styleguide', [], 'messages'),
                 'webui.living_styleguide.show',
             ),
         ];
@@ -125,6 +127,6 @@ readonly class MainNavigationPresentationService extends AbstractMainNavigationS
 
     public function getBrandLogoHtml(): string
     {
-        return '<strong>ETFS Starter Kit</strong>';
+        return '<strong>' . $this->translator->trans('navigation.brand', [], 'messages') . '</strong>';
     }
 }

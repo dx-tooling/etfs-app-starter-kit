@@ -1,0 +1,22 @@
+# Navigation - Abschnittstitel
+navigation:
+    primary_title: "Hauptmenü"
+    secondary_title: "Schnellzugriff"
+    tertiary_title: "Werkzeuge"
+    entries:
+        sign_in: "Anmelden"
+        sign_up: "Registrieren"
+        your_account: "Ihr Konto"
+        organization: "Organisation"
+        home: "Startseite"
+        living_styleguide: "Living Styleguide"
+    brand: "ETFS Starter Kit"
+
+# Benachrichtigungs-Widget
+notifications:
+    time_suffix: "Uhr:"
+    no_unread: "Keine ungelesenen Benachrichtigungen."
+
+# Inhaltsseiten
+content:
+    hello_world: "Hallo, Welt."

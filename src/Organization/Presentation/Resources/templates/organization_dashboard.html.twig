@@ -1,11 +1,11 @@
 {% extends '@common.presentation/base_appshell.html.twig' %}
 
-{% block title %}Organization{% endblock %}
+{% block title %}{{ 'dashboard.title'|trans({}, 'organization') }}{% endblock %}
 
 {% block body %}
     <div class="max-w-4xl mx-auto py-8">
         <h1 class="etfswui-pagetitle">
-            Organization
+            {{ 'dashboard.heading'|trans({}, 'organization') }}
         </h1>
 
         {# Flash Messages #}
@@ -33,7 +33,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z" />
                         </svg>
                     </div>
-                    <h2 class="etfswui-h4">Active Organization</h2>
+                    <h2 class="etfswui-h4">{{ 'dashboard.active.title'|trans({}, 'organization') }}</h2>
                 </div>
 
                 {% if organizationName %}
@@ -47,19 +47,19 @@
                                 <input
                                     type="text"
                                     name="name"
-                                    placeholder="Enter new name"
+                                    placeholder="{{ 'dashboard.active.rename_placeholder'|trans({}, 'organization') }}"
                                     value="{{ currentOrganizationRawName }}"
                                     class="etfswui-form-input flex-1"
                                 >
                                 <button type="submit" class="etfswui-button-default">
-                                    Rename
+                                    {{ 'dashboard.active.rename_button'|trans({}, 'organization') }}
                                 </button>
                             </div>
                         </form>
                     {% endif %}
                 {% else %}
                     <p class="etfswui-text-small mb-4">
-                        No organization selected. Create one below or accept an invitation.
+                        {{ 'dashboard.active.no_organization'|trans({}, 'organization') }}
                     </p>
                 {% endif %}
             </div>
@@ -75,11 +75,11 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
                             </svg>
                         </div>
-                        <h2 class="etfswui-h4">Invite Members</h2>
+                        <h2 class="etfswui-h4">{{ 'dashboard.invite.title'|trans({}, 'organization') }}</h2>
                     </div>
 
                     <p class="etfswui-text-small mb-4">
-                        Invite team members to join your organization by email.
+                        {{ 'dashboard.invite.description'|trans({}, 'organization') }}
                     </p>
 
                     <form action="{{ path('organization.presentation.invite') }}" method="post">
@@ -88,7 +88,7 @@
                             <input
                                 type="email"
                                 name="email"
-                                placeholder="Enter email address"
+                                placeholder="{{ 'dashboard.invite.email_placeholder'|trans({}, 'organization') }}"
                                 required
                                 class="etfswui-form-input flex-1"
                             >
@@ -96,7 +96,7 @@
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
                                 </svg>
-                                Send Invite
+                                {{ 'dashboard.invite.send_button'|trans({}, 'organization') }}
                             </button>
                         </div>
                     </form>
@@ -104,7 +104,7 @@
                     {# Pending Invitations #}
                     {% if pendingInvitations|length > 0 %}
                         <div class="mt-6 pt-4 border-t border-dark-200 dark:border-dark-700">
-                            <h3 class="etfswui-text-small font-medium mb-3">Pending Invitations</h3>
+                            <h3 class="etfswui-text-small font-medium mb-3">{{ 'dashboard.invite.pending_title'|trans({}, 'organization') }}</h3>
                             <div class="space-y-2">
                                 {% for invitation in pendingInvitations %}
                                     <div class="flex items-center justify-between py-2 px-3 bg-dark-50 dark:bg-dark-700/50 rounded-md">
@@ -116,12 +116,12 @@
                                         </div>
                                         <div class="flex items-center gap-3">
                                             <span class="text-xs text-dark-500 dark:text-dark-400">
-                                                Sent {{ invitation.createdAt|date('M j') }}
+                                                {{ 'dashboard.invite.sent_date'|trans({date: invitation.createdAt|date('M j')}, 'organization') }}
                                             </span>
                                             <form action="{{ path('organization.presentation.resend_invitation', { invitationId: invitation.id }) }}" method="post" class="inline">
                                                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('resend_invitation') }}">
                                                 <button type="submit" class="etfswui-button-as-link-default text-xs">
-                                                    Resend
+                                                    {{ 'dashboard.invite.resend_button'|trans({}, 'organization') }}
                                                 </button>
                                             </form>
                                         </div>
@@ -145,8 +145,8 @@
                             </svg>
                         </div>
                         <div>
-                            <h2 class="etfswui-h4">Members</h2>
-                            <p class="etfswui-text-small">{{ members|length }} member{{ members|length != 1 ? 's' : '' }}</p>
+                            <h2 class="etfswui-h4">{{ 'dashboard.members.title'|trans({}, 'organization') }}</h2>
+                            <p class="etfswui-text-small">{{ 'dashboard.members.count'|trans({count: members|length}, 'organization') }}</p>
                         </div>
                     </div>
 
@@ -165,12 +165,12 @@
                                                 {{ member.displayName }}
                                                 {% if member.isOwner %}
                                                     <span class="etfswui-badge etfswui-badge-warning">
-                                                        Owner
+                                                        {{ 'dashboard.members.owner_badge'|trans({}, 'organization') }}
                                                     </span>
                                                 {% endif %}
                                                 {% if member.isCurrentUser %}
                                                     <span class="etfswui-badge etfswui-badge-info">
-                                                        You
+                                                        {{ 'dashboard.members.you_badge'|trans({}, 'organization') }}
                                                     </span>
                                                 {% endif %}
                                             </p>
@@ -199,10 +199,10 @@
                                                     <svg class="w-4 h-4 inline" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
                                                     </svg>
-                                                    Manage groups
+                                                    {{ 'dashboard.members.manage_groups'|trans({}, 'organization') }}
                                                 </summary>
                                                 <div class="absolute right-0 mt-1 w-56 bg-white dark:bg-dark-700 rounded-md shadow-lg ring-1 ring-dark-200 dark:ring-dark-600 z-10 py-2">
-                                                    <p class="px-3 py-1 text-xs font-medium text-dark-500 dark:text-dark-400 uppercase tracking-wide">Groups</p>
+                                                    <p class="px-3 py-1 text-xs font-medium text-dark-500 dark:text-dark-400 uppercase tracking-wide">{{ 'dashboard.members.groups_label'|trans({}, 'organization') }}</p>
                                                     {% for group in groups %}
                                                         {% set isInGroup = group.id in member.groupIds %}
                                                         <div class="px-3 py-1.5 flex items-center justify-between">
@@ -212,7 +212,7 @@
                                                                     <input type="hidden" name="_csrf_token" value="{{ csrf_token('manage_group') }}">
                                                                     <input type="hidden" name="member_id" value="{{ member.id }}">
                                                                     <button type="submit" class="etfswui-button-as-link-danger text-xs">
-                                                                        Remove
+                                                                        {{ 'dashboard.members.remove_button'|trans({}, 'organization') }}
                                                                     </button>
                                                                 </form>
                                                             {% else %}
@@ -220,7 +220,7 @@
                                                                     <input type="hidden" name="_csrf_token" value="{{ csrf_token('manage_group') }}">
                                                                     <input type="hidden" name="member_id" value="{{ member.id }}">
                                                                     <button type="submit" class="etfswui-button-as-link-default text-xs">
-                                                                        Add
+                                                                        {{ 'dashboard.members.add_button'|trans({}, 'organization') }}
                                                                     </button>
                                                                 </form>
                                                             {% endif %}
@@ -249,8 +249,8 @@
                             </svg>
                         </div>
                         <div>
-                            <h2 class="etfswui-h4">Groups</h2>
-                            <p class="etfswui-text-small">{{ groups|length }} group{{ groups|length != 1 ? 's' : '' }} in this organization</p>
+                            <h2 class="etfswui-h4">{{ 'dashboard.groups.title'|trans({}, 'organization') }}</h2>
+                            <p class="etfswui-text-small">{{ 'dashboard.groups.count'|trans({count: groups|length}, 'organization') }}</p>
                         </div>
                     </div>
 
@@ -274,11 +274,11 @@
                                             {{ group.name }}
                                             {% if group.isDefault %}
                                                 <span class="etfswui-badge etfswui-badge-success">
-                                                    Default
+                                                    {{ 'dashboard.groups.default_badge'|trans({}, 'organization') }}
                                                 </span>
                                             {% endif %}
                                         </p>
-                                        <p class="text-xs text-dark-500 dark:text-dark-400">{{ memberCount }} member{{ memberCount != 1 ? 's' : '' }}</p>
+                                        <p class="text-xs text-dark-500 dark:text-dark-400">{{ 'dashboard.groups.member_count'|trans({count: memberCount}, 'organization') }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -297,7 +297,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                         </svg>
                     </div>
-                    <h2 class="etfswui-h4">Create New Organization</h2>
+                    <h2 class="etfswui-h4">{{ 'dashboard.create.title'|trans({}, 'organization') }}</h2>
                 </div>
 
                 <form action="{{ path('organization.presentation.create') }}" method="post">
@@ -306,7 +306,7 @@
                         <input
                             type="text"
                             name="name"
-                            placeholder="Enter organization name"
+                            placeholder="{{ 'dashboard.create.name_placeholder'|trans({}, 'organization') }}"
                             required
                             minlength="1"
                             class="etfswui-form-input flex-1"
@@ -315,7 +315,7 @@
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                             </svg>
-                            Create
+                            {{ 'dashboard.create.create_button'|trans({}, 'organization') }}
                         </button>
                     </div>
                 </form>
@@ -332,7 +332,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
                             </svg>
                         </div>
-                        <h2 class="etfswui-h4">Your Organizations</h2>
+                        <h2 class="etfswui-h4">{{ 'dashboard.list.title'|trans({}, 'organization') }}</h2>
                     </div>
 
                     <div class="divide-y divide-dark-200 dark:divide-dark-700">
@@ -349,12 +349,12 @@
                                             {{ org.name }}
                                             {% if org.isActive %}
                                                 <span class="etfswui-badge etfswui-badge-success ml-2">
-                                                    Active
+                                                    {{ 'dashboard.list.active_badge'|trans({}, 'organization') }}
                                                 </span>
                                             {% endif %}
                                         </p>
                                         <p class="text-xs text-dark-500 dark:text-dark-400">
-                                            {% if org.isOwned %}Owned by you{% else %}Member{% endif %}
+                                            {% if org.isOwned %}{{ 'dashboard.list.owned_by_you'|trans({}, 'organization') }}{% else %}{{ 'dashboard.list.member_role'|trans({}, 'organization') }}{% endif %}
                                         </p>
                                     </div>
                                 </div>
@@ -363,7 +363,7 @@
                                     <form action="{{ path('organization.presentation.switch', { organizationId: org.id }) }}" method="post">
                                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('switch_organization') }}">
                                         <button type="submit" class="etfswui-button-secondary">
-                                            Switch
+                                            {{ 'dashboard.list.switch_button'|trans({}, 'organization') }}
                                         </button>
                                     </form>
                                 {% endif %}

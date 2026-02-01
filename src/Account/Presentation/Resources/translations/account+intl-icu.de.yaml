@@ -1,0 +1,55 @@
+# Anmeldeseite
+sign_in:
+    title: "Anmelden"
+    heading: "Willkommen zurück"
+    subheading: "Melden Sie sich an, um fortzufahren"
+    form:
+        email_label: "E-Mail-Adresse"
+        email_placeholder: "beispiel@email.de"
+        password_label: "Passwort"
+        password_placeholder: "Geben Sie Ihr Passwort ein"
+        submit: "Anmelden"
+    no_account: "Sie haben noch kein Konto?"
+    create_account_link: "Jetzt erstellen"
+
+# Registrierungsseite
+sign_up:
+    title: "Konto erstellen"
+    heading: "Erstellen Sie Ihr Konto"
+    subheading: "Starten Sie noch heute mit Ihrem kostenlosen Konto"
+    form:
+        email_label: "E-Mail-Adresse"
+        email_placeholder: "beispiel@email.de"
+        password_label: "Passwort"
+        password_placeholder: "Erstellen Sie ein sicheres Passwort"
+        password_confirm_label: "Passwort bestätigen"
+        password_confirm_placeholder: "Bestätigen Sie Ihr Passwort"
+        submit: "Konto erstellen"
+    has_account: "Sie haben bereits ein Konto?"
+    sign_in_link: "Stattdessen anmelden"
+    terms:
+        intro: "Durch die Erstellung eines Kontos stimmen Sie unseren"
+        tos: "Nutzungsbedingungen"
+        and: "und"
+        privacy: "Datenschutzrichtlinien"
+
+# Konto-Dashboard
+dashboard:
+    title: "Ihr Konto"
+    heading: "Ihr Konto"
+    details:
+        title: "Kontodaten"
+        description: "Ihre persönlichen Kontoinformationen"
+        email: "E-Mail"
+        member_since: "Mitglied seit"
+    organization:
+        title: "Aktuelle Organisation"
+        manage_link: "Organisation verwalten →"
+    sign_out: "Abmelden"
+
+# Flash-Nachrichten
+flash:
+    error:
+        missing_credentials: "Bitte geben Sie sowohl E-Mail als auch Passwort ein."
+    success:
+        registration_complete: "Registrierung erfolgreich. Bitte melden Sie sich an."

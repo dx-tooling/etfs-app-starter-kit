@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
 final class OrganizationController extends AbstractController
@@ -27,7 +28,8 @@ final class OrganizationController extends AbstractController
         private readonly EventDispatcherInterface           $eventDispatcher,
         private readonly EntityManagerInterface             $entityManager,
         private readonly AccountFacadeInterface             $accountFacade,
-        private readonly Security                           $security
+        private readonly Security                           $security,
+        private readonly TranslatorInterface                $translator
     ) {
     }
 
@@ -203,7 +205,7 @@ final class OrganizationController extends AbstractController
             $name = is_string($name) && trim($name) !== '' ? trim($name) : null;
 
             if ($name === null) {
-                $this->addFlash('error', 'Please provide a name for the organization.');
+                $this->addFlash('error', $this->translator->trans('flash.error.missing_name', [], 'organization'));
 
                 return $this->redirectToRoute('organization.presentation.dashboard');
             }
@@ -219,9 +221,9 @@ final class OrganizationController extends AbstractController
             );
 
             $displayName = $this->organizationDomainService->getOrganizationName($organization, null);
-            $this->addFlash('success', "Organization \"$displayName\" created successfully.");
+            $this->addFlash('success', $this->translator->trans('flash.success.created', ['name' => $displayName], 'organization'));
         } catch (Throwable $e) {
-            $this->addFlash('error', 'Failed to create organization: ' . $e->getMessage());
+            $this->addFlash('error', $this->translator->trans('flash.error.create_failed', ['message' => $e->getMessage()], 'organization'));
         }
 
         return $this->redirectToRoute('organization.presentation.dashboard');
@@ -245,7 +247,7 @@ final class OrganizationController extends AbstractController
         $organizationId = $accountInfo->currentlyActiveOrganizationId;
 
         if ($organizationId === null) {
-            $this->addFlash('error', 'No active organization to rename.');
+            $this->addFlash('error', $this->translator->trans('flash.error.no_active_organization_rename', [], 'organization'));
 
             return $this->redirectToRoute('organization.presentation.dashboard');
         }
@@ -254,14 +256,14 @@ final class OrganizationController extends AbstractController
             $organization = $this->organizationDomainService->getOrganizationById($organizationId);
 
             if ($organization === null) {
-                $this->addFlash('error', 'Organization not found.');
+                $this->addFlash('error', $this->translator->trans('flash.error.organization_not_found', [], 'organization'));
 
                 return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             // Only owner can rename
             if ($organization->getOwningUsersId() !== $userId) {
-                $this->addFlash('error', 'Only the organization owner can rename it.');
+                $this->addFlash('error', $this->translator->trans('flash.error.owner_only_rename', [], 'organization'));
 
                 return $this->redirectToRoute('organization.presentation.dashboard');
             }
@@ -272,9 +274,9 @@ final class OrganizationController extends AbstractController
             $this->organizationDomainService->renameOrganization($organization, $name);
 
             $displayName = $this->organizationDomainService->getOrganizationName($organization, null);
-            $this->addFlash('success', "Organization renamed to \"$displayName\".");
+            $this->addFlash('success', $this->translator->trans('flash.success.renamed', ['name' => $displayName], 'organization'));
         } catch (Throwable $e) {
-            $this->addFlash('error', 'Failed to rename organization: ' . $e->getMessage());
+            $this->addFlash('error', $this->translator->trans('flash.error.rename_failed', ['message' => $e->getMessage()], 'organization'));
         }
 
         return $this->redirectToRoute('organization.presentation.dashboard');
@@ -300,7 +302,7 @@ final class OrganizationController extends AbstractController
             $organization = $this->organizationDomainService->getOrganizationById($organizationId);
 
             if ($organization === null) {
-                $this->addFlash('error', 'Organization not found.');
+                $this->addFlash('error', $this->translator->trans('flash.error.organization_not_found', [], 'organization'));
 
                 return $this->redirectToRoute('organization.presentation.dashboard');
             }
@@ -308,9 +310,9 @@ final class OrganizationController extends AbstractController
             $this->organizationDomainService->switchOrganization($userId, $organization);
 
             $organizationName = $this->organizationDomainService->getOrganizationName($organization, null);
-            $this->addFlash('success', "Switched to \"$organizationName\".");
+            $this->addFlash('success', $this->translator->trans('flash.success.switched', ['name' => $organizationName], 'organization'));
         } catch (Throwable $e) {
-            $this->addFlash('error', 'Failed to switch organization: ' . $e->getMessage());
+            $this->addFlash('error', $this->translator->trans('flash.error.switch_failed', ['message' => $e->getMessage()], 'organization'));
         }
 
         return $this->redirectToRoute('organization.presentation.dashboard');
@@ -334,7 +336,7 @@ final class OrganizationController extends AbstractController
         $organizationId = $accountInfo->currentlyActiveOrganizationId;
 
         if ($organizationId === null) {
-            $this->addFlash('error', 'No active organization to invite to.');
+            $this->addFlash('error', $this->translator->trans('flash.error.no_active_organization_invite', [], 'organization'));
 
             return $this->redirectToRoute('organization.presentation.dashboard');
         }
@@ -343,14 +345,14 @@ final class OrganizationController extends AbstractController
             $organization = $this->organizationDomainService->getOrganizationById($organizationId);
 
             if ($organization === null) {
-                $this->addFlash('error', 'Organization not found.');
+                $this->addFlash('error', $this->translator->trans('flash.error.organization_not_found', [], 'organization'));
 
                 return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             // Only owner can invite
             if ($organization->getOwningUsersId() !== $userId) {
-                $this->addFlash('error', 'Only the organization owner can invite members.');
+                $this->addFlash('error', $this->translator->trans('flash.error.owner_only_invite', [], 'organization'));
 
                 return $this->redirectToRoute('organization.presentation.dashboard');
             }
@@ -359,14 +361,14 @@ final class OrganizationController extends AbstractController
             $email = is_string($email) ? trim(mb_strtolower($email)) : '';
 
             if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $this->addFlash('error', 'Please provide a valid email address.');
+                $this->addFlash('error', $this->translator->trans('flash.error.invalid_email', [], 'organization'));
 
                 return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             // Check if can be invited
             if (!$this->organizationDomainService->emailCanBeInvitedToOrganization($email, $organization)) {
-                $this->addFlash('error', 'This email is already a member of this organization or is the owner.');
+                $this->addFlash('error', $this->translator->trans('flash.error.email_already_member', [], 'organization'));
 
                 return $this->redirectToRoute('organization.presentation.dashboard');
             }
@@ -374,12 +376,12 @@ final class OrganizationController extends AbstractController
             $invitation = $this->organizationDomainService->inviteEmailToOrganization($email, $organization);
 
             if ($invitation === null) {
-                $this->addFlash('error', 'Could not send invitation.');
+                $this->addFlash('error', $this->translator->trans('flash.error.invitation_failed', [], 'organization'));
             } else {
-                $this->addFlash('success', "Invitation sent to $email.");
+                $this->addFlash('success', $this->translator->trans('flash.success.invitation_sent', ['email' => $email], 'organization'));
             }
         } catch (Throwable $e) {
-            $this->addFlash('error', 'Failed to send invitation: ' . $e->getMessage());
+            $this->addFlash('error', $this->translator->trans('flash.error.invite_failed', ['message' => $e->getMessage()], 'organization'));
         }
 
         return $this->redirectToRoute('organization.presentation.dashboard');
@@ -405,7 +407,7 @@ final class OrganizationController extends AbstractController
             $invitation = $this->entityManager->getRepository(Invitation::class)->find($invitationId);
 
             if ($invitation === null) {
-                $this->addFlash('error', 'Invitation not found.');
+                $this->addFlash('error', $this->translator->trans('flash.error.invitation_not_found', [], 'organization'));
 
                 return $this->redirectToRoute('organization.presentation.dashboard');
             }
@@ -414,16 +416,16 @@ final class OrganizationController extends AbstractController
 
             // Only owner can resend invitations
             if ($organization->getOwningUsersId() !== $userId) {
-                $this->addFlash('error', 'Only the organization owner can resend invitations.');
+                $this->addFlash('error', $this->translator->trans('flash.error.owner_only_resend', [], 'organization'));
 
                 return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             $this->organizationDomainService->resendInvitation($invitation);
 
-            $this->addFlash('success', "Invitation resent to {$invitation->getEmail()}.");
+            $this->addFlash('success', $this->translator->trans('flash.success.invitation_resent', ['email' => $invitation->getEmail()], 'organization'));
         } catch (Throwable $e) {
-            $this->addFlash('error', 'Failed to resend invitation: ' . $e->getMessage());
+            $this->addFlash('error', $this->translator->trans('flash.error.resend_failed', ['message' => $e->getMessage()], 'organization'));
         }
 
         return $this->redirectToRoute('organization.presentation.dashboard');
@@ -440,13 +442,13 @@ final class OrganizationController extends AbstractController
         $invitation = $this->entityManager->getRepository(Invitation::class)->find($invitationId);
 
         if ($invitation === null) {
-            $this->addFlash('error', 'Invitation not found or has already been used.');
+            $this->addFlash('error', $this->translator->trans('flash.error.invitation_not_found_or_used', [], 'organization'));
 
             return $this->redirectToRoute('content.presentation.homepage');
         }
 
         $organization     = $invitation->getOrganization();
-        $ownerName        = $this->accountFacade->getAccountCoreEmailById($organization->getOwningUsersId()) ?? 'Someone';
+        $ownerName        = $this->accountFacade->getAccountCoreEmailById($organization->getOwningUsersId()) ?? $this->translator->trans('fallback.someone', [], 'organization');
         $organizationName = $this->organizationDomainService->getOrganizationName($organization, null);
 
         // GET request - show the acceptance page
@@ -468,7 +470,7 @@ final class OrganizationController extends AbstractController
             $newUserId = $this->organizationDomainService->acceptInvitation($invitation, $userId);
 
             if ($newUserId === null) {
-                $this->addFlash('error', 'Failed to accept invitation.');
+                $this->addFlash('error', $this->translator->trans('flash.error.accept_failed', [], 'organization'));
 
                 return $this->redirectToRoute('content.presentation.homepage');
             }
@@ -481,11 +483,11 @@ final class OrganizationController extends AbstractController
                 }
             }
 
-            $this->addFlash('success', "You've successfully joined \"$organizationName\".");
+            $this->addFlash('success', $this->translator->trans('flash.success.joined', ['name' => $organizationName], 'organization'));
 
             return $this->redirectToRoute('organization.presentation.dashboard');
         } catch (Throwable $e) {
-            $this->addFlash('error', 'Failed to accept invitation: ' . $e->getMessage());
+            $this->addFlash('error', $this->translator->trans('flash.error.accept_invitation_failed', ['message' => $e->getMessage()], 'organization'));
 
             return $this->redirectToRoute('content.presentation.homepage');
         }
@@ -509,7 +511,7 @@ final class OrganizationController extends AbstractController
         $organizationId = $accountInfo->currentlyActiveOrganizationId;
 
         if ($organizationId === null) {
-            $this->addFlash('error', 'No active organization.');
+            $this->addFlash('error', $this->translator->trans('flash.error.no_active_organization', [], 'organization'));
 
             return $this->redirectToRoute('organization.presentation.dashboard');
         }
@@ -518,14 +520,14 @@ final class OrganizationController extends AbstractController
             $organization = $this->organizationDomainService->getOrganizationById($organizationId);
 
             if ($organization === null) {
-                $this->addFlash('error', 'Organization not found.');
+                $this->addFlash('error', $this->translator->trans('flash.error.organization_not_found', [], 'organization'));
 
                 return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             // Only owner can manage groups
             if ($organization->getOwningUsersId() !== $userId) {
-                $this->addFlash('error', 'Only the organization owner can manage group membership.');
+                $this->addFlash('error', $this->translator->trans('flash.error.owner_only_groups', [], 'organization'));
 
                 return $this->redirectToRoute('organization.presentation.dashboard');
             }
@@ -533,7 +535,7 @@ final class OrganizationController extends AbstractController
             $group = $this->organizationDomainService->getGroupById($groupId);
 
             if ($group === null || $group->getOrganization()->getId() !== $organizationId) {
-                $this->addFlash('error', 'Group not found.');
+                $this->addFlash('error', $this->translator->trans('flash.error.group_not_found', [], 'organization'));
 
                 return $this->redirectToRoute('organization.presentation.dashboard');
             }
@@ -541,15 +543,15 @@ final class OrganizationController extends AbstractController
             $memberId = $request->request->get('member_id');
 
             if (!is_string($memberId) || $memberId === '') {
-                $this->addFlash('error', 'Invalid member ID.');
+                $this->addFlash('error', $this->translator->trans('flash.error.invalid_member_id', [], 'organization'));
 
                 return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             $this->organizationDomainService->addUserToGroup($memberId, $group);
-            $this->addFlash('success', "Member added to {$group->getName()}.");
+            $this->addFlash('success', $this->translator->trans('flash.success.member_added', ['group' => $group->getName()], 'organization'));
         } catch (Throwable $e) {
-            $this->addFlash('error', 'Failed to add member to group: ' . $e->getMessage());
+            $this->addFlash('error', $this->translator->trans('flash.error.add_member_failed', ['message' => $e->getMessage()], 'organization'));
         }
 
         return $this->redirectToRoute('organization.presentation.dashboard');
@@ -573,7 +575,7 @@ final class OrganizationController extends AbstractController
         $organizationId = $accountInfo->currentlyActiveOrganizationId;
 
         if ($organizationId === null) {
-            $this->addFlash('error', 'No active organization.');
+            $this->addFlash('error', $this->translator->trans('flash.error.no_active_organization', [], 'organization'));
 
             return $this->redirectToRoute('organization.presentation.dashboard');
         }
@@ -582,14 +584,14 @@ final class OrganizationController extends AbstractController
             $organization = $this->organizationDomainService->getOrganizationById($organizationId);
 
             if ($organization === null) {
-                $this->addFlash('error', 'Organization not found.');
+                $this->addFlash('error', $this->translator->trans('flash.error.organization_not_found', [], 'organization'));
 
                 return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             // Only owner can manage groups
             if ($organization->getOwningUsersId() !== $userId) {
-                $this->addFlash('error', 'Only the organization owner can manage group membership.');
+                $this->addFlash('error', $this->translator->trans('flash.error.owner_only_groups', [], 'organization'));
 
                 return $this->redirectToRoute('organization.presentation.dashboard');
             }
@@ -597,7 +599,7 @@ final class OrganizationController extends AbstractController
             $group = $this->organizationDomainService->getGroupById($groupId);
 
             if ($group === null || $group->getOrganization()->getId() !== $organizationId) {
-                $this->addFlash('error', 'Group not found.');
+                $this->addFlash('error', $this->translator->trans('flash.error.group_not_found', [], 'organization'));
 
                 return $this->redirectToRoute('organization.presentation.dashboard');
             }
@@ -605,15 +607,15 @@ final class OrganizationController extends AbstractController
             $memberId = $request->request->get('member_id');
 
             if (!is_string($memberId) || $memberId === '') {
-                $this->addFlash('error', 'Invalid member ID.');
+                $this->addFlash('error', $this->translator->trans('flash.error.invalid_member_id', [], 'organization'));
 
                 return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
             $this->organizationDomainService->removeUserFromGroup($memberId, $group);
-            $this->addFlash('success', "Member removed from {$group->getName()}.");
+            $this->addFlash('success', $this->translator->trans('flash.success.member_removed', ['group' => $group->getName()], 'organization'));
         } catch (Throwable $e) {
-            $this->addFlash('error', 'Failed to remove member from group: ' . $e->getMessage());
+            $this->addFlash('error', $this->translator->trans('flash.error.remove_member_failed', ['message' => $e->getMessage()], 'organization'));
         }
 
         return $this->redirectToRoute('organization.presentation.dashboard');

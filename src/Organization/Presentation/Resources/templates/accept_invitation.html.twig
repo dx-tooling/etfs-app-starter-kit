@@ -1,6 +1,6 @@
 {% extends '@common.presentation/base_appshell.html.twig' %}
 
-{% block title %}Join Organization{% endblock %}
+{% block title %}{{ 'invitation.accept.title'|trans({}, 'organization') }}{% endblock %}
 
 {% block body %}
     <div class="min-h-[60vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -13,10 +13,10 @@
                     </svg>
                 </div>
                 <h1 class="etfswui-h1">
-                    Join Organization
+                    {{ 'invitation.accept.heading'|trans({}, 'organization') }}
                 </h1>
                 <p class="etfswui-text-small mt-2">
-                    You've been invited to join an organization
+                    {{ 'invitation.accept.subheading'|trans({}, 'organization') }}
                 </p>
             </div>
 
@@ -25,11 +25,11 @@
                 <div class="etfswui-card-content">
                     <div class="text-center mb-6">
                         <p class="etfswui-text mb-2">
-                            <span class="font-semibold">{{ ownerName }}</span> has invited you to join their organization.
+                            {{ 'invitation.accept.invited_by'|trans({name: ownerName}, 'organization') }}
                         </p>
                         {% if organizationName %}
                             <p class="etfswui-text-small">
-                                Organization: <span class="font-medium text-dark-900 dark:text-white">{{ organizationName }}</span>
+                                {{ 'invitation.accept.organization_label'|trans({}, 'organization') }} <span class="font-medium text-dark-900 dark:text-white">{{ organizationName }}</span>
                             </p>
                         {% endif %}
                     </div>
@@ -38,12 +38,12 @@
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('accept_invitation') }}">
 
                         <button type="submit" class="etfswui-button-default w-full justify-center">
-                            Accept Invitation
+                            {{ 'invitation.accept.accept_button'|trans({}, 'organization') }}
                         </button>
                     </form>
 
                     <p class="etfswui-text-small mt-4 text-center">
-                        By accepting, you'll join this organization and can collaborate with its members.
+                        {{ 'invitation.accept.note'|trans({}, 'organization') }}
                     </p>
                 </div>
             </div>
@@ -51,7 +51,7 @@
             {# Back link #}
             <p class="text-center etfswui-text-small">
                 <a href="{{ path('content.presentation.homepage') }}" class="etfswui-link-default font-medium">
-                    Go to homepage
+                    {{ 'invitation.accept.homepage_link'|trans({}, 'organization') }}
                 </a>
             </p>
         </div>

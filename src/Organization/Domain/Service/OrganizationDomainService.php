@@ -246,7 +246,7 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
             return $this->translator->trans(
                 'default_organization_name',
                 [],
-                'etfs.organization',
+                'organization',
                 $iso639_1Code->value,
             );
         }
@@ -297,7 +297,7 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
         return $this->translator->trans(
             "group.name.{$group->getName()}",
             [],
-            'etfs.organization',
+            'organization',
             $iso639_1Code->value,
         );
     }

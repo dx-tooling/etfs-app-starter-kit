@@ -12,13 +12,15 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
 final class AccountController extends AbstractController
 {
     public function __construct(
         private readonly AccountDomainService        $accountService,
-        private readonly OrganizationFacadeInterface $organizationFacade
+        private readonly OrganizationFacadeInterface $organizationFacade,
+        private readonly TranslatorInterface         $translator
     ) {
     }
 
@@ -58,14 +60,14 @@ final class AccountController extends AbstractController
             $password = $request->request->get('password');
 
             if (!$email || !$password) {
-                $this->addFlash('error', 'Please provide both email and password.');
+                $this->addFlash('error', $this->translator->trans('flash.error.missing_credentials', [], 'account'));
 
                 return $this->render('@account.presentation/sign_up.html.twig');
             }
 
             try {
                 $this->accountService->register((string) $email, (string) $password);
-                $this->addFlash('success', 'Registration successful. Please sign in.');
+                $this->addFlash('success', $this->translator->trans('flash.success.registration_complete', [], 'account'));
 
                 return $this->redirectToRoute('account.presentation.sign_in');
             } catch (Throwable $e) {

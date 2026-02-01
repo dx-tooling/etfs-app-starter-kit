@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Organization\Presentation\Controller;
 
-use App\Account\Domain\Entity\AccountCore;
 use App\Account\Facade\AccountFacadeInterface;
 use App\Account\Facade\Dto\AccountInfoDto;
 use App\Organization\Domain\Entity\Invitation;
@@ -52,14 +51,14 @@ final class OrganizationController extends AbstractController
     )]
     public function dashboardAction(): Response
     {
-        /** @var AccountCore|null $user */
+        /** @var UserInterface|null $user */
         $user = $this->getUser();
 
         if ($user === null) {
             return $this->redirectToRoute('account.presentation.sign_in');
         }
 
-        if ($user->getMustSetPassword()) {
+        if ($this->accountFacade->mustSetPassword($user->getUserIdentifier())) {
             return $this->redirectToRoute('account.presentation.set_password');
         }
 

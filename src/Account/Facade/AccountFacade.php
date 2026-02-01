@@ -76,6 +76,16 @@ readonly class AccountFacade implements AccountFacadeInterface
         return $accountCore->getEmail();
     }
 
+    public function mustSetPassword(string $email): bool
+    {
+        $accountCore = $this->accountDomainService->findByEmail($email);
+        if (is_null($accountCore)) {
+            return false;
+        }
+
+        return $accountCore->getMustSetPassword();
+    }
+
     /**
      * @param list<string> $accountCoreIds
      *

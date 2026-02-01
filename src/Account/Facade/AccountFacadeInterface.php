@@ -21,6 +21,8 @@ interface AccountFacadeInterface
 
     public function getAccountCoreEmailById(string $accountCoreId): ?string;
 
+    public function mustSetPassword(string $email): bool;
+
     /**
      * @param list<string> $accountCoreIds
      *

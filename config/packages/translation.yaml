@@ -6,8 +6,6 @@ framework:
             - '%kernel.project_dir%/src/Shared/Presentation/Resources/translations'
             - '%kernel.project_dir%/src/Account/Presentation/Resources/translations'
             - '%kernel.project_dir%/src/Organization/Presentation/Resources/translations'
-            - '%kernel.project_dir%/src/Dashboard/Presentation/Resources/translations'
-            - '%kernel.project_dir%/src/Settings/Presentation/Resources/translations'
         fallbacks:
             - !php/enum App\Shared\Domain\Enum\Iso639_1Code::En->value
             - !php/enum App\Shared\Domain\Enum\Iso639_1Code::De->value

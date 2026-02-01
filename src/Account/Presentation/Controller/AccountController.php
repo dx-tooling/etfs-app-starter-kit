@@ -18,9 +18,9 @@ use Throwable;
 final class AccountController extends AbstractController
 {
     public function __construct(
-        private readonly AccountDomainService          $accountService,
-        private readonly OrganizationFacadeInterface   $organizationFacade,
-        private readonly AccountFacadeInterface        $accountFacade
+        private readonly AccountDomainService        $accountService,
+        private readonly OrganizationFacadeInterface $organizationFacade,
+        private readonly AccountFacadeInterface      $accountFacade
     ) {
     }
 
@@ -103,7 +103,7 @@ final class AccountController extends AbstractController
         }
 
         $currentlyActiveOrganizationId = $user->getCurrentlyActiveOrganizationsId();
-        $organizationName               = null;
+        $organizationName              = null;
 
         if ($currentlyActiveOrganizationId !== null) {
             $organizationName = $this->organizationFacade->getOrganizationNameById($currentlyActiveOrganizationId);

@@ -55,10 +55,10 @@ final class OrganizationController extends AbstractController
             return $this->redirectToRoute('account.presentation.sign_in');
         }
 
-        $userInfo                       = $this->getUserInfo($user);
-        $userId                         = $userInfo->id;
-        $organizationName               = null;
-        $currentOrganization            = null;
+        $userInfo                      = $this->getUserInfo($user);
+        $userId                        = $userInfo->id;
+        $organizationName              = null;
+        $currentOrganization           = null;
         $currentlyActiveOrganizationId = $userInfo->currentlyActiveOrganizationId;
 
         if ($currentlyActiveOrganizationId !== null) {

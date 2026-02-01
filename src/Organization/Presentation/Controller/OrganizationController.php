@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 namespace App\Organization\Presentation\Controller;
 
-use App\Account\Domain\Entity\User;
 use App\Account\Facade\AccountFacadeInterface;
+use App\Account\Facade\Dto\UserInfoDto;
 use App\Organization\Domain\Entity\Invitation;
 use App\Organization\Domain\Service\OrganizationDomainServiceInterface;
-use App\Organization\Domain\SymfonyEvent\CurrentlyActiveOrganizationChangedSymfonyEvent;
+use App\Organization\Facade\SymfonyEvent\CurrentlyActiveOrganizationChangedSymfonyEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
+use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Throwable;
 
 final class OrganizationController extends AbstractController
@@ -29,6 +31,17 @@ final class OrganizationController extends AbstractController
     ) {
     }
 
+    private function getUserInfo(UserInterface $user): UserInfoDto
+    {
+        $userInfo = $this->accountFacade->getLoggedInUserInfo($user);
+
+        if ($userInfo === null) {
+            throw new RuntimeException('Account not found for authenticated user');
+        }
+
+        return $userInfo;
+    }
+
     #[Route(
         path: '/organization',
         name: 'organization.presentation.dashboard',
@@ -36,21 +49,20 @@ final class OrganizationController extends AbstractController
     )]
     public function dashboardAction(): Response
     {
-        /** @var User|null $user */
         $user = $this->getUser();
 
         if ($user === null) {
             return $this->redirectToRoute('account.presentation.sign_in');
         }
 
-        $userId = $user->getId();
-
+        $userInfo                       = $this->getUserInfo($user);
+        $userId                         = $userInfo->id;
         $organizationName               = null;
         $currentOrganization            = null;
-        $currentlyActiveOrganizationsId = $user->getCurrentlyActiveOrganizationsId();
+        $currentlyActiveOrganizationId = $userInfo->currentlyActiveOrganizationId;
 
-        if ($currentlyActiveOrganizationsId !== null) {
-            $currentOrganization = $this->organizationDomainService->getOrganizationById($currentlyActiveOrganizationsId);
+        if ($currentlyActiveOrganizationId !== null) {
+            $currentOrganization = $this->organizationDomainService->getOrganizationById($currentlyActiveOrganizationId);
             if ($currentOrganization !== null) {
                 $organizationName = $this->organizationDomainService->getOrganizationName($currentOrganization, null);
             }
@@ -158,7 +170,7 @@ final class OrganizationController extends AbstractController
         return $this->render('@organization.presentation/organization_dashboard.html.twig', [
             'organizationName'               => $organizationName,
             'organizations'                  => $organizations,
-            'currentOrganizationId'          => $currentlyActiveOrganizationsId,
+            'currentOrganizationId'          => $currentlyActiveOrganizationId,
             'canRenameCurrentOrganization'   => $canRenameCurrentOrganization,
             'canInviteToCurrentOrganization' => $canInviteToCurrentOrganization,
             'currentOrganizationRawName'     => $currentOrganizationRawName,
@@ -176,12 +188,14 @@ final class OrganizationController extends AbstractController
     )]
     public function createAction(Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
 
         if ($user === null) {
             return $this->redirectToRoute('account.presentation.sign_in');
         }
+
+        $userInfo = $this->getUserInfo($user);
+        $userId   = $userInfo->id;
 
         try {
             $name = $request->request->get('name');
@@ -193,13 +207,13 @@ final class OrganizationController extends AbstractController
                 return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
-            $organization = $this->organizationDomainService->createOrganization($user->getId(), $name);
+            $organization = $this->organizationDomainService->createOrganization($userId, $name);
 
             // Switch to the new organization
             $this->eventDispatcher->dispatch(
                 new CurrentlyActiveOrganizationChangedSymfonyEvent(
                     $organization->getId(),
-                    $user->getId()
+                    $userId
                 )
             );
 
@@ -219,14 +233,15 @@ final class OrganizationController extends AbstractController
     )]
     public function renameAction(Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
 
         if ($user === null) {
             return $this->redirectToRoute('account.presentation.sign_in');
         }
 
-        $organizationId = $user->getCurrentlyActiveOrganizationsId();
+        $userInfo       = $this->getUserInfo($user);
+        $userId         = $userInfo->id;
+        $organizationId = $userInfo->currentlyActiveOrganizationId;
 
         if ($organizationId === null) {
             $this->addFlash('error', 'No active organization to rename.');
@@ -244,7 +259,7 @@ final class OrganizationController extends AbstractController
             }
 
             // Only owner can rename
-            if ($organization->getOwningUsersId() !== $user->getId()) {
+            if ($organization->getOwningUsersId() !== $userId) {
                 $this->addFlash('error', 'Only the organization owner can rename it.');
 
                 return $this->redirectToRoute('organization.presentation.dashboard');
@@ -271,12 +286,14 @@ final class OrganizationController extends AbstractController
     )]
     public function switchAction(Request $request, string $organizationId): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
 
         if ($user === null) {
             return $this->redirectToRoute('account.presentation.sign_in');
         }
+
+        $userInfo = $this->getUserInfo($user);
+        $userId   = $userInfo->id;
 
         try {
             $organization = $this->organizationDomainService->getOrganizationById($organizationId);
@@ -287,7 +304,7 @@ final class OrganizationController extends AbstractController
                 return $this->redirectToRoute('organization.presentation.dashboard');
             }
 
-            $this->organizationDomainService->switchOrganization($user->getId(), $organization);
+            $this->organizationDomainService->switchOrganization($userId, $organization);
 
             $organizationName = $this->organizationDomainService->getOrganizationName($organization, null);
             $this->addFlash('success', "Switched to \"$organizationName\".");
@@ -305,14 +322,15 @@ final class OrganizationController extends AbstractController
     )]
     public function inviteAction(Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
 
         if ($user === null) {
             return $this->redirectToRoute('account.presentation.sign_in');
         }
 
-        $organizationId = $user->getCurrentlyActiveOrganizationsId();
+        $userInfo       = $this->getUserInfo($user);
+        $userId         = $userInfo->id;
+        $organizationId = $userInfo->currentlyActiveOrganizationId;
 
         if ($organizationId === null) {
             $this->addFlash('error', 'No active organization to invite to.');
@@ -330,7 +348,7 @@ final class OrganizationController extends AbstractController
             }
 
             // Only owner can invite
-            if ($organization->getOwningUsersId() !== $user->getId()) {
+            if ($organization->getOwningUsersId() !== $userId) {
                 $this->addFlash('error', 'Only the organization owner can invite members.');
 
                 return $this->redirectToRoute('organization.presentation.dashboard');
@@ -373,12 +391,14 @@ final class OrganizationController extends AbstractController
     )]
     public function resendInvitationAction(Request $request, string $invitationId): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
 
         if ($user === null) {
             return $this->redirectToRoute('account.presentation.sign_in');
         }
+
+        $userInfo = $this->getUserInfo($user);
+        $userId   = $userInfo->id;
 
         try {
             $invitation = $this->entityManager->getRepository(Invitation::class)->find($invitationId);
@@ -392,7 +412,7 @@ final class OrganizationController extends AbstractController
             $organization = $invitation->getOrganization();
 
             // Only owner can resend invitations
-            if ($organization->getOwningUsersId() !== $user->getId()) {
+            if ($organization->getOwningUsersId() !== $userId) {
                 $this->addFlash('error', 'Only the organization owner can resend invitations.');
 
                 return $this->redirectToRoute('organization.presentation.dashboard');
@@ -439,9 +459,10 @@ final class OrganizationController extends AbstractController
 
         // POST request - accept the invitation
         try {
-            /** @var User|null $currentUser */
             $currentUser = $this->getUser();
-            $userId      = $currentUser?->getId();
+            $userId      = $currentUser !== null
+                ? $this->getUserInfo($currentUser)->id
+                : null;
 
             $newUserId = $this->organizationDomainService->acceptInvitation($invitation, $userId);
 
@@ -453,7 +474,7 @@ final class OrganizationController extends AbstractController
 
             // If user wasn't logged in and we created a new one, log them in
             if ($currentUser === null && $newUserId !== null) {
-                $newUser = $this->entityManager->getRepository(User::class)->find($newUserId);
+                $newUser = $this->accountFacade->getUserForLogin($newUserId);
                 if ($newUser !== null) {
                     $this->security->login($newUser, 'form_login', 'main');
                 }
@@ -476,14 +497,15 @@ final class OrganizationController extends AbstractController
     )]
     public function addMemberToGroupAction(Request $request, string $groupId): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
 
         if ($user === null) {
             return $this->redirectToRoute('account.presentation.sign_in');
         }
 
-        $organizationId = $user->getCurrentlyActiveOrganizationsId();
+        $userInfo       = $this->getUserInfo($user);
+        $userId         = $userInfo->id;
+        $organizationId = $userInfo->currentlyActiveOrganizationId;
 
         if ($organizationId === null) {
             $this->addFlash('error', 'No active organization.');
@@ -501,7 +523,7 @@ final class OrganizationController extends AbstractController
             }
 
             // Only owner can manage groups
-            if ($organization->getOwningUsersId() !== $user->getId()) {
+            if ($organization->getOwningUsersId() !== $userId) {
                 $this->addFlash('error', 'Only the organization owner can manage group membership.');
 
                 return $this->redirectToRoute('organization.presentation.dashboard');
@@ -539,14 +561,15 @@ final class OrganizationController extends AbstractController
     )]
     public function removeMemberFromGroupAction(Request $request, string $groupId): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
 
         if ($user === null) {
             return $this->redirectToRoute('account.presentation.sign_in');
         }
 
-        $organizationId = $user->getCurrentlyActiveOrganizationsId();
+        $userInfo       = $this->getUserInfo($user);
+        $userId         = $userInfo->id;
+        $organizationId = $userInfo->currentlyActiveOrganizationId;
 
         if ($organizationId === null) {
             $this->addFlash('error', 'No active organization.');
@@ -564,7 +587,7 @@ final class OrganizationController extends AbstractController
             }
 
             // Only owner can manage groups
-            if ($organization->getOwningUsersId() !== $user->getId()) {
+            if ($organization->getOwningUsersId() !== $userId) {
                 $this->addFlash('error', 'Only the organization owner can manage group membership.');
 
                 return $this->redirectToRoute('organization.presentation.dashboard');

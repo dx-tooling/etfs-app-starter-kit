@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Account\Domain\Service;
 
 use App\Account\Domain\Entity\User;
-use App\Account\Domain\SymfonyEvent\UserCreatedSymfonyEvent;
+use App\Account\Facade\SymfonyEvent\UserCreatedSymfonyEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;

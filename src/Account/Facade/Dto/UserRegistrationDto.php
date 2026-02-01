@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Account\Facade\Dto;
 
-use App\Shared\Domain\ValueObject\EmailAddress;
+use App\Shared\Facade\ValueObject\EmailAddress;
 
 final class UserRegistrationDto
 {

@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Organization\Domain\Service;
 
 use App\Organization\Domain\Entity\Group;
 use App\Organization\Domain\Entity\Invitation;
 use App\Organization\Domain\Entity\Organization;
 use App\Organization\Domain\Enum\AccessRight;
-use App\Shared\Domain\Enum\Iso639_1Code;
+use App\Shared\Facade\Enum\Iso639_1Code;
 
 interface OrganizationDomainServiceInterface
 {

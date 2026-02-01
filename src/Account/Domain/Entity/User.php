@@ -63,16 +63,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         unique: false,
         nullable: true,
     )]
-    private ?string $currentlyActiveOrganizationsId = null;
+    private ?string $currentlyActiveOrganizationId = null;
 
     public function getCurrentlyActiveOrganizationsId(): ?string
     {
-        return $this->currentlyActiveOrganizationsId;
+        return $this->currentlyActiveOrganizationId;
     }
 
-    public function setCurrentlyActiveOrganizationsId(?string $currentlyActiveOrganizationsId): void
+    public function setCurrentlyActiveOrganizationsId(?string $currentlyActiveOrganizationId): void
     {
-        $this->currentlyActiveOrganizationsId = $currentlyActiveOrganizationsId;
+        $this->currentlyActiveOrganizationId = $currentlyActiveOrganizationId;
     }
 
     #[ORM\Column(

@@ -7,7 +7,7 @@ namespace App\Account\Presentation\Controller;
 use App\Account\Domain\Entity\User;
 use App\Account\Domain\Service\AccountDomainService;
 use App\Account\Facade\AccountFacadeInterface;
-use App\Organization\Domain\Service\OrganizationDomainServiceInterface;
+use App\Organization\Facade\OrganizationFacadeInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,9 +18,9 @@ use Throwable;
 final class AccountController extends AbstractController
 {
     public function __construct(
-        private readonly AccountDomainService               $accountService,
-        private readonly OrganizationDomainServiceInterface $organizationDomainService,
-        private readonly AccountFacadeInterface             $accountFacade
+        private readonly AccountDomainService          $accountService,
+        private readonly OrganizationFacadeInterface   $organizationFacade,
+        private readonly AccountFacadeInterface        $accountFacade
     ) {
     }
 
@@ -102,14 +102,11 @@ final class AccountController extends AbstractController
             return $this->redirectToRoute('account.presentation.sign_in');
         }
 
+        $currentlyActiveOrganizationId = $user->getCurrentlyActiveOrganizationsId();
         $organizationName               = null;
-        $currentlyActiveOrganizationsId = $user->getCurrentlyActiveOrganizationsId();
 
-        if ($currentlyActiveOrganizationsId !== null) {
-            $currentOrganization = $this->organizationDomainService->getOrganizationById($currentlyActiveOrganizationsId);
-            if ($currentOrganization !== null) {
-                $organizationName = $this->organizationDomainService->getOrganizationName($currentOrganization, null);
-            }
+        if ($currentlyActiveOrganizationId !== null) {
+            $organizationName = $this->organizationFacade->getOrganizationNameById($currentlyActiveOrganizationId);
         }
 
         return $this->render('@account.presentation/account_dashboard.html.twig', [

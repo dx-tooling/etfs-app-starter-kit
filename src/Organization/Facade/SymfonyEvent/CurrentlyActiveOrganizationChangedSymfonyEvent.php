@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Organization\Domain\SymfonyEvent;
+namespace App\Organization\Facade\SymfonyEvent;
 
 readonly class CurrentlyActiveOrganizationChangedSymfonyEvent
 {

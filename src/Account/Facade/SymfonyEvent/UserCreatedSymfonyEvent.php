@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Account\Domain\SymfonyEvent;
+namespace App\Account\Facade\SymfonyEvent;
 
 readonly class UserCreatedSymfonyEvent
 {

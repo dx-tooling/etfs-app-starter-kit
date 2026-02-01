@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Account\Facade\Dto;
 
 use DateTimeImmutable;
@@ -10,7 +12,8 @@ final readonly class UserInfoDto
         public string            $id,
         public string            $email,
         public ?string           $name,
-        public DateTimeImmutable $createdAt
+        public DateTimeImmutable $createdAt,
+        public ?string           $currentlyActiveOrganizationId = null
     ) {
     }
 

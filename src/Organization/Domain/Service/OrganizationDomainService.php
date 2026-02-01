@@ -1,19 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Organization\Domain\Service;
 
-use App\Account\Domain\Entity\User;
 use App\Account\Facade\AccountFacadeInterface;
 use App\Account\Facade\Dto\UserRegistrationDto;
 use App\Organization\Domain\Entity\Group;
 use App\Organization\Domain\Entity\Invitation;
 use App\Organization\Domain\Entity\Organization;
 use App\Organization\Domain\Enum\AccessRight;
-use App\Organization\Domain\SymfonyEvent\CurrentlyActiveOrganizationChangedSymfonyEvent;
+use App\Organization\Facade\SymfonyEvent\CurrentlyActiveOrganizationChangedSymfonyEvent;
 use App\Organization\Infrastructure\Repository\OrganizationRepositoryInterface;
 use App\Organization\Presentation\Service\OrganizationPresentationServiceInterface;
-use App\Shared\Domain\Enum\Iso639_1Code;
-use App\Shared\Domain\ValueObject\EmailAddress;
+use App\Shared\Facade\Enum\Iso639_1Code;
+use App\Shared\Facade\ValueObject\EmailAddress;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
@@ -277,7 +278,6 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
         $this->organizationPresentationService->sendInvitationMail($invitation);
     }
 
-    /** @return User[] */
     /**
      * @return string[]
      */
@@ -322,13 +322,13 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
     public function getGroupsOfUserForCurrentlyActiveOrganization(
         string $userId
     ): array {
-        $currentlyActiveOrganizationsId = $this->accountFacade->getCurrentlyActiveOrganizationsIdForUser($userId);
+        $currentlyActiveOrganizationId = $this->accountFacade->getCurrentlyActiveOrganizationsIdForUser($userId);
 
-        if (is_null($currentlyActiveOrganizationsId)) {
+        if (is_null($currentlyActiveOrganizationId)) {
             throw new Exception('No currently active organization found for user with id ' . $userId);
         }
 
-        $organization = $this->getOrganizationById($currentlyActiveOrganizationsId);
+        $organization = $this->getOrganizationById($currentlyActiveOrganizationId);
 
         /** @var ObjectRepository<Group> $repo */
         $repo = $this->entityManager->getRepository(Group::class);
@@ -473,13 +473,13 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
     public function currentlyActiveOrganizationIsOwnOrganization(
         string $userId
     ): bool {
-        $currentlyActiveOrganizationsId = $this->accountFacade->getCurrentlyActiveOrganizationsIdForUser($userId);
+        $currentlyActiveOrganizationId = $this->accountFacade->getCurrentlyActiveOrganizationsIdForUser($userId);
 
-        if (is_null($currentlyActiveOrganizationsId)) {
+        if (is_null($currentlyActiveOrganizationId)) {
             throw new Exception('No currently active organization found for user with id ' . $userId);
         }
 
-        $organization = $this->getOrganizationById($currentlyActiveOrganizationsId);
+        $organization = $this->getOrganizationById($currentlyActiveOrganizationId);
 
         return !is_null($organization) && $organization->getOwningUsersId() === $userId;
     }

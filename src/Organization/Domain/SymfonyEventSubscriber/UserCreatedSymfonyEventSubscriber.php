@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Organization\Domain\SymfonyEventSubscriber;
 
-use App\Account\Domain\SymfonyEvent\UserCreatedSymfonyEvent;
+use App\Account\Facade\SymfonyEvent\UserCreatedSymfonyEvent;
 use App\Organization\Domain\Service\OrganizationDomainServiceInterface;
-use App\Organization\Domain\SymfonyEvent\CurrentlyActiveOrganizationChangedSymfonyEvent;
+use App\Organization\Facade\SymfonyEvent\CurrentlyActiveOrganizationChangedSymfonyEvent;
 use Exception;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;

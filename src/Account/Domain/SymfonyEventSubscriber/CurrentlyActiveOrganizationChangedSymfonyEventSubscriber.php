@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Account\Domain\SymfonyEventSubscriber;
 
 use App\Account\Domain\Entity\User;
-use App\Organization\Domain\SymfonyEvent\CurrentlyActiveOrganizationChangedSymfonyEvent;
+use App\Organization\Facade\SymfonyEvent\CurrentlyActiveOrganizationChangedSymfonyEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Exception;
@@ -39,7 +41,7 @@ readonly class CurrentlyActiveOrganizationChangedSymfonyEventSubscriber implemen
             );
         }
 
-        $user->setCurrentlyActiveOrganizationsId($event->organizationId);
+        $user->setCurrentlyActiveOrganizationId($event->organizationId);
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();

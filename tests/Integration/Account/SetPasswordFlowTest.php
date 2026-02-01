@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\Account;
 
-use App\Account\Domain\Entity\AccountCore;
 use App\Account\Domain\Service\AccountDomainServiceInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\BrowserKit\AbstractBrowser;
 
 /**
  * Tests for the password setting flow, particularly for users created via invitation.
@@ -17,7 +16,7 @@ final class SetPasswordFlowTest extends WebTestCase
 {
     private AccountDomainServiceInterface $accountService;
     private EntityManagerInterface $entityManager;
-    private AbstractBrowser $client;
+    private KernelBrowser $client;
 
     protected function setUp(): void
     {

@@ -190,10 +190,12 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
             }
         } else {
             // New user - register them (they'll get their own org via event)
+            // They must set a password since they're being created via invitation
             $result = $this->accountFacade->register(
                 new UserRegistrationDto(
                     EmailAddress::fromString($invitation->getEmail()),
-                    null
+                    null,
+                    true
                 )
             );
 

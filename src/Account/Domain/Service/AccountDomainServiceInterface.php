@@ -10,7 +10,8 @@ interface AccountDomainServiceInterface
 {
     public function register(
         string  $email,
-        ?string $plainPassword = null
+        ?string $plainPassword = null,
+        bool    $mustSetPassword = false
     ): AccountCore;
 
     public function findByEmail(string $email): ?AccountCore;

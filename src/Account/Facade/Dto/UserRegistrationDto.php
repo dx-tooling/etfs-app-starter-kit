@@ -10,7 +10,8 @@ final class UserRegistrationDto
 {
     public function __construct(
         public EmailAddress $emailAddress,
-        public ?string      $plainPassword = null
+        public ?string      $plainPassword = null,
+        public bool         $mustSetPassword = false
     ) {
     }
 }

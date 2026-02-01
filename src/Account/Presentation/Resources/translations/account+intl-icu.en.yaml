@@ -47,10 +47,24 @@ dashboard:
         manage_link: "Manage organization →"
     sign_out: "Sign out"
 
+# Set Password Page
+set_password:
+    title: "Set Your Password"
+    heading: "Set your password"
+    subheading: "Please create a password to secure your account"
+    form:
+        password_label: "Password"
+        password_placeholder: "Create a strong password"
+        password_confirm_label: "Confirm password"
+        password_confirm_placeholder: "Confirm your password"
+        submit: "Set password"
+
 # Flash Messages
 flash:
     error:
         missing_credentials: "Please provide both email and password."
         passwords_mismatch: "Passwords do not match."
+        password_required: "Please enter a password."
     success:
         registration_complete: "Registration successful. Please sign in."
+        password_set: "Your password has been set successfully."

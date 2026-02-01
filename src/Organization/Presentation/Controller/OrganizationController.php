@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Organization\Presentation\Controller;
 
+use App\Account\Domain\Entity\AccountCore;
 use App\Account\Facade\AccountFacadeInterface;
 use App\Account\Facade\Dto\AccountInfoDto;
 use App\Organization\Domain\Entity\Invitation;
@@ -51,10 +52,15 @@ final class OrganizationController extends AbstractController
     )]
     public function dashboardAction(): Response
     {
+        /** @var AccountCore|null $user */
         $user = $this->getUser();
 
         if ($user === null) {
             return $this->redirectToRoute('account.presentation.sign_in');
+        }
+
+        if ($user->getMustSetPassword()) {
+            return $this->redirectToRoute('account.presentation.set_password');
         }
 
         $accountInfo                   = $this->getAccountInfo($user);
@@ -475,12 +481,16 @@ final class OrganizationController extends AbstractController
                 return $this->redirectToRoute('content.presentation.homepage');
             }
 
-            // If user wasn't logged in and we created a new one, log them in
+            // If user wasn't logged in and we created a new one, log them in and send to set password
             if ($currentUser === null) {
                 $newUser = $this->accountFacade->getAccountCoreForLogin($newUserId);
                 if ($newUser !== null) {
                     $this->security->login($newUser, 'form_login', 'main');
                 }
+
+                $this->addFlash('success', $this->translator->trans('flash.success.joined', ['name' => $organizationName], 'organization'));
+
+                return $this->redirectToRoute('account.presentation.set_password');
             }
 
             $this->addFlash('success', $this->translator->trans('flash.success.joined', ['name' => $organizationName], 'organization'));

@@ -26,7 +26,8 @@ readonly class AccountDomainService implements AccountDomainServiceInterface
      */
     public function register(
         string  $email,
-        ?string $plainPassword = null
+        ?string $plainPassword = null,
+        bool    $mustSetPassword = false
     ): AccountCore {
         $email               = trim(mb_strtolower($email));
         $existingAccountCore = $this->entityManager->getRepository(AccountCore::class)->findOneBy(
@@ -47,6 +48,7 @@ readonly class AccountDomainService implements AccountDomainServiceInterface
 
         // Create the real AccountCore with the hashed password
         $accountCore = new AccountCore($email, $hashedPassword);
+        $accountCore->setMustSetPassword($mustSetPassword);
 
         $this->entityManager->persist($accountCore);
         $this->entityManager->flush();

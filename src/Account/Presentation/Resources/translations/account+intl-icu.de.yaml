@@ -47,10 +47,24 @@ dashboard:
         manage_link: "Organisation verwalten →"
     sign_out: "Abmelden"
 
+# Passwort festlegen
+set_password:
+    title: "Passwort festlegen"
+    heading: "Passwort festlegen"
+    subheading: "Bitte erstellen Sie ein Passwort, um Ihr Konto zu sichern"
+    form:
+        password_label: "Passwort"
+        password_placeholder: "Erstellen Sie ein sicheres Passwort"
+        password_confirm_label: "Passwort bestätigen"
+        password_confirm_placeholder: "Bestätigen Sie Ihr Passwort"
+        submit: "Passwort festlegen"
+
 # Flash-Nachrichten
 flash:
     error:
         missing_credentials: "Bitte geben Sie sowohl E-Mail als auch Passwort ein."
         passwords_mismatch: "Die Passwörter stimmen nicht überein."
+        password_required: "Bitte geben Sie ein Passwort ein."
     success:
         registration_complete: "Registrierung erfolgreich. Bitte melden Sie sich an."
+        password_set: "Ihr Passwort wurde erfolgreich festgelegt."

@@ -121,6 +121,10 @@ final class AccountController extends AbstractController
             return $this->redirectToRoute('account.presentation.sign_in');
         }
 
+        if ($accountCore->getMustSetPassword()) {
+            return $this->redirectToRoute('account.presentation.set_password');
+        }
+
         $currentlyActiveOrganizationId = $accountCore->getCurrentlyActiveOrganizationId();
         $organizationName              = null;
 
@@ -131,5 +135,50 @@ final class AccountController extends AbstractController
         return $this->render('@account.presentation/account_dashboard.html.twig', [
             'organizationName' => $organizationName,
         ]);
+    }
+
+    #[Route(
+        path: '/account/set-password',
+        name: 'account.presentation.set_password',
+        methods: [Request::METHOD_GET, Request::METHOD_POST]
+    )]
+    public function setPasswordAction(Request $request): Response
+    {
+        /** @var AccountCore|null $accountCore */
+        $accountCore = $this->getUser();
+
+        if ($accountCore === null) {
+            return $this->redirectToRoute('account.presentation.sign_in');
+        }
+
+        // If user doesn't need to set password, redirect to dashboard
+        if (!$accountCore->getMustSetPassword()) {
+            return $this->redirectToRoute('account.presentation.dashboard');
+        }
+
+        if ($request->isMethod(Request::METHOD_POST)) {
+            $password        = $request->request->get('password');
+            $passwordConfirm = $request->request->get('password_confirm');
+
+            if (!$password) {
+                $this->addFlash('error', $this->translator->trans('flash.error.password_required', [], 'account'));
+
+                return $this->render('@account.presentation/set_password.html.twig');
+            }
+
+            if ($password !== $passwordConfirm) {
+                $this->addFlash('error', $this->translator->trans('flash.error.passwords_mismatch', [], 'account'));
+
+                return $this->render('@account.presentation/set_password.html.twig');
+            }
+
+            $this->accountService->updatePassword($accountCore, (string) $password);
+            $accountCore->setMustSetPassword(false);
+            $this->addFlash('success', $this->translator->trans('flash.success.password_set', [], 'account'));
+
+            return $this->redirectToRoute('account.presentation.dashboard');
+        }
+
+        return $this->render('@account.presentation/set_password.html.twig');
     }
 }

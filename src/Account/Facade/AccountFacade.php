@@ -26,7 +26,8 @@ readonly class AccountFacade implements AccountFacadeInterface
         try {
             $accountCore = $this->accountDomainService->register(
                 (string) $dto->emailAddress,
-                $dto->plainPassword
+                $dto->plainPassword,
+                $dto->mustSetPassword
             );
 
             return new ResultDto(true, null, $accountCore->getId());

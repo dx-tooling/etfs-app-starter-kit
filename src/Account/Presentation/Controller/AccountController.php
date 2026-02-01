@@ -172,8 +172,8 @@ final class AccountController extends AbstractController
                 return $this->render('@account.presentation/set_password.html.twig');
             }
 
-            $this->accountService->updatePassword($accountCore, (string) $password);
             $accountCore->setMustSetPassword(false);
+            $this->accountService->updatePassword($accountCore, (string) $password);
             $this->addFlash('success', $this->translator->trans('flash.success.password_set', [], 'account'));
 
             return $this->redirectToRoute('account.presentation.dashboard');

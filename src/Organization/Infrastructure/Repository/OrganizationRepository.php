@@ -16,7 +16,7 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
     }
 
     /**
-     * @return Organization[]
+     * @return list<Organization>
      *
      * @throws Exception
      */
@@ -134,7 +134,7 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
     }
 
     /**
-     * @return string[]
+     * @return list<string>
      *
      * @throws Exception
      */
@@ -150,7 +150,10 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
             'groupId' => $groupId,
         ]);
 
-        return $result->fetchFirstColumn();
+        /** @var list<string> $memberIds */
+        $memberIds = $result->fetchFirstColumn();
+
+        return $memberIds;
     }
 
     /** @throws Exception */
@@ -173,7 +176,7 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
     }
 
     /**
-     * @return string[]
+     * @return list<string>
      *
      * @throws Exception
      */
@@ -189,11 +192,14 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
             'userId' => $userId,
         ]);
 
-        return $result->fetchFirstColumn();
+        /** @var list<string> $groupIds */
+        $groupIds = $result->fetchFirstColumn();
+
+        return $groupIds;
     }
 
     /**
-     * @return string[]
+     * @return list<string>
      *
      * @throws Exception
      */
@@ -209,6 +215,9 @@ final readonly class OrganizationRepository implements OrganizationRepositoryInt
             'organizationId' => $organizationId,
         ]);
 
-        return $result->fetchFirstColumn();
+        /** @var list<string> $userIds */
+        $userIds = $result->fetchFirstColumn();
+
+        return $userIds;
     }
 }

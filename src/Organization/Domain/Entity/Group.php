@@ -11,14 +11,13 @@ use Doctrine\ORM\Mapping as ORM;
 use EnterpriseToolingForSymfony\SharedBundle\DateAndTime\Service\DateAndTimeService;
 use Exception;
 use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
-use ValueError;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'organization_groups')]
 class Group implements OrganizationOwnedEntityInterface
 {
     /**
-     * @param AccessRight[] $accessRights
+     * @param list<AccessRight> $accessRights
      *
      * @throws Exception
      */
@@ -28,19 +27,11 @@ class Group implements OrganizationOwnedEntityInterface
         array        $accessRights,
         bool         $isDefaultForNewMembers
     ) {
-        $this->organization = $organization;
-        $this->name         = $name;
-
-        foreach ($accessRights as $accessRight) {
-            if (!$accessRight instanceof AccessRight) {
-                throw new ValueError('Not an access right in $accessRights.');
-            }
-        }
-        $this->accessRights = $accessRights;
-
+        $this->organization           = $organization;
+        $this->name                   = $name;
+        $this->accessRights           = $accessRights;
         $this->isDefaultForNewMembers = $isDefaultForNewMembers;
-
-        $this->createdAt = DateAndTimeService::getDateTimeImmutable();
+        $this->createdAt              = DateAndTimeService::getDateTimeImmutable();
     }
 
     #[ORM\Id]
@@ -106,16 +97,17 @@ class Group implements OrganizationOwnedEntityInterface
         return $this->createdAt;
     }
 
+    /** @var list<AccessRight> */
     #[ORM\Column(
         type: Types::SIMPLE_ARRAY,
         length: 1024,
-        nullable: true,
+        nullable: false,
         enumType: AccessRight::class
     )]
     private readonly array $accessRights;
 
     /**
-     * @return AccessRight[]
+     * @return list<AccessRight>
      */
     public function getAccessRights(): array
     {

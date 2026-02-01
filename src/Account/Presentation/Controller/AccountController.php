@@ -6,7 +6,6 @@ namespace App\Account\Presentation\Controller;
 
 use App\Account\Domain\Entity\User;
 use App\Account\Domain\Service\AccountDomainService;
-use App\Account\Facade\AccountFacadeInterface;
 use App\Organization\Facade\OrganizationFacadeInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,8 +18,7 @@ final class AccountController extends AbstractController
 {
     public function __construct(
         private readonly AccountDomainService        $accountService,
-        private readonly OrganizationFacadeInterface $organizationFacade,
-        private readonly AccountFacadeInterface      $accountFacade
+        private readonly OrganizationFacadeInterface $organizationFacade
     ) {
     }
 
@@ -102,7 +100,7 @@ final class AccountController extends AbstractController
             return $this->redirectToRoute('account.presentation.sign_in');
         }
 
-        $currentlyActiveOrganizationId = $user->getCurrentlyActiveOrganizationsId();
+        $currentlyActiveOrganizationId = $user->getCurrentlyActiveOrganizationId();
         $organizationName              = null;
 
         if ($currentlyActiveOrganizationId !== null) {

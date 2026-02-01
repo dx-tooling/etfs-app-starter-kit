@@ -1,10 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Shared\Presentation\Service;
 
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -13,8 +13,9 @@ use Symfony\Component\Mime\Message;
 readonly class MailService implements MailServiceInterface
 {
     public function __construct(
-        private MailerInterface       $mailer,
-        private ContainerBagInterface $containerBag
+        private MailerInterface $mailer,
+        #[Autowire(param: 'app.mail.default_sender_address')]
+        private string          $defaultSenderAddress
     ) {
     }
 
@@ -41,14 +42,10 @@ readonly class MailService implements MailServiceInterface
         $this->mailer->send($email);
     }
 
-    /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
     public function getDefaultSenderAddress(): Address
     {
         return new Address(
-            $this->containerBag->get('app.mail.default_sender_address'),
+            $this->defaultSenderAddress,
             'ETFS'
         );
     }

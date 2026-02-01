@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Account\Presentation\Service;
 
 use App\Account\Domain\Entity\User;

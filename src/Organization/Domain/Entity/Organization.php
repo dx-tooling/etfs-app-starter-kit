@@ -53,7 +53,7 @@ class Organization
 
     public function setName(?string $name): void
     {
-        $this->name = mb_substr(trim($name), 0, 256);
+        $this->name = $name !== null ? mb_substr(trim($name), 0, 256) : null;
     }
 
     public function getName(): ?string

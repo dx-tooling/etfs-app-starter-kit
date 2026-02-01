@@ -8,24 +8,16 @@ use App\Account\Facade\SymfonyEvent\UserCreatedSymfonyEvent;
 use App\Organization\Domain\Service\OrganizationDomainServiceInterface;
 use App\Organization\Facade\SymfonyEvent\CurrentlyActiveOrganizationChangedSymfonyEvent;
 use Exception;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-readonly class UserCreatedSymfonyEventSubscriber implements EventSubscriberInterface
+#[AsEventListener(event: UserCreatedSymfonyEvent::class, method: 'handle')]
+readonly class UserCreatedSymfonyEventSubscriber
 {
     public function __construct(
         private OrganizationDomainServiceInterface $organizationDomainService,
         private EventDispatcherInterface           $eventDispatcher
     ) {
-    }
-
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            UserCreatedSymfonyEvent::class => [
-                ['handle']
-            ],
-        ];
     }
 
     /**

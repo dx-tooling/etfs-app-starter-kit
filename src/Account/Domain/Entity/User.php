@@ -65,12 +65,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     )]
     private ?string $currentlyActiveOrganizationId = null;
 
-    public function getCurrentlyActiveOrganizationsId(): ?string
+    public function getCurrentlyActiveOrganizationId(): ?string
     {
         return $this->currentlyActiveOrganizationId;
     }
 
-    public function setCurrentlyActiveOrganizationsId(?string $currentlyActiveOrganizationId): void
+    public function setCurrentlyActiveOrganizationId(?string $currentlyActiveOrganizationId): void
     {
         $this->currentlyActiveOrganizationId = $currentlyActiveOrganizationId;
     }
@@ -81,9 +81,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         unique: true,
         nullable: false
     )]
-    private ?string $email = null;
+    private string $email = '';
 
-    public function getEmail(): ?string
+    public function getEmail(): string
     {
         return $this->email;
     }
@@ -110,15 +110,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->name = $name !== null ? trim($name) : null;
     }
 
+    /** @var list<string> */
     #[ORM\Column(type: Types::JSON)]
     private array $roles = [];
 
+    /**
+     * @return list<string>
+     */
     public function getRoles(): array
     {
         $roles   = $this->roles;
         $roles[] = Role::USER->value;
 
-        return array_unique($roles);
+        return array_values(array_unique($roles));
     }
 
     public function hasRole(Role $role): bool
@@ -169,13 +173,38 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->hasRole(Role::ADMIN);
     }
 
+    /**
+     * Returns true if the user has been registered (has an email set).
+     */
+    public function isRegistered(): bool
+    {
+        return $this->email !== '';
+    }
+
+    /**
+     * Returns true if the user has been verified.
+     * Note: Verification flow not yet implemented, defaults to true for registered users.
+     */
+    public function isVerified(): bool
+    {
+        return $this->isRegistered();
+    }
+
+    /**
+     * @return non-empty-string
+     */
     public function getUserIdentifier(): string
     {
-        if (is_null($this->email)) {
+        if ($this->email !== '') {
+            return $this->email;
+        }
+
+        if ($this->id !== null && $this->id !== '') {
             return $this->id;
         }
 
-        return $this->email;
+        // This should never happen in practice - every persisted user has an ID
+        return 'uninitialized-user';
     }
 
     public function eraseCredentials(): void

@@ -7,7 +7,10 @@ namespace DoctrineMigrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
-final class Version20260201092119 extends AbstractMigration
+/**
+ * Auto-generated Migration: Please modify to your needs!
+ */
+final class Version20260201094103 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -16,6 +19,7 @@ final class Version20260201092119 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
+        // this up() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
             CREATE TABLE app_notifications (
               id CHAR(36) NOT NULL,
@@ -61,7 +65,7 @@ final class Version20260201092119 extends AbstractMigration
               id CHAR(36) NOT NULL,
               name VARCHAR(256) NOT NULL,
               created_at DATE NOT NULL,
-              access_rights TEXT DEFAULT NULL,
+              access_rights TEXT NOT NULL,
               is_default_for_new_members TINYINT NOT NULL,
               organizations_id CHAR(36) NOT NULL,
               INDEX IDX_F5E3E98586288A55 (organizations_id),
@@ -149,6 +153,7 @@ final class Version20260201092119 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
+        // this down() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE organization_groups DROP FOREIGN KEY FK_F5E3E98586288A55');
         $this->addSql('ALTER TABLE organization_invitations DROP FOREIGN KEY FK_137BB4D586288A55');
         $this->addSql('DROP TABLE app_notifications');

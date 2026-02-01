@@ -109,11 +109,12 @@ final class OrganizationController extends AbstractController
             $orgGroups = $this->organizationDomainService->getGroups($currentOrganization);
 
             // Build a map of userId -> groupIds for quick lookup
+            /** @var array<string, list<string>> $userGroupMap */
             $userGroupMap = [];
             foreach ($orgGroups as $group) {
                 $groupMemberIds = $this->organizationDomainService->getGroupMemberIds($group);
                 foreach ($groupMemberIds as $memberId) {
-                    if (!isset($userGroupMap[$memberId])) {
+                    if (!array_key_exists($memberId, $userGroupMap)) {
                         $userGroupMap[$memberId] = [];
                     }
                     $userGroupMap[$memberId][] = $group->getId();
@@ -134,7 +135,7 @@ final class OrganizationController extends AbstractController
             }
 
             // Sort: owner first, then by display name
-            usort($members, function ($a, $b) {
+            usort($members, function (array $a, array $b): int {
                 if ($a['isOwner'] !== $b['isOwner']) {
                     return $a['isOwner'] ? -1 : 1;
                 }
@@ -473,7 +474,7 @@ final class OrganizationController extends AbstractController
             }
 
             // If user wasn't logged in and we created a new one, log them in
-            if ($currentUser === null && $newUserId !== null) {
+            if ($currentUser === null) {
                 $newUser = $this->accountFacade->getUserForLogin($newUserId);
                 if ($newUser !== null) {
                     $this->security->login($newUser, 'form_login', 'main');

@@ -22,9 +22,9 @@ interface AccountFacadeInterface
     public function getUserNameOrEmailById(string $userId): ?string;
 
     /**
-     * @param string[] $userIds
+     * @param list<string> $userIds
      *
-     * @return UserInfoDto[]
+     * @return list<UserInfoDto>
      */
     public function getUserInfoByIds(array $userIds): array;
 

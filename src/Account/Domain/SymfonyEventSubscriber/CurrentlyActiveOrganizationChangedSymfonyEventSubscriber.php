@@ -9,22 +9,14 @@ use App\Organization\Facade\SymfonyEvent\CurrentlyActiveOrganizationChangedSymfo
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Exception;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
-readonly class CurrentlyActiveOrganizationChangedSymfonyEventSubscriber implements EventSubscriberInterface
+#[AsEventListener(event: CurrentlyActiveOrganizationChangedSymfonyEvent::class, method: 'handle')]
+readonly class CurrentlyActiveOrganizationChangedSymfonyEventSubscriber
 {
     public function __construct(
         private EntityManagerInterface $entityManager
     ) {
-    }
-
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            CurrentlyActiveOrganizationChangedSymfonyEvent::class => [
-                ['handle']
-            ],
-        ];
     }
 
     /**

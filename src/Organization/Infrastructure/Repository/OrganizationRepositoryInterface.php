@@ -8,7 +8,7 @@ use App\Organization\Domain\Entity\Organization;
 
 interface OrganizationRepositoryInterface
 {
-    /** @return Organization[] */
+    /** @return list<Organization> */
     public function getAllOrganizationsForUser(string $userId): array;
 
     public function userHasJoinedOrganizations(string $userId): bool;
@@ -23,14 +23,14 @@ interface OrganizationRepositoryInterface
 
     public function removeMemberFromGroup(string $userId, string $groupId): void;
 
-    /** @return string[] */
+    /** @return list<string> */
     public function getMemberIdsOfGroup(string $groupId): array;
 
     public function userIsMemberOfGroup(string $userId, string $groupId): bool;
 
-    /** @return string[] */
+    /** @return list<string> */
     public function getGroupIdsOfUser(string $userId): array;
 
-    /** @return string[] */
+    /** @return list<string> */
     public function getJoinedUserIdsForOrganization(string $organizationId): array;
 }

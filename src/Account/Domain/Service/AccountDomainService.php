@@ -45,7 +45,7 @@ readonly class AccountDomainService implements AccountDomainServiceInterface
         $user->setEmail($email);
 
         if (is_null($plainPassword)) {
-            $plainPassword = random_int(PHP_INT_MIN, PHP_INT_MAX);
+            $plainPassword = (string) random_int(PHP_INT_MIN, PHP_INT_MAX);
         }
 
         $user->setPassword(
@@ -59,7 +59,7 @@ readonly class AccountDomainService implements AccountDomainServiceInterface
         $this->entityManager->flush();
 
         $this->eventDispatcher->dispatch(
-            new UserCreatedSymfonyEvent($user->getId())
+            new UserCreatedSymfonyEvent((string) $user->getId())
         );
 
         return $user;
@@ -67,6 +67,7 @@ readonly class AccountDomainService implements AccountDomainServiceInterface
 
     public function findByEmail(string $email): ?User
     {
+        /* @var User|null */
         return $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
     }
 

@@ -12,6 +12,7 @@ use App\Shared\Facade\Enum\Iso639_1Code;
 
 interface OrganizationDomainServiceInterface
 {
+    /** @return list<Organization> */
     public function getAllOrganizationsForUser(
         string $userId
     ): array;
@@ -52,13 +53,14 @@ interface OrganizationDomainServiceInterface
         Organization $organization
     ): bool;
 
+    /** @return list<Invitation> */
     public function getPendingInvitations(
         Organization $organization
     ): array;
 
     public function resendInvitation(Invitation $invitation): void;
 
-    /** @return string[] */
+    /** @return list<string> */
     public function getAllUserIdsForOrganization(Organization $organization): array;
 
     public function getGroupName(
@@ -66,10 +68,12 @@ interface OrganizationDomainServiceInterface
         Iso639_1Code $iso639_1Code,
     ): string;
 
+    /** @return list<Group> */
     public function getGroups(
         Organization $organization
     ): array;
 
+    /** @return list<Group> */
     public function getGroupsOfUserForCurrentlyActiveOrganization(
         string $userId
     ): array;
@@ -78,7 +82,7 @@ interface OrganizationDomainServiceInterface
         Organization $organization
     ): Group;
 
-    /** @return string[] */
+    /** @return list<string> */
     public function getGroupMemberIds(Group $group): array;
 
     public function addUserToGroup(string $userId, Group $group): void;
@@ -108,7 +112,7 @@ interface OrganizationDomainServiceInterface
 
     public function userCanSwitchOrganizations(string $userId): bool;
 
-    /** @return Organization[] */
+    /** @return list<Organization> */
     public function organizationsUserCanSwitchTo(string $userId): array;
 
     public function switchOrganization(

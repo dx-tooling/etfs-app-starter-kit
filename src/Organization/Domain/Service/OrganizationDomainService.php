@@ -17,8 +17,8 @@ use App\Shared\Facade\Enum\Iso639_1Code;
 use App\Shared\Facade\ValueObject\EmailAddress;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Exception\ORMException;
-use Doctrine\Persistence\ObjectRepository;
 use Exception;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -35,7 +35,7 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
     ) {
     }
 
-    /** @return Organization[] */
+    /** @return list<Organization> */
     public function getAllOrganizationsForUser(string $userId): array
     {
         return $this->organizationRepository->getAllOrganizationsForUser($userId);
@@ -143,7 +143,7 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
             return null;
         }
 
-        /** @var ObjectRepository<Invitation> $repo */
+        /** @var EntityRepository<Invitation> $repo */
         $repo = $this->entityManager->getRepository(Invitation::class);
 
         /** @var Invitation|null $invitation */
@@ -260,13 +260,14 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
         return sizeof($this->getPendingInvitations($organization)) > 0;
     }
 
-    /** @return Invitation[] */
+    /** @return list<Invitation> */
     public function getPendingInvitations(
         Organization $organization
     ): array {
-        /** @var ObjectRepository<Invitation> $repo */
+        /** @var EntityRepository<Invitation> $repo */
         $repo = $this->entityManager->getRepository(Invitation::class);
 
+        /* @var list<Invitation> */
         return $repo->findBy(
             ['organization' => $organization],
             ['createdAt' => Criteria::DESC]
@@ -279,7 +280,7 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
     }
 
     /**
-     * @return string[]
+     * @return list<string>
      */
     public function getAllUserIdsForOrganization(Organization $organization): array
     {
@@ -301,13 +302,14 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
         );
     }
 
-    /** @return Group[] */
+    /** @return list<Group> */
     public function getGroups(
         Organization $organization
     ): array {
-        /** @var ObjectRepository<Group> $repo */
+        /** @var EntityRepository<Group> $repo */
         $repo = $this->entityManager->getRepository(Group::class);
 
+        /* @var list<Group> */
         return $repo->findBy(
             ['organization' => $organization],
             ['createdAt' => Criteria::DESC]
@@ -315,14 +317,14 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
     }
 
     /**
-     * @return Group[]
+     * @return list<Group>
      *
      * @throws Exception
      */
     public function getGroupsOfUserForCurrentlyActiveOrganization(
         string $userId
     ): array {
-        $currentlyActiveOrganizationId = $this->accountFacade->getCurrentlyActiveOrganizationsIdForUser($userId);
+        $currentlyActiveOrganizationId = $this->accountFacade->getCurrentlyActiveOrganizationIdForUser($userId);
 
         if (is_null($currentlyActiveOrganizationId)) {
             throw new Exception('No currently active organization found for user with id ' . $userId);
@@ -330,16 +332,16 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
 
         $organization = $this->getOrganizationById($currentlyActiveOrganizationId);
 
-        /** @var ObjectRepository<Group> $repo */
+        /** @var EntityRepository<Group> $repo */
         $repo = $this->entityManager->getRepository(Group::class);
 
-        /** @var Group[] $allGroups */
+        /** @var list<Group> $allGroups */
         $allGroups = $repo->findBy(
             ['organization' => $organization],
             ['createdAt' => Criteria::DESC]
         );
 
-        /** @var Group[] $foundGroups */
+        /** @var list<Group> $foundGroups */
         $foundGroups = [];
         foreach ($allGroups as $group) {
             if ($this->organizationRepository->userIsMemberOfGroup($userId, $group->getId())) {
@@ -356,7 +358,7 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
     public function getDefaultGroupForNewMembers(
         Organization $organization
     ): Group {
-        /** @var ObjectRepository<Group> $repo */
+        /** @var EntityRepository<Group> $repo */
         $repo = $this->entityManager->getRepository(Group::class);
 
         /** @var Group|null $group */
@@ -377,7 +379,7 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
     }
 
     /**
-     * @return string[]
+     * @return list<string>
      *
      * @throws Exception
      */
@@ -400,6 +402,7 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
 
     public function getGroupById(string $groupId): ?Group
     {
+        /* @var Group|null */
         return $this->entityManager->getRepository(Group::class)->find($groupId);
     }
 
@@ -473,7 +476,7 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
     public function currentlyActiveOrganizationIsOwnOrganization(
         string $userId
     ): bool {
-        $currentlyActiveOrganizationId = $this->accountFacade->getCurrentlyActiveOrganizationsIdForUser($userId);
+        $currentlyActiveOrganizationId = $this->accountFacade->getCurrentlyActiveOrganizationIdForUser($userId);
 
         if (is_null($currentlyActiveOrganizationId)) {
             throw new Exception('No currently active organization found for user with id ' . $userId);
@@ -489,7 +492,7 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
         return count($this->getAllOrganizationsForUser($userId)) > 1;
     }
 
-    /** @return Organization[] */
+    /** @return list<Organization> */
     public function organizationsUserCanSwitchTo(string $userId): array
     {
         return $this->getAllOrganizationsForUser($userId);

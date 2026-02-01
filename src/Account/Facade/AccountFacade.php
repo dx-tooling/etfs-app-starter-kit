@@ -10,6 +10,7 @@ use App\Account\Facade\Dto\ResultDto;
 use App\Account\Facade\Dto\UserInfoDto;
 use App\Account\Facade\Dto\UserRegistrationDto;
 use Doctrine\ORM\EntityManagerInterface;
+use EnterpriseToolingForSymfony\SharedBundle\DateAndTime\Service\DateAndTimeService;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Throwable;
 
@@ -25,7 +26,7 @@ readonly class AccountFacade implements AccountFacadeInterface
     {
         try {
             $user = $this->accountDomainService->register(
-                $dto->emailAddress,
+                (string) $dto->emailAddress,
                 $dto->plainPassword
             );
 
@@ -37,6 +38,7 @@ readonly class AccountFacade implements AccountFacadeInterface
 
     public function getUserIdByEmail(string $email): ?string
     {
+        /** @var User|null $user */
         $user = $this
             ->entityManager
             ->getRepository(User::class)
@@ -75,9 +77,9 @@ readonly class AccountFacade implements AccountFacadeInterface
     }
 
     /**
-     * @param string[] $userIds
+     * @param list<string> $userIds
      *
-     * @return UserInfoDto[]
+     * @return list<UserInfoDto>
      */
     public function getUserInfoByIds(array $userIds): array
     {
@@ -85,6 +87,7 @@ readonly class AccountFacade implements AccountFacadeInterface
             return [];
         }
 
+        /** @var list<User> $users */
         $users = $this->entityManager
             ->getRepository(User::class)
             ->findBy(['id' => $userIds]);
@@ -92,10 +95,10 @@ readonly class AccountFacade implements AccountFacadeInterface
         $result = [];
         foreach ($users as $user) {
             $result[] = new UserInfoDto(
-                $user->getId(),
-                $user->getEmail(),
+                (string) $user->getId(),
+                (string) $user->getEmail(),
                 $user->getName(),
-                $user->getCreatedAt(),
+                $user->getCreatedAt() ?? DateAndTimeService::getDateTimeImmutable(),
                 $user->getCurrentlyActiveOrganizationId()
             );
         }
@@ -123,10 +126,10 @@ readonly class AccountFacade implements AccountFacadeInterface
         }
 
         return new UserInfoDto(
-            $userEntity->getId(),
-            $userEntity->getEmail(),
+            (string) $userEntity->getId(),
+            (string) $userEntity->getEmail(),
             $userEntity->getName(),
-            $userEntity->getCreatedAt(),
+            $userEntity->getCreatedAt() ?? DateAndTimeService::getDateTimeImmutable(),
             $userEntity->getCurrentlyActiveOrganizationId()
         );
     }

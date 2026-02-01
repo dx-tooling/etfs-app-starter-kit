@@ -1,5 +1,7 @@
 # ETFS App Starter Kit
 
+[![CI](https://img.shields.io/github/actions/workflow/status/dx-tooling/etfs-app-starter-kit/ci.yml?branch=main)](https://github.com/dx-tooling/etfs-app-starter-kit/actions/workflows/ci.yml)
+
 A very-opinionated, very-batteries-included Symfony application starter kit from the Enterprise Tooling for Symfony project.
 
 

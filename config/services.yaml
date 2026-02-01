@@ -6,26 +6,6 @@
 parameters:
     app.timezone: '%env(APP_TIMEZONE)%'
 
-    app.routing.locale_requirement: 'en|de'
-
-    app.routing.route_prefix.api: 'api'
-
-    app.routing.route_prefix.without_locale.admin: 'admin'
-
-    app.routing.route_prefix.with_locale.admin.en: '{_locale}/admin'
-    app.routing.route_prefix.with_locale.admin.de: '{_locale}/administration'
-
-    app.routing.route_prefix.without_locale.protected: 'my'
-
-    app.routing.route_prefix.with_locale.unprotected.en: '{_locale}'
-    app.routing.route_prefix.with_locale.unprotected.de: '{_locale}'
-
-    app.routing.route_prefix.with_locale.protected.en: '{_locale}/my'
-    app.routing.route_prefix.with_locale.protected.de: '{_locale}/mein-bereich'
-
-    app.activecampaign.api_url: '%env(ACTIVECAMPAIGN_API_URL)%'
-    app.activecampaign.api_token: '%env(ACTIVECAMPAIGN_API_TOKEN)%'
-
     app.mail.default_sender_address: '%env(MAIL_DEFAULT_SENDER_ADDRESS)%'
 
 services:

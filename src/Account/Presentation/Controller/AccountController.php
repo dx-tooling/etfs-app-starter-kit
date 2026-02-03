@@ -157,6 +157,12 @@ final class AccountController extends AbstractController
         }
 
         if ($request->isMethod(Request::METHOD_POST)) {
+            if (!$this->isCsrfTokenValid('set_password', $request->request->getString('_csrf_token'))) {
+                $this->addFlash('error', $this->translator->trans('flash.error.invalid_csrf', [], 'account'));
+
+                return $this->render('@account.presentation/set_password.html.twig');
+            }
+
             $password        = $request->request->get('password');
             $passwordConfirm = $request->request->get('password_confirm');
 
@@ -174,6 +180,11 @@ final class AccountController extends AbstractController
 
             $accountCore->setMustSetPassword(false);
             $this->accountService->updatePassword($accountCore, (string) $password);
+            $refreshedAccount = $this->accountService->findByEmail($accountCore->getEmail());
+
+            if ($refreshedAccount !== null) {
+                $this->security->login($refreshedAccount, 'form_login', 'main');
+            }
             $this->addFlash('success', $this->translator->trans('flash.success.password_set', [], 'account'));
 
             return $this->redirectToRoute('account.presentation.dashboard');

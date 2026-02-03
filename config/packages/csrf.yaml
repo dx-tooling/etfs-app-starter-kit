@@ -9,3 +9,5 @@ framework:
             - submit
             - authenticate
             - logout
+            - accept_invitation
+            - set_password

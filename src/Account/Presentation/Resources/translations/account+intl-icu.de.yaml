@@ -63,6 +63,7 @@ set_password:
 flash:
     error:
         missing_credentials: "Bitte geben Sie sowohl E-Mail als auch Passwort ein."
+        invalid_csrf: "Ungültiges CSRF-Token."
         passwords_mismatch: "Die Passwörter stimmen nicht überein."
         password_required: "Bitte geben Sie ein Passwort ein."
     success:

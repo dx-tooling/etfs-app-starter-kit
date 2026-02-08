@@ -99,6 +99,9 @@ readonly class OrganizationDomainService implements OrganizationDomainServiceInt
         $this->entityManager->persist($organization);
         $this->entityManager->flush();
 
+        $this->organizationRepository->addMemberToGroup($userId, $adminGroup->getId());
+        $this->organizationRepository->addMemberToGroup($userId, $teamMemberGroup->getId());
+
         return $organization;
     }
 

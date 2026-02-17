@@ -25,7 +25,7 @@ node_modules/
 
 ###> remove-on-project-creation ###
 composer.lock
-package-lock.json
+/package-lock.json
 ###< remove-on-project-creation ###
 
 ###> phpstan/phpstan ###

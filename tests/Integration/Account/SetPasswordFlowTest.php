@@ -30,7 +30,7 @@ final class SetPasswordFlowTest extends WebTestCase
         $this->accountService = $service;
 
         /** @var SecurityUserProvider $provider */
-        $provider                    = $container->get(SecurityUserProvider::class);
+        $provider                   = $container->get(SecurityUserProvider::class);
         $this->securityUserProvider = $provider;
 
         /** @var EntityManagerInterface $em */

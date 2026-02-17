@@ -1,3 +1,7 @@
+# Single CI workflow so all jobs are attributed to the push commit.
+# Previously, workflow_run-triggered jobs were displayed under main's commit (GitHub docs:
+# for workflow_run, GITHUB_SHA/GITHUB_REF are "Last commit on default branch" / "Default branch").
+
 name: CI
 
 on:
@@ -16,8 +20,6 @@ jobs:
         permissions:
             contents: read
             packages: write
-        outputs:
-            image: ${{ env.APP_IMAGE }}
         steps:
             - uses: actions/checkout@v4
             - name: Set up Docker Buildx
@@ -38,14 +40,26 @@ jobs:
                   cache-from: type=gha
                   cache-to: type=gha,mode=max
 
-    quality:
-        name: Quality checks
+    build-frontend:
+        name: Frontend build
         runs-on: ubuntu-latest
-        needs: build-app-image
+        needs: [build-app-image]
         env:
             HOST_PROJECT_PATH: ${{ github.workspace }}
         steps:
             - uses: actions/checkout@v4
+            - name: Restore Composer cache
+              uses: actions/cache@v4
+              with:
+                  path: vendor
+                  key: composer-${{ hashFiles('composer.lock') }}
+                  restore-keys: composer-
+            - name: Restore npm cache
+              uses: actions/cache@v4
+              with:
+                  path: node_modules
+                  key: npm-${{ hashFiles('package-lock.json') }}
+                  restore-keys: npm-
             - name: Login to GitHub Container Registry
               uses: docker/login-action@v3
               with:
@@ -55,35 +69,79 @@ jobs:
             - name: Pull app image
               run: docker pull ${{ env.APP_IMAGE }}
             - name: Start Docker services
-              run: docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d app mariadb
+              run: docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d app
             - name: Install dependencies
               run: |
                   docker compose exec -T app mise trust
                   docker compose exec -T app mise install
                   docker compose exec -T app composer install
                   docker compose exec -T app mise exec node -- npm install --no-save
-            - name: Setup database
+            - name: Build frontend assets
               run: |
-                  docker compose exec -T app php bin/console doctrine:database:create --if-not-exists
-                  docker compose exec -T app php bin/console doctrine:migrations:migrate --no-interaction
-            - name: Run quality checks
-              run: |
-                  docker compose exec -T app php bin/console doctrine:schema:validate
-                  docker compose exec -T app php bin/php-cs-fixer.php fix
-                  docker compose exec -T app mise exec node -- npm run prettier:fix
-                  docker compose exec -T app mise exec node -- npm run lint
-                  docker compose exec -T app mise exec node -- npm exec tsc
-                  docker compose exec -T app php vendor/bin/phpstan --memory-limit=1024M
-                  git diff --exit-code
+                  docker compose exec -T app rm -rf public/assets
+                  docker compose exec -T app mise exec node -- php bin/console tailwind:build
+                  docker compose exec -T app mise exec node -- php bin/console typescript:build
+                  docker compose exec -T app php bin/console asset-map:compile
 
-    tests-php:
-        name: PHP tests
+    tests-frontend:
+        name: Frontend tests
         runs-on: ubuntu-latest
-        needs: build-app-image
+        needs: [build-app-image]
         env:
             HOST_PROJECT_PATH: ${{ github.workspace }}
         steps:
             - uses: actions/checkout@v4
+            - name: Restore Composer cache
+              uses: actions/cache@v4
+              with:
+                  path: vendor
+                  key: composer-${{ hashFiles('composer.lock') }}
+                  restore-keys: composer-
+            - name: Restore npm cache
+              uses: actions/cache@v4
+              with:
+                  path: node_modules
+                  key: npm-${{ hashFiles('package-lock.json') }}
+                  restore-keys: npm-
+            - name: Login to GitHub Container Registry
+              uses: docker/login-action@v3
+              with:
+                  registry: ghcr.io
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+            - name: Pull app image
+              run: docker pull ${{ env.APP_IMAGE }}
+            - name: Start Docker services
+              run: docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d app
+            - name: Install dependencies
+              run: |
+                  docker compose exec -T app mise trust
+                  docker compose exec -T app mise install
+                  docker compose exec -T app composer install
+                  docker compose exec -T app mise exec node -- npm install --no-save
+            - name: Run frontend tests
+              run: docker compose exec -T app mise exec node -- npm test
+
+    tests-php:
+        name: PHP tests
+        runs-on: ubuntu-latest
+        needs: [build-app-image]
+        env:
+            HOST_PROJECT_PATH: ${{ github.workspace }}
+        steps:
+            - uses: actions/checkout@v4
+            - name: Restore Composer cache
+              uses: actions/cache@v4
+              with:
+                  path: vendor
+                  key: composer-${{ hashFiles('composer.lock') }}
+                  restore-keys: composer-
+            - name: Restore npm cache
+              uses: actions/cache@v4
+              with:
+                  path: node_modules
+                  key: npm-${{ hashFiles('package-lock.json') }}
+                  restore-keys: npm-
             - name: Login to GitHub Container Registry
               uses: docker/login-action@v3
               with:
@@ -133,14 +191,26 @@ jobs:
                   docker compose exec -T app php bin/console doctrine:migrations:migrate --env=test --no-interaction
                   docker compose exec -T app php vendor/bin/pest -v tests/Application
 
-    tests-frontend:
-        name: Frontend tests
+    quality:
+        name: Quality checks
         runs-on: ubuntu-latest
-        needs: build-app-image
+        needs: [build-app-image]
         env:
             HOST_PROJECT_PATH: ${{ github.workspace }}
         steps:
             - uses: actions/checkout@v4
+            - name: Restore Composer cache
+              uses: actions/cache@v4
+              with:
+                  path: vendor
+                  key: composer-${{ hashFiles('composer.lock') }}
+                  restore-keys: composer-
+            - name: Restore npm cache
+              uses: actions/cache@v4
+              with:
+                  path: node_modules
+                  key: npm-${{ hashFiles('package-lock.json') }}
+                  restore-keys: npm-
             - name: Login to GitHub Container Registry
               uses: docker/login-action@v3
               with:
@@ -150,24 +220,55 @@ jobs:
             - name: Pull app image
               run: docker pull ${{ env.APP_IMAGE }}
             - name: Start Docker services
-              run: docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d app
+              run: docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d app mariadb
+            - name: Wait for MariaDB
+              run: |
+                  for i in {1..30}; do
+                    docker compose exec -T mariadb mariadb -uroot -psecret -e "SELECT 1" && break
+                    echo "Waiting for MariaDB... ($i/30)"
+                    sleep 2
+                  done
             - name: Install dependencies
               run: |
                   docker compose exec -T app mise trust
                   docker compose exec -T app mise install
                   docker compose exec -T app composer install
                   docker compose exec -T app mise exec node -- npm install --no-save
-            - name: Run frontend tests
-              run: docker compose exec -T app mise exec node -- npm test
+            - name: Setup database
+              run: |
+                  docker compose exec -T app php bin/console doctrine:database:create --if-not-exists
+                  docker compose exec -T app php bin/console doctrine:migrations:migrate --no-interaction
+            - name: Run quality checks
+              run: |
+                  docker compose exec -T app php bin/console doctrine:schema:validate
+                  docker compose exec -T app php bin/php-cs-fixer.php fix
+                  docker compose exec -T app mise exec node -- npm run prettier:fix
+                  docker compose exec -T app mise exec node -- npm run lint
+                  docker compose exec -T app mise exec node -- npm exec tsc
+                  docker compose exec -T app php vendor/bin/phpstan --memory-limit=1024M
+                  git diff --exit-code
 
-    build-frontend:
-        name: Frontend build
+    tests-e2e:
+        name: E2E tests
         runs-on: ubuntu-latest
-        needs: build-app-image
+        needs: [build-app-image]
         env:
             HOST_PROJECT_PATH: ${{ github.workspace }}
+            COMPOSE_FILES: -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.e2e.yml
         steps:
             - uses: actions/checkout@v4
+            - name: Restore Composer cache
+              uses: actions/cache@v4
+              with:
+                  path: vendor
+                  key: composer-${{ hashFiles('composer.lock') }}
+                  restore-keys: composer-
+            - name: Restore npm cache
+              uses: actions/cache@v4
+              with:
+                  path: node_modules
+                  key: npm-${{ hashFiles('package-lock.json') }}
+                  restore-keys: npm-
             - name: Login to GitHub Container Registry
               uses: docker/login-action@v3
               with:
@@ -176,17 +277,59 @@ jobs:
                   password: ${{ secrets.GITHUB_TOKEN }}
             - name: Pull app image
               run: docker pull ${{ env.APP_IMAGE }}
-            - name: Start Docker services
-              run: docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d app
+            - name: Start E2E stack
+              run: docker compose ${{ env.COMPOSE_FILES }} up -d app messenger nginx mariadb
+            - name: Wait for MariaDB
+              run: |
+                  for i in $(seq 1 30); do
+                    docker compose ${{ env.COMPOSE_FILES }} exec -T mariadb mariadb -uroot -psecret -e "SELECT 1" && break
+                    echo "Waiting for MariaDB... ($i/30)"
+                    sleep 2
+                  done
             - name: Install dependencies
               run: |
-                  docker compose exec -T app mise trust
-                  docker compose exec -T app mise install
-                  docker compose exec -T app composer install
-                  docker compose exec -T app mise exec node -- npm install --no-save
+                  docker compose ${{ env.COMPOSE_FILES }} exec -T app mise trust
+                  docker compose ${{ env.COMPOSE_FILES }} exec -T app mise install
+                  docker compose ${{ env.COMPOSE_FILES }} exec -T app composer install
+                  docker compose ${{ env.COMPOSE_FILES }} exec -T app mise exec node -- npm install --no-save
             - name: Build frontend assets
               run: |
-                  docker compose exec -T app rm -rf public/assets
-                  docker compose exec -T app mise exec node -- php bin/console tailwind:build
-                  docker compose exec -T app mise exec node -- php bin/console typescript:build
-                  docker compose exec -T app php bin/console asset-map:compile
+                  docker compose ${{ env.COMPOSE_FILES }} exec -T app rm -rf public/assets
+                  docker compose ${{ env.COMPOSE_FILES }} exec -T app mise exec node -- php bin/console tailwind:build
+                  docker compose ${{ env.COMPOSE_FILES }} exec -T app mise exec node -- php bin/console typescript:build
+                  docker compose ${{ env.COMPOSE_FILES }} exec -T app php bin/console asset-map:compile
+            - name: Wait for app
+              run: |
+                  for i in $(seq 1 30); do
+                    code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/ 2>/dev/null || true)
+                    if [ "$code" = "200" ] || [ "$code" = "302" ]; then break; fi
+                    echo "Waiting for app... ($i/30)"
+                    sleep 2
+                  done
+            - name: Reset test DB and create e2e user
+              run: |
+                  docker compose ${{ env.COMPOSE_FILES }} exec -T app php bin/console doctrine:database:drop --env=test --if-exists --force
+                  docker compose ${{ env.COMPOSE_FILES }} exec -T app php bin/console doctrine:database:create --env=test
+                  docker compose ${{ env.COMPOSE_FILES }} exec -T app php bin/console doctrine:migrations:migrate --no-interaction --env=test
+                  docker compose ${{ env.COMPOSE_FILES }} exec -T app php bin/console app:e2e:create-user e2e@example.com --password=e2e-secret
+            - name: Restore Playwright deps cache
+              uses: actions/cache@v4
+              with:
+                  path: tests/End2End/node_modules
+                  key: playwright-deps-${{ hashFiles('tests/End2End/package-lock.json') }}
+                  restore-keys: playwright-deps-
+            - name: Restore Playwright browsers cache
+              uses: actions/cache@v4
+              with:
+                  path: /home/runner/.cache/ms-playwright
+                  key: playwright-browsers-${{ hashFiles('tests/End2End/package-lock.json') }}
+                  restore-keys: playwright-browsers-
+            - name: Install Playwright
+              run: |
+                  cd tests/End2End
+                  npm ci
+                  npx playwright install --with-deps chromium
+            - name: Run Playwright tests
+              run: |
+                  cd tests/End2End
+                  BASE_URL=http://127.0.0.1:8080 npx playwright test

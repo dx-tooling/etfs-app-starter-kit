@@ -4,6 +4,11 @@
 
 set -e
 
+# Auto-create .env.local with HOST_PROJECT_PATH if it doesn't exist yet
+if [ ! -f .env.local ]; then
+    echo "HOST_PROJECT_PATH=\"$(pwd)\"" > .env.local
+fi
+
 # Source .env and .env.local for Docker Compose variable interpolation
 # Docker Compose only reads .env by default, but we want to support .env.local
 # for local overrides (e.g., ETFS_PROJECT_NAME) without modifying version-controlled files

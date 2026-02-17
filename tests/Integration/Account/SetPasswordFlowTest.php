@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Integration\Account;
 
 use App\Account\Domain\Service\AccountDomainServiceInterface;
+use App\Account\Infrastructure\Security\SecurityUserProvider;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -15,6 +16,7 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 final class SetPasswordFlowTest extends WebTestCase
 {
     private AccountDomainServiceInterface $accountService;
+    private SecurityUserProvider $securityUserProvider;
     private EntityManagerInterface $entityManager;
     private KernelBrowser $client;
 
@@ -26,6 +28,10 @@ final class SetPasswordFlowTest extends WebTestCase
         /** @var AccountDomainServiceInterface $service */
         $service              = $container->get(AccountDomainServiceInterface::class);
         $this->accountService = $service;
+
+        /** @var SecurityUserProvider $provider */
+        $provider                    = $container->get(SecurityUserProvider::class);
+        $this->securityUserProvider = $provider;
 
         /** @var EntityManagerInterface $em */
         $em                  = $container->get(EntityManagerInterface::class);
@@ -56,8 +62,9 @@ final class SetPasswordFlowTest extends WebTestCase
 
         $this->assertTrue($account->getMustSetPassword(), 'Account should have mustSetPassword=true after invitation registration');
 
-        // Step 2: Log in as the user and call the set-password endpoint
-        $this->client->loginUser($account);
+        // Step 2: Log in as the SecurityUser and call the set-password endpoint
+        $securityUser = $this->securityUserProvider->loadUserByIdentifier($email);
+        $this->client->loginUser($securityUser);
 
         $csrfToken = $this->getSetPasswordCsrfToken();
         $this->client->request('POST', '/en/account/set-password', [
@@ -122,7 +129,9 @@ final class SetPasswordFlowTest extends WebTestCase
         $email   = 'csrf-test-' . uniqid() . '@example.com';
         $account = $this->accountService->register($email, null, true);
 
-        $this->client->loginUser($account);
+        // Log in as SecurityUser instead of AccountCore entity
+        $securityUser = $this->securityUserProvider->loadUserByIdentifier($email);
+        $this->client->loginUser($securityUser);
 
         $this->client->request('POST', '/en/account/set-password', [
             '_csrf_token'      => 'invalid-token',

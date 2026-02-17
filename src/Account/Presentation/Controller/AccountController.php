@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Account\Presentation\Controller;
 
-use App\Account\Domain\Entity\AccountCore;
 use App\Account\Domain\Service\AccountDomainService;
+use App\Account\Infrastructure\Security\SecurityUserProvider;
+use App\Common\Domain\Security\SecurityUser;
 use App\Organization\Facade\OrganizationFacadeInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -22,7 +23,8 @@ final class AccountController extends AbstractController
         private readonly AccountDomainService        $accountService,
         private readonly OrganizationFacadeInterface $organizationFacade,
         private readonly TranslatorInterface         $translator,
-        private readonly Security                    $security
+        private readonly Security                    $security,
+        private readonly SecurityUserProvider        $securityUserProvider
     ) {
     }
 
@@ -83,8 +85,10 @@ final class AccountController extends AbstractController
             }
 
             try {
-                $accountCore = $this->accountService->register((string) $email, (string) $password);
-                $this->security->login($accountCore, 'form_login', 'main');
+                $this->accountService->register((string) $email, (string) $password);
+                // Load user as SecurityUser via provider to store correct class in session
+                $securityUser = $this->securityUserProvider->loadUserByIdentifier((string) $email);
+                $this->security->login($securityUser, 'form_login', 'main');
 
                 return $this->redirectToRoute('account.presentation.dashboard');
             } catch (Throwable $e) {
@@ -114,18 +118,19 @@ final class AccountController extends AbstractController
     )]
     public function dashboardAction(): Response
     {
-        /** @var AccountCore|null $accountCore */
-        $accountCore = $this->getUser();
+        /** @var SecurityUser|null $securityUser */
+        $securityUser = $this->getUser();
 
-        if ($accountCore === null) {
+        if ($securityUser === null) {
             return $this->redirectToRoute('account.presentation.sign_in');
         }
 
-        if ($accountCore->getMustSetPassword()) {
+        if ($securityUser->getMustSetPassword()) {
             return $this->redirectToRoute('account.presentation.set_password');
         }
 
-        $currentlyActiveOrganizationId = $accountCore->getCurrentlyActiveOrganizationId();
+        $accountCore                   = $this->accountService->findByEmail($securityUser->getEmail());
+        $currentlyActiveOrganizationId = $accountCore?->getCurrentlyActiveOrganizationId();
         $organizationName              = null;
 
         if ($currentlyActiveOrganizationId !== null) {
@@ -144,15 +149,15 @@ final class AccountController extends AbstractController
     )]
     public function setPasswordAction(Request $request): Response
     {
-        /** @var AccountCore|null $accountCore */
-        $accountCore = $this->getUser();
+        /** @var SecurityUser|null $securityUser */
+        $securityUser = $this->getUser();
 
-        if ($accountCore === null) {
+        if ($securityUser === null) {
             return $this->redirectToRoute('account.presentation.sign_in');
         }
 
         // If user doesn't need to set password, redirect to dashboard
-        if (!$accountCore->getMustSetPassword()) {
+        if (!$securityUser->getMustSetPassword()) {
             return $this->redirectToRoute('account.presentation.dashboard');
         }
 
@@ -178,12 +183,14 @@ final class AccountController extends AbstractController
                 return $this->render('@account.presentation/set_password.html.twig');
             }
 
-            $accountCore->setMustSetPassword(false);
-            $this->accountService->updatePassword($accountCore, (string) $password);
-            $refreshedAccount = $this->accountService->findByEmail($accountCore->getEmail());
+            $accountCore = $this->accountService->findByEmail($securityUser->getEmail());
 
-            if ($refreshedAccount !== null) {
-                $this->security->login($refreshedAccount, 'form_login', 'main');
+            if ($accountCore !== null) {
+                $accountCore->setMustSetPassword(false);
+                $this->accountService->updatePassword($accountCore, (string) $password);
+                // Refresh security user in session after password change
+                $refreshedUser = $this->securityUserProvider->loadUserByIdentifier($securityUser->getEmail());
+                $this->security->login($refreshedUser, 'form_login', 'main');
             }
             $this->addFlash('success', $this->translator->trans('flash.success.password_set', [], 'account'));
 

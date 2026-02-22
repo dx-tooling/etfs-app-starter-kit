@@ -9,6 +9,7 @@ use App\Account\Domain\Service\AccountDomainServiceInterface;
 use App\Account\Facade\Dto\AccountInfoDto;
 use App\Account\Facade\Dto\ResultDto;
 use App\Account\Facade\Dto\UserRegistrationDto;
+use App\Account\Infrastructure\Security\SecurityUserProvider;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Throwable;
@@ -17,7 +18,8 @@ readonly class AccountFacade implements AccountFacadeInterface
 {
     public function __construct(
         private AccountDomainServiceInterface $accountDomainService,
-        private EntityManagerInterface        $entityManager
+        private EntityManagerInterface        $entityManager,
+        private SecurityUserProvider          $securityUserProvider
     ) {
     }
 
@@ -118,7 +120,14 @@ readonly class AccountFacade implements AccountFacadeInterface
 
     public function getAccountCoreForLogin(string $accountCoreId): ?UserInterface
     {
-        return $this->entityManager->getRepository(AccountCore::class)->find($accountCoreId);
+        /** @var AccountCore|null $accountCore */
+        $accountCore = $this->entityManager->getRepository(AccountCore::class)->find($accountCoreId);
+
+        if ($accountCore === null) {
+            return null;
+        }
+
+        return $this->securityUserProvider->loadUserByIdentifier($accountCore->getEmail());
     }
 
     public function getLoggedInAccountCoreInfo(UserInterface $user): ?AccountInfoDto

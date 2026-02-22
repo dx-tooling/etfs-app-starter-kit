@@ -25,7 +25,7 @@ node_modules/
 
 ###> remove-on-project-creation ###
 composer.lock
-package-lock.json
+/package-lock.json
 ###< remove-on-project-creation ###
 
 ###> phpstan/phpstan ###
@@ -41,3 +41,13 @@ phpstan.neon
 /.php-cs-fixer.php
 /.php-cs-fixer.cache
 ###< friendsofphp/php-cs-fixer ###
+
+# Container-generated cache directories
+/.cache/
+/.gnupg/
+/.local/
+/.npm/
+
+# E2E Playwright
+/tests/End2End/playwright-report/
+/tests/End2End/test-results/

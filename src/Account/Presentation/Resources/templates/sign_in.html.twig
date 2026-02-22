@@ -3,11 +3,11 @@
 {% block title %}{{ 'sign_in.title'|trans({}, 'account') }}{% endblock %}
 
 {% block body %}
-    <div class="min-h-[60vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="min-h-[60vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8" data-test-id="sign-in-page">
         <div class="w-full max-w-md space-y-8">
             {# Header #}
             <div class="text-center">
-                <h1 class="etfswui-h1">
+                <h1 class="etfswui-h1" data-test-id="sign-in-heading">
                     {{ 'sign_in.heading'|trans({}, 'account') }}
                 </h1>
                 <p class="etfswui-text-small mt-2">
@@ -52,6 +52,7 @@
                                 value="{{ last_username }}"
                                 placeholder="{{ 'sign_in.form.email_placeholder'|trans({}, 'account') }}"
                                 class="etfswui-form-input"
+                                data-test-id="sign-in-email"
                             >
                         </div>
 
@@ -68,6 +69,7 @@
                                 required
                                 placeholder="{{ 'sign_in.form.password_placeholder'|trans({}, 'account') }}"
                                 class="etfswui-form-input"
+                                data-test-id="sign-in-password"
                             >
                         </div>
 
@@ -86,6 +88,7 @@
                         <button
                             type="submit"
                             class="etfswui-button-default w-full justify-center"
+                            data-test-id="sign-in-submit"
                         >
                             {{ 'sign_in.form.submit'|trans({}, 'account') }}
                         </button>
